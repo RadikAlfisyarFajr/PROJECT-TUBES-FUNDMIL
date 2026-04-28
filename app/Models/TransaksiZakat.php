@@ -17,6 +17,8 @@ class TransaksiZakat extends Model
         'sub_jenis',
         'jumlah',
         'harga_beras_snapshot',
+        'jenis_pembayaran',
+        'bukti_pembayaran',
         'keterangan',
         'tanggal'
     ];
