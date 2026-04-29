@@ -11,6 +11,9 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    public const ROLE_SUPER_ADMIN = 'super_admin';
+    public const ROLE_ADMIN_INSTANSI = 'admin_instansi';
+
     protected $fillable = [
         'name',
         'email',
@@ -39,5 +42,15 @@ class User extends Authenticatable
     public function instansi(): BelongsTo
     {
         return $this->belongsTo(Instansi::class);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === self::ROLE_SUPER_ADMIN;
+    }
+
+    public function isAdminInstansi(): bool
+    {
+        return $this->role === self::ROLE_ADMIN_INSTANSI;
     }
 }
