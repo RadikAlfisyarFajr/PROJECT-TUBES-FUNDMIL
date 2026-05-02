@@ -294,11 +294,11 @@
                         <i class="bi bi-list"></i>
                         <span class="nav-text ms-3">Menu</span>
                     </button>
-                    <a class="nav-link active d-flex align-items-center" href="#">
+                    <a class="nav-link active d-flex align-items-center" href="{{ route('dashboard.admin') }}">
                         <i class="bi bi-house-door-fill"></i>
                         <span class="nav-text">Beranda</span>
                     </a>
-                    <a class="nav-link d-flex align-items-center" href="#">
+                    <a class="nav-link d-flex align-items-center" href="{{ route('profil-instansi.index') }}">
                         <i class="bi bi-person-badge-fill"></i>
                         <span class="nav-text">Profil Instansi</span>
                     </a>
