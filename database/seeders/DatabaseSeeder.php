@@ -25,5 +25,19 @@ class DatabaseSeeder extends Seeder
             'role' => 'super_admin',
             'status' => 'active',
         ]);
+
+        $this->call([
+            InstansiSeeder::class,
+            HargaBerasSeeder::class,
+            NishabSeeder::class,
+            ProfilInstansiSeeder::class,
+            KategoriDanaSeeder::class,
+            PemasukanSeeder::class,
+            MustahikSeeder::class,
+            ProgramPenyaluranSeeder::class,
+            PengaturanDistribusiSeeder::class,
+            PenyaluranSeeder::class,
+            LaporanSeeder::class,
+        ]);
     }
 }

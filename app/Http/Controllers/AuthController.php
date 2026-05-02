@@ -9,17 +9,37 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function showAuthForm()
+    private function desaOptions(): array
     {
-        $desaOptions = [
+        return [
             'Desa Soreang',
             'Desa Cangkuang',
             'Desa Cikeruh',
             'Desa Ciwidey',
             'Desa Margahayu',
         ];
+    }
 
-        return view('auth', compact('desaOptions'));
+    public function showLandingPage()
+    {
+        return view('public.landing');
+    }
+
+    public function showAuthForm()
+    {
+        return redirect()->route('login');
+    }
+
+    public function showLoginForm()
+    {
+        return view('auth.login');
+    }
+
+    public function showRegisterForm()
+    {
+        return view('auth.register', [
+            'desaOptions' => $this->desaOptions(),
+        ]);
     }
 
     public function register(Request $request)
@@ -43,7 +63,7 @@ class AuthController extends Controller
             'status' => 'pending',
         ]);
 
-        return redirect()->route('auth')->with('success', 'Registrasi berhasil. Akun Anda menunggu persetujuan super admin.');
+        return redirect()->route('login')->with('success', 'Registrasi berhasil. Akun Anda menunggu persetujuan super admin.');
     }
 
     public function login(Request $request)
@@ -119,6 +139,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('auth');
+        return redirect()->route('public.home');
     }
 }
