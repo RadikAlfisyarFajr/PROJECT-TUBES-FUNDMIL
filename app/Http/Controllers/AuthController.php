@@ -107,7 +107,7 @@ class AuthController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        return view('dashboard.superadmin', compact('pendingUsers'));
+        return view('superadmin.approval-admin-instansi.approval-admin-instansi-index', compact('pendingUsers'));
     }
 
     public function approveAdminInstansi(User $user)
