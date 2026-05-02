@@ -16,14 +16,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
+        User::updateOrCreate([
+            'email' => 'superadmin@example.com',
+        ], [
             'name' => 'Super Admin',
             'nama_instansi' => 'Super Admin',
-            'email' => 'superadmin@example.com',
             'username' => 'superadmin',
             'password' => Hash::make('SuperAdmin123'),
-            'role' => 'super_admin',
+            'role' => User::ROLE_SUPER_ADMIN,
             'status' => 'active',
+            'instansi_id' => null,
         ]);
 
         $this->call([
