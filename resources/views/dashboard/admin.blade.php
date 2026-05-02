@@ -28,19 +28,19 @@
             display: flex;
         }
         .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
+            position: relative;
+            top: auto;
+            left: auto;
+            bottom: auto;
             width: 260px;
             background: #fbfdf8;
             border-right: 1px solid rgba(17, 79, 34, 0.08);
             padding: 2rem 1.25rem;
-            transition: transform .3s ease, width .3s ease, padding .3s ease;
-            z-index: 1100;
-            transform: translateX(-100%);
-            height: 100vh;
-            overflow-y: auto;
+            transition: width .3s ease, padding .3s ease;
+            flex-shrink: 0;
+            height: auto;
+            overflow-y: visible;
+            transform: translateX(0);
         }
         .sidebar__brand {
             font-weight: 700;
@@ -114,16 +114,14 @@
         }
         .content {
             flex: 1;
-            padding: 1.5rem 1.5rem 1.5rem 2.5rem;
-            margin-left: 120px;
-            transition: margin-left .3s ease;
+            padding: 1.5rem;
+            transition: none;
             min-height: 100vh;
             background: #edf6ee;
         }
-        .sidebar-open .content {
-            margin-left: 260px;
+        .sidebar-open .sidebar {
+            transform: translateX(0);
         }
-        .sidebar-toggle {
             background: transparent;
             border: none;
             color: #33453a;
@@ -150,8 +148,12 @@
         }
         @media (max-width: 991px) {
             .sidebar {
+                position: fixed;
                 transform: translateX(-100%);
                 width: 260px;
+                z-index: 1100;
+                height: 100vh;
+                overflow-y: auto;
             }
             .sidebar-collapsed .sidebar {
                 width: 260px;
