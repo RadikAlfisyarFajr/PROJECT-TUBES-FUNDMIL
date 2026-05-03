@@ -53,4 +53,9 @@ class Instansi extends Model
     {
         return $this->hasMany(RekeningInstansi::class);
     }
+
+    public function profilNotifications(): HasMany
+    {
+        return $this->hasMany(ProfilInstansiNotification::class);
+    }
 }

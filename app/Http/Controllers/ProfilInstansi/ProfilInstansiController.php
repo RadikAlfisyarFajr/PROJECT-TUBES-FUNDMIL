@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\ProfilInstansi;
 
 use App\Models\Instansi;
+use App\Models\ProfilInstansiNotification;
 use App\Models\RekeningInstansi;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -15,8 +16,19 @@ class ProfilInstansiController extends Controller
     {
         $instansi = $this->resolveInstansi();
         $instansi->load('rekening');
+        $notifications = $instansi->profilNotifications()
+            ->latest()
+            ->limit(10)
+            ->get();
+        $unreadNotifications = $instansi->profilNotifications()
+            ->whereNull('read_at')
+            ->count();
 
-        return view('admin.profil-instansi.profil-instansi-index', compact('instansi'));
+        return view('admin.profil-instansi.profil-instansi-index', compact(
+            'instansi',
+            'notifications',
+            'unreadNotifications'
+        ));
     }
 
     public function create()
@@ -61,6 +73,12 @@ class ProfilInstansiController extends Controller
         $this->replaceUploadedFile($request, $validated, $instansi, 'tanda_tangan', 'profil-instansi/tanda-tangan');
 
         $instansi->update($validated);
+        $this->recordNotification(
+            $instansi,
+            'Profil instansi diperbarui',
+            'Informasi profil, foto profil, atau tanda tangan digital baru saja diperbarui.',
+            'profile'
+        );
 
         return redirect()
             ->route('profil-instansi.index')
@@ -83,6 +101,12 @@ class ProfilInstansiController extends Controller
         $validated = $this->validateRekening($request);
 
         $instansi->rekening()->create($validated);
+        $this->recordNotification(
+            $instansi,
+            'Rekening ditambahkan',
+            "Rekening {$validated['nama_bank']} berhasil ditambahkan.",
+            'rekening'
+        );
 
         return redirect()
             ->route('profil-instansi.index')
@@ -92,7 +116,14 @@ class ProfilInstansiController extends Controller
     public function updateRekening(Request $request, RekeningInstansi $rekening)
     {
         $this->authorizeRekening($rekening);
-        $rekening->update($this->validateRekening($request));
+        $validated = $this->validateRekening($request);
+        $rekening->update($validated);
+        $this->recordNotification(
+            $rekening->instansi,
+            'Rekening diperbarui',
+            "Data rekening {$validated['nama_bank']} berhasil diperbarui.",
+            'rekening'
+        );
 
         return redirect()
             ->route('profil-instansi.index')
@@ -102,11 +133,30 @@ class ProfilInstansiController extends Controller
     public function destroyRekening(RekeningInstansi $rekening)
     {
         $this->authorizeRekening($rekening);
+        $instansi = $rekening->instansi;
+        $namaBank = $rekening->nama_bank;
         $rekening->delete();
+        $this->recordNotification(
+            $instansi,
+            'Rekening dihapus',
+            "Rekening {$namaBank} berhasil dihapus.",
+            'rekening'
+        );
 
         return redirect()
             ->route('profil-instansi.index')
             ->with('success', 'Rekening berhasil dihapus.');
+    }
+
+    public function markNotificationsRead()
+    {
+        $instansi = $this->resolveInstansi();
+
+        $instansi->profilNotifications()
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        return response()->noContent();
     }
 
     private function resolveInstansi(?string $id = null): Instansi
@@ -170,5 +220,15 @@ class ProfilInstansiController extends Controller
         }
 
         $validated[$field] = $request->file($field)->store($directory, 'public');
+    }
+
+    private function recordNotification(Instansi $instansi, string $title, string $message, string $type = 'info'): void
+    {
+        ProfilInstansiNotification::query()->create([
+            'instansi_id' => $instansi->id,
+            'title' => $title,
+            'message' => $message,
+            'type' => $type,
+        ]);
     }
 }

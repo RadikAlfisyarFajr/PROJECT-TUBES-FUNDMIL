@@ -275,6 +275,93 @@
             place-items: center;
             color: var(--green);
             font-weight: 900;
+            overflow: hidden;
+            flex: 0 0 auto;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .notification-toggle {
+            width: 38px;
+            height: 38px;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: #64706a;
+            display: grid;
+            place-items: center;
+            position: relative;
+        }
+
+        .notification-toggle:hover,
+        .notification-toggle.show {
+            background: var(--green-soft);
+            color: var(--green);
+        }
+
+        .notification-badge {
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 999px;
+            background: #d82132;
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-size: .68rem;
+            font-weight: 900;
+            position: absolute;
+            top: 2px;
+            right: 1px;
+        }
+
+        .notification-menu {
+            width: min(360px, calc(100vw - 32px));
+            padding: 0;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            box-shadow: 0 18px 38px rgba(20, 47, 27, .13);
+            overflow: hidden;
+        }
+
+        .notification-header {
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--line);
+            font-weight: 900;
+        }
+
+        .notification-item {
+            padding: 14px 18px;
+            border-bottom: 1px solid #edf1ee;
+            white-space: normal;
+        }
+
+        .notification-item:last-child {
+            border-bottom: 0;
+        }
+
+        .notification-title {
+            color: var(--ink);
+            font-weight: 850;
+            margin-bottom: 4px;
+        }
+
+        .notification-text {
+            color: #536058;
+            font-size: .82rem;
+            line-height: 1.45;
+            margin-bottom: 6px;
+        }
+
+        .notification-time {
+            color: #8a958f;
+            font-size: .74rem;
+            font-weight: 700;
         }
 
         .profile-card {
@@ -641,8 +728,43 @@
                         <i class="bi bi-floppy-fill"></i>
                         <span>Update Profil</span>
                     </a>
-                    <i class="bi bi-bell-fill text-muted fs-5"></i>
-                    <div class="avatar">AI</div>
+                    <div class="dropdown">
+                        <button
+                            id="notificationToggle"
+                            class="notification-toggle"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside"
+                            aria-expanded="false"
+                            aria-label="Notifikasi profil instansi"
+                        >
+                            <i class="bi bi-bell-fill fs-5"></i>
+                            @if ($unreadNotifications > 0)
+                                <span id="notificationBadge" class="notification-badge">{{ $unreadNotifications > 9 ? '9+' : $unreadNotifications }}</span>
+                            @endif
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end notification-menu" aria-labelledby="notificationToggle">
+                            <div class="notification-header">Notifikasi Pembaruan</div>
+                            @forelse ($notifications as $notification)
+                                <div class="notification-item">
+                                    <div class="notification-title">{{ $notification->title }}</div>
+                                    <div class="notification-text">{{ $notification->message }}</div>
+                                    <div class="notification-time">{{ $notification->created_at->diffForHumans() }}</div>
+                                </div>
+                            @empty
+                                <div class="notification-item text-center text-muted">
+                                    Belum ada pembaruan profil.
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                    <div class="avatar">
+                        @if ($instansi->logo)
+                            <img src="{{ asset('storage/'.$instansi->logo) }}" alt="Logo {{ $instansi->nama }}">
+                        @else
+                            {{ strtoupper(substr($instansi->nama, 0, 1)) }}{{ strtoupper(substr(strstr($instansi->nama, ' ') ?: '', 1, 1)) }}
+                        @endif
+                    </div>
                 </div>
             </header>
 
@@ -866,6 +988,21 @@
 
         sidebarToggle.addEventListener('click', () => {
             document.body.classList.toggle('sidebar-expanded');
+        });
+
+        const notificationToggle = document.getElementById('notificationToggle');
+
+        notificationToggle?.addEventListener('shown.bs.dropdown', () => {
+            const badge = document.getElementById('notificationBadge');
+            badge?.remove();
+
+            fetch('{{ route('profil-instansi.notifications.read') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            });
         });
     </script>
 </body>

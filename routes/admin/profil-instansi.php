@@ -9,6 +9,8 @@ Route::put('profil-instansi/rekening/{rekening}', [ProfilInstansiController::cla
     ->name('profil-instansi.rekening.update');
 Route::delete('profil-instansi/rekening/{rekening}', [ProfilInstansiController::class, 'destroyRekening'])
     ->name('profil-instansi.rekening.destroy');
+Route::post('profil-instansi/notifikasi/read', [ProfilInstansiController::class, 'markNotificationsRead'])
+    ->name('profil-instansi.notifications.read');
 
 Route::resource('profil-instansi', ProfilInstansiController::class)
     ->names('profil-instansi');
