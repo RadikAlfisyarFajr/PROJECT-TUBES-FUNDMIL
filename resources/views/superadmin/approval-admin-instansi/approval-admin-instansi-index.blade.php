@@ -1,3 +1,7 @@
+@php
+    $pendingUsers = $pendingUsers ?? collect();
+@endphp
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -9,17 +13,22 @@
     <style>
         :root {
             --green: #0b7131;
-            --green-dark: #063d1f;
+            --green-dark: #053f24;
             --green-soft: #e8f5ec;
-            --surface: #f5f8f6;
-            --line: #e3ebe4;
+            --surface: #f7f9f7;
+            --panel: #ffffff;
+            --line: #e7eee8;
             --ink: #111711;
-            --muted: #728074;
-            --nav-text: #273b51;
+            --muted: #66746b;
+            --nav: #263b52;
+            --danger: #b42335;
+            --shadow: 0 16px 34px rgba(20, 47, 27, .06);
         }
+
         * {
             letter-spacing: 0;
         }
+
         body {
             min-height: 100vh;
             margin: 0;
@@ -27,128 +36,148 @@
             color: var(--ink);
             font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
-        .admin-layout {
+
+        .super-layout {
             min-height: 100vh;
             display: grid;
             grid-template-columns: 320px minmax(0, 1fr);
         }
+
         .sidebar {
-            background: #f0f4f2;
+            background: #f0f3f1;
             border-right: 1px solid var(--line);
-            padding: 42px 24px 28px;
+            padding: 42px 20px 30px;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
+
+        .brand {
+            padding: 0 20px;
+        }
+
         .brand-title {
             color: var(--green-dark);
-            font-size: 1.35rem;
+            font-size: 1.45rem;
             font-weight: 900;
             margin-bottom: 8px;
         }
+
         .brand-subtitle {
-            color: #9aa39b;
+            color: #9fa8a2;
             font-size: .78rem;
             font-weight: 800;
             letter-spacing: .34em;
         }
+
         .sidebar-nav {
-            margin-top: 74px;
+            margin-top: 76px;
             display: grid;
             gap: 12px;
         }
-        .nav-item-link {
+
+        .nav-item-link,
+        .logout-button {
             display: flex;
             align-items: center;
             gap: 18px;
-            min-height: 62px;
-            padding: 0 22px;
-            border-radius: 16px;
-            color: var(--nav-text);
-            font-size: 1.05rem;
-            font-weight: 700;
+            min-height: 58px;
+            padding: 0 20px;
+            border-radius: 20px;
+            color: var(--nav);
+            font-weight: 650;
             text-decoration: none;
+            border: 0;
+            background: transparent;
+            width: 100%;
+            text-align: left;
         }
-        .nav-item-link.active {
+
+        .nav-item-link:hover,
+        .nav-item-link.active,
+        .logout-button:hover {
             background: #fff;
             color: var(--green);
-            box-shadow: 0 12px 28px rgba(15, 45, 22, .05);
-            border-left: 4px solid var(--green);
         }
-        .nav-item-link i {
+
+        .nav-item-link.active {
+            box-shadow: inset 4px 0 0 var(--green);
+        }
+
+        .nav-item-link i,
+        .logout-button i {
             width: 24px;
-            color: #41516a;
-            font-size: 1.35rem;
+            color: #3f5164;
+            font-size: 1.25rem;
             text-align: center;
         }
-        .nav-item-link.active i {
+
+        .nav-item-link.active i,
+        .logout-button:hover i {
             color: var(--green);
         }
-        .sidebar-bottom {
+
+        .sidebar-footer {
             margin-top: auto;
             border-top: 1px solid var(--line);
             padding-top: 28px;
+            display: grid;
+            gap: 8px;
         }
-        .logout-button {
-            border: 0;
-            background: transparent;
-            color: var(--nav-text);
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            padding: 14px 22px;
-            font-size: 1.05rem;
-            font-weight: 700;
-        }
+
         .main-content {
-            padding: 36px 46px 54px;
+            padding: 34px 42px 52px;
         }
+
         .page-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            gap: 24px;
-            margin-bottom: 34px;
+            gap: 28px;
+            margin-bottom: 38px;
         }
+
         .page-title {
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 900;
+            font-size: clamp(2.1rem, 4vw, 2.7rem);
+            font-weight: 950;
             line-height: 1.05;
             margin: 0 0 8px;
         }
+
         .page-description {
-            color: #394338;
+            color: #263026;
             font-size: 1.08rem;
             margin: 0;
         }
+
         .summary-card {
             background: var(--green);
             color: #fff;
             border-radius: 18px;
-            min-width: 230px;
+            min-width: 260px;
             padding: 20px 24px;
-            box-shadow: 0 18px 35px rgba(11, 113, 49, .18);
+            box-shadow: 0 18px 35px rgba(11, 113, 49, .2);
         }
+
         .summary-card .number {
-            font-size: 2.4rem;
+            font-size: 2.3rem;
             line-height: 1;
-            font-weight: 900;
+            font-weight: 950;
         }
-        .filter-card,
-        .table-card,
-        .empty-card {
-            background: rgba(255,255,255,.72);
+
+        .toolbar {
+            background: rgba(255,255,255,.68);
             border: 1px solid #edf1ed;
-            border-radius: 20px;
-            box-shadow: 0 10px 28px rgba(15, 28, 17, .035);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 32px;
         }
-        .filter-card {
-            padding: 22px;
-            margin-bottom: 30px;
-        }
+
         .search-wrap {
             position: relative;
         }
+
         .search-wrap i {
             position: absolute;
             left: 20px;
@@ -157,6 +186,7 @@
             color: #233025;
             font-size: 1.35rem;
         }
+
         .form-control,
         .form-select {
             min-height: 58px;
@@ -165,31 +195,42 @@
             box-shadow: none;
             font-size: 1rem;
         }
+
         .search-input {
             padding-left: 58px;
         }
-        .table-card {
+
+        .table-card,
+        .empty-card {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
             overflow: hidden;
         }
+
         .approval-table {
             margin: 0;
         }
+
         .approval-table thead th {
-            background: #f0f3f1;
+            background: #eef1ef;
             border: 0;
-            color: #1f2a20;
-            font-size: .8rem;
-            font-weight: 900;
-            letter-spacing: .2em;
+            color: #202a20;
+            font-size: .78rem;
+            font-weight: 950;
+            letter-spacing: .16em;
             padding: 24px 28px;
             text-transform: uppercase;
             white-space: nowrap;
         }
+
         .approval-table tbody td {
             border-color: #edf1ee;
             padding: 28px;
             vertical-align: middle;
         }
+
         .instansi-icon {
             width: 54px;
             height: 54px;
@@ -201,15 +242,18 @@
             font-size: 1.45rem;
             flex: 0 0 auto;
         }
+
         .instansi-name {
             font-size: 1.06rem;
             font-weight: 900;
             margin-bottom: 2px;
         }
+
         .muted-small {
             color: var(--muted);
             font-size: .9rem;
         }
+
         .status-pill {
             display: inline-flex;
             align-items: center;
@@ -222,32 +266,38 @@
             padding: 7px 12px;
             text-transform: uppercase;
         }
+
         .action-stack {
             display: flex;
             justify-content: flex-end;
             gap: 10px;
             flex-wrap: wrap;
         }
+
+        .btn-approve,
+        .btn-reject {
+            border-radius: 999px;
+            font-weight: 850;
+            padding: 10px 16px;
+        }
+
         .btn-approve {
             background: var(--green);
             border-color: var(--green);
             color: #fff;
-            border-radius: 999px;
-            font-weight: 800;
-            padding: 10px 16px;
         }
+
         .btn-reject {
             border-color: #f0b6be;
-            color: #b42335;
+            color: var(--danger);
             background: #fff;
-            border-radius: 999px;
-            font-weight: 800;
-            padding: 10px 16px;
         }
+
         .empty-card {
-            padding: 54px 28px;
+            padding: 60px 28px;
             text-align: center;
         }
+
         .empty-icon {
             width: 74px;
             height: 74px;
@@ -259,32 +309,41 @@
             color: var(--green);
             font-size: 2rem;
         }
+
         @media (max-width: 991px) {
-            .admin-layout {
+            .super-layout {
                 grid-template-columns: 1fr;
             }
+
             .sidebar {
                 min-height: auto;
-                padding: 24px 18px;
+                padding: 28px 18px;
             }
+
             .sidebar-nav {
                 margin-top: 28px;
             }
-            .sidebar-bottom {
+
+            .sidebar-footer {
                 margin-top: 28px;
             }
+
             .main-content {
                 padding: 28px 18px 42px;
             }
+
             .page-header {
                 flex-direction: column;
             }
+
             .summary-card {
                 width: 100%;
             }
+
             .approval-table thead {
                 display: none;
             }
+
             .approval-table,
             .approval-table tbody,
             .approval-table tr,
@@ -292,12 +351,15 @@
                 display: block;
                 width: 100%;
             }
+
             .approval-table tbody tr {
                 border-bottom: 1px solid #edf1ee;
             }
+
             .approval-table tbody td {
                 padding: 18px 20px;
             }
+
             .action-stack {
                 justify-content: flex-start;
             }
@@ -305,9 +367,9 @@
     </style>
 </head>
 <body>
-    <div class="admin-layout">
+    <div class="super-layout">
         <aside class="sidebar">
-            <div>
+            <div class="brand">
                 <div class="brand-title">FUNDMIL SOREANG</div>
                 <div class="brand-subtitle">SISTEM AMANAH DIGITAL</div>
             </div>
@@ -319,7 +381,7 @@
                 </a>
             </nav>
 
-            <div class="sidebar-bottom">
+            <div class="sidebar-footer">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="logout-button">
@@ -334,7 +396,7 @@
             <header class="page-header">
                 <div>
                     <h1 class="page-title">Approval Admin Instansi</h1>
-                    <p class="page-description">Tinjau akun instansi baru sebelum mereka dapat masuk ke dashboard pengelolaan zakat.</p>
+                    <p class="page-description">Monitoring dan aktivasi akun admin instansi yang menunggu persetujuan.</p>
                 </div>
                 <div class="summary-card">
                     <div class="text-uppercase fw-bold small mb-2">Menunggu Approval</div>
@@ -346,7 +408,7 @@
                 <div class="alert alert-success border-0 rounded-4 shadow-sm mb-4">{{ session('success') }}</div>
             @endif
 
-            <section class="filter-card">
+            <section class="toolbar">
                 <div class="row g-3">
                     <div class="col-lg-8">
                         <div class="search-wrap">
@@ -415,8 +477,8 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <div class="fw-semibold">{{ $user->created_at->format('d M Y') }}</div>
-                                            <div class="muted-small">{{ $user->created_at->format('H:i') }} WIB</div>
+                                            <div class="fw-semibold">{{ optional($user->created_at)->format('d M Y') ?? '-' }}</div>
+                                            <div class="muted-small">{{ optional($user->created_at)->format('H:i') ?? '--:--' }} WIB</div>
                                         </td>
                                         <td>
                                             <div class="action-stack">

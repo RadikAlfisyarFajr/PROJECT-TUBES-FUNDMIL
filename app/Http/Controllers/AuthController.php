@@ -6,17 +6,23 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
     private function desaOptions(): array
     {
         return [
+            'Desa Cingcin',
             'Desa Soreang',
-            'Desa Cangkuang',
-            'Desa Cikeruh',
-            'Desa Ciwidey',
-            'Desa Margahayu',
+            'Desa Pamekaran',
+            'Desa Sekarwangi',
+            'Desa Parungserab',
+            'Desa Karamatmulya',
+            'Desa Sukapura',
+            'Desa Sadu',
+            'Desa Buninagara',
+            'Desa Cahaya Maju',
         ];
     }
 
@@ -46,7 +52,7 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'nama_instansi' => 'required|string|max:255',
-            'desa' => 'required|string|max:100',
+            'desa' => ['required', 'string', 'max:100', Rule::in($this->desaOptions())],
             'email' => 'required|email|max:255|unique:users,email',
             'username' => 'required|string|max:50|unique:users,username',
             'password' => 'required|string|min:8',

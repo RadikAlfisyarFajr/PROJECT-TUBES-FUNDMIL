@@ -324,10 +324,6 @@
                         <i class="bi bi-bar-chart-fill"></i>
                         <span class="nav-text">Laporan</span>
                     </a>
-                    <a class="nav-link d-flex align-items-center" href="#">
-                        <i class="bi bi-gear-fill"></i>
-                        <span class="nav-text">Pengaturan</span>
-                    </a>
                 </nav>
 
                 <div class="sidebar__footer mt-5 pt-4 border-top" style="color: var(--text-muted);">

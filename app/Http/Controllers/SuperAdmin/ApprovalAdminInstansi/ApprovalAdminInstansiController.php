@@ -3,12 +3,18 @@
 namespace App\Http\Controllers\SuperAdmin\ApprovalAdminInstansi;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 
 class ApprovalAdminInstansiController extends Controller
 {
     public function index()
     {
-        return view('superadmin.approval-admin-instansi.approval-admin-instansi-index');
+        $pendingUsers = User::where('role', 'admin_instansi')
+            ->where('status', 'pending')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('superadmin.approval-admin-instansi.approval-admin-instansi-index', compact('pendingUsers'));
     }
 
     public function show(string $id)
