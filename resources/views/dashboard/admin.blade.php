@@ -21,24 +21,40 @@
             background: #edf6ee;
             color: var(--text-dark);
             min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
             font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
         .dashboard-layout {
             min-height: 100vh;
             display: flex;
+            flex-wrap: nowrap;
+            gap: 0;
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: 0;
+            margin-right: 0;
+            max-width: none;
+            width: 100%;
+        }
+        .dashboard-layout > .row {
+            width: 100%;
+            margin: 0;
+            display: flex;
+            flex-wrap: nowrap;
         }
         .sidebar {
-            position: fixed;
+            position: sticky;
             top: 0;
             left: 0;
-            bottom: 0;
             width: 260px;
+            flex: 0 0 260px;
             background: #fbfdf8;
             border-right: 1px solid rgba(17, 79, 34, 0.08);
             padding: 2rem 1.25rem;
             transition: transform .3s ease, width .3s ease, padding .3s ease;
             z-index: 1100;
-            transform: translateX(-100%);
+            transform: none;
             height: 100vh;
             overflow-y: auto;
         }
@@ -66,6 +82,7 @@
         .sidebar .nav-link .bi {
             font-size: 1.1rem;
             margin-right: .85rem;
+            color: #0f6b32;
         }
         .sidebar__footer {
             position: absolute;
@@ -76,14 +93,14 @@
             transform: translateX(0);
         }
         .sidebar-collapsed .sidebar {
-            width: 120px;
-            padding: 2rem 1rem;
+            width: 88px;
+            flex-basis: 88px;
+            padding: 1.25rem .75rem;
             transform: translateX(0);
         }
         .sidebar-collapsed .sidebar__brand span,
         .sidebar-collapsed .sidebar__subtitle,
-        .sidebar-collapsed .nav-link .nav-text,
-        .sidebar-collapsed .sidebar__footer a {
+        .sidebar-collapsed .nav-link .nav-text {
             display: none;
         }
         .sidebar-collapsed .sidebar__brand {
@@ -91,13 +108,34 @@
         }
         .sidebar-collapsed .nav-link {
             justify-content: center;
-            padding: 0.95rem .6rem;
+            width: 58px;
+            height: 58px;
+            padding: 0;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 16px;
+        }
+        .sidebar-collapsed .sidebar .nav-link .bi,
+        .sidebar-collapsed .sidebar-toggle .bi {
+            margin-right: 0;
+            font-size: 1.25rem;
         }
         .sidebar-collapsed .sidebar__footer {
             left: 50%;
             transform: translateX(-50%);
             width: auto;
             bottom: 1.5rem;
+        }
+        .sidebar-collapsed .sidebar__footer a {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            justify-content: center;
+            font-size: 0;
+        }
+        .sidebar-collapsed .sidebar__footer a .bi {
+            font-size: 1.25rem;
+            color: #0f6b32;
         }
         .sidebar-overlay {
             position: fixed;
@@ -114,14 +152,16 @@
         }
         .content {
             flex: 1;
-            padding: 1.5rem 1.5rem 1.5rem 2.5rem;
-            margin-left: 120px;
-            transition: margin-left .3s ease;
+            width: auto;
+            min-width: 0;
+            max-width: none;
+            padding: 1.5rem 1.5rem 1.5rem 1.5rem;
+            transition: padding-left .3s ease;
             min-height: 100vh;
             background: #edf6ee;
         }
         .sidebar-open .content {
-            margin-left: 260px;
+            padding-left: 1.5rem;
         }
         .sidebar-toggle {
             background: transparent;
@@ -146,12 +186,18 @@
         }
         .sidebar-collapsed .sidebar-toggle {
             justify-content: center;
-            padding: 0.95rem .6rem;
+            width: 58px;
+            height: 58px;
+            padding: 0;
+            margin-left: auto;
+            margin-right: auto;
         }
         @media (max-width: 991px) {
             .sidebar {
+                position: fixed;
                 transform: translateX(-100%);
                 width: 260px;
+                flex-basis: 260px;
             }
             .sidebar-collapsed .sidebar {
                 width: 260px;
@@ -159,15 +205,17 @@
             }
             .sidebar-collapsed .sidebar__brand span,
             .sidebar-collapsed .sidebar__subtitle,
-            .sidebar-collapsed .nav-link .nav-text,
-            .sidebar-collapsed .sidebar__footer a {
+            .sidebar-collapsed .nav-link .nav-text {
                 display: block;
             }
             .content {
                 margin-left: 0;
+                padding-left: 1.5rem;
+                width: 100%;
             }
             .sidebar-open .content {
                 margin-left: 0;
+                padding-left: 1.5rem;
             }
         }
         .topbar {
@@ -267,7 +315,7 @@
         @media (max-width: 991px) {
             .sidebar {
                 min-height: auto;
-                position: relative;
+                position: fixed;
             }
             .sidebar__footer {
                 position: static;
@@ -292,35 +340,35 @@
                         <i class="bi bi-list"></i>
                         <span class="nav-text ms-3">Menu</span>
                     </button>
-                    <a class="nav-link active d-flex align-items-center" href="#">
+                    <a class="nav-link active d-flex align-items-center" href="{{ route('dashboard.admin') }}">
                         <i class="bi bi-house-door-fill"></i>
                         <span class="nav-text">Beranda</span>
                     </a>
-                    <a class="nav-link d-flex align-items-center" href="#">
+                    <a class="nav-link d-flex align-items-center" href="{{ route('profil-instansi.index') }}">
                         <i class="bi bi-person-badge-fill"></i>
                         <span class="nav-text">Profil Instansi</span>
                     </a>
-                    <a class="nav-link d-flex align-items-center" href="#">
+                    <a class="nav-link d-flex align-items-center" href="{{ route('kategori-dana.index') }}">
                         <i class="bi bi-tags-fill"></i>
                         <span class="nav-text">Kategori Dana</span>
                     </a>
-                    <a class="nav-link d-flex align-items-center" href="#">
+                    <a class="nav-link d-flex align-items-center" href="{{ route('pemasukan.index') }}">
                         <i class="bi bi-cash-stack"></i>
                         <span class="nav-text">Pemasukan Zakat</span>
                     </a>
-                    <a class="nav-link d-flex align-items-center" href="#">
+                    <a class="nav-link d-flex align-items-center" href="{{ route('mustahik.index') }}">
                         <i class="bi bi-people-fill"></i>
                         <span class="nav-text">Data Mustahik</span>
                     </a>
-                    <a class="nav-link d-flex align-items-center" href="#">
+                    <a class="nav-link d-flex align-items-center" href="{{ route('program-penyaluran.index') }}">
                         <i class="bi bi-box-seam"></i>
                         <span class="nav-text">Program Penyaluran</span>
                     </a>
-                    <a class="nav-link d-flex align-items-center" href="#">
+                    <a class="nav-link d-flex align-items-center" href="{{ route('pengaturan-distribusi.index') }}">
                         <i class="bi bi-sliders2-vertical"></i>
                         <span class="nav-text">Pengaturan Distribusi</span>
                     </a>
-                    <a class="nav-link d-flex align-items-center" href="#">
+                    <a class="nav-link d-flex align-items-center" href="{{ route('laporan.index') }}">
                         <i class="bi bi-bar-chart-fill"></i>
                         <span class="nav-text">Laporan</span>
                     </a>

@@ -23,11 +23,13 @@
 
         * {
             letter-spacing: 0;
+            box-sizing: border-box;
         }
 
         body {
             min-height: 100vh;
             margin: 0;
+            overflow-x: hidden;
             background: var(--surface);
             color: var(--ink);
             font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -36,20 +38,63 @@
         .app-layout {
             min-height: 100vh;
             display: grid;
+            grid-template-columns: 88px minmax(0, 1fr);
+            transition: grid-template-columns .25s ease;
+        }
+
+        body.sidebar-expanded .app-layout {
             grid-template-columns: 280px minmax(0, 1fr);
         }
 
         .sidebar {
             background: #f0f3f1;
             border-right: 1px solid var(--line);
-            padding: 38px 18px 28px;
+            padding: 20px 12px 24px;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            overflow-x: hidden;
+            transition: padding .25s ease;
+        }
+
+        body.sidebar-expanded .sidebar {
+            padding: 38px 18px 28px;
         }
 
         .brand {
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 52px;
+            overflow: hidden;
+            transition: padding .25s ease;
+        }
+
+        body.sidebar-expanded .brand {
+            justify-content: flex-start;
             padding: 0 18px;
+        }
+
+        .brand-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 10px;
+            background: var(--green);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+        }
+
+        .brand-copy {
+            display: none;
+            white-space: nowrap;
+        }
+
+        body.sidebar-expanded .brand-copy {
+            display: block;
         }
 
         .brand-title {
@@ -57,6 +102,7 @@
             font-size: 1.45rem;
             font-weight: 900;
             margin-bottom: 8px;
+            white-space: nowrap;
         }
 
         .brand-subtitle {
@@ -64,53 +110,99 @@
             font-size: .78rem;
             font-weight: 800;
             letter-spacing: .35em;
+            white-space: nowrap;
         }
 
         .sidebar-nav {
-            margin-top: 66px;
+            margin-top: 52px;
             display: grid;
             gap: 10px;
+            transition: margin-top .25s ease;
         }
 
+        body.sidebar-expanded .sidebar-nav {
+            margin-top: 66px;
+        }
+
+        .sidebar-toggle,
         .nav-item-link {
+            width: 58px;
+            height: 58px;
+            min-height: 58px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 0;
+            background: transparent;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 16px;
-            min-height: 54px;
-            padding: 0 18px;
-            border-radius: 20px;
+            padding: 0;
+            border-radius: 16px;
             color: var(--nav);
             font-weight: 600;
             text-decoration: none;
+            overflow: hidden;
+            white-space: nowrap;
+            transition: background .2s ease, color .2s ease, width .25s ease, padding .25s ease, border-radius .25s ease;
+        }
+
+        body.sidebar-expanded .sidebar-toggle,
+        body.sidebar-expanded .nav-item-link {
+            width: 100%;
+            padding: 0 18px;
+            justify-content: flex-start;
         }
 
         .nav-item-link:hover,
-        .nav-item-link.active {
+        .nav-item-link.active,
+        .sidebar-toggle:hover {
             background: #fff;
             color: var(--green);
         }
 
         .nav-item-link.active {
-            box-shadow: inset 4px 0 0 var(--green);
+            background: #dceee2;
         }
 
+        .sidebar-toggle i,
         .nav-item-link i {
             width: 24px;
-            color: #3f5164;
+            color: var(--green-dark);
             font-size: 1.25rem;
             text-align: center;
+            flex: 0 0 auto;
         }
 
         .nav-item-link.active i {
             color: var(--green);
         }
 
+        .nav-item-link span,
+        .sidebar-toggle span {
+            display: none;
+        }
+
+        body.sidebar-expanded .nav-item-link span,
+        body.sidebar-expanded .sidebar-toggle span {
+            display: inline;
+        }
+
         .sidebar-footer {
             margin-top: auto;
             border-top: 1px solid var(--line);
-            padding-top: 26px;
+            padding-top: 18px;
             display: grid;
             gap: 8px;
+        }
+
+        .sidebar-toggle {
+            color: #315062;
+            font-weight: 700;
+        }
+
+        .sidebar-toggle i {
+            font-size: 1.35rem;
         }
 
         .logout-button {
@@ -235,19 +327,129 @@
             min-height: 138px;
             border-radius: 20px;
             overflow: hidden;
-            background:
-                radial-gradient(circle at 50% 90%, #f6edcf 0 12%, transparent 13%),
-                linear-gradient(135deg, #53121c, #741926);
+            background: linear-gradient(135deg, #54121d 0%, #741926 100%);
             position: relative;
             display: grid;
             place-items: end center;
         }
 
-        .hero-visual i {
-            color: #fff5d6;
-            font-size: 5.4rem;
+        .hero-visual::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 18% 22%, rgba(255,255,255,.08), transparent 22%),
+                radial-gradient(circle at 82% 18%, rgba(255,218,124,.14), transparent 20%);
+        }
+
+        .mosque-art {
+            position: relative;
+            width: 250px;
+            height: 138px;
             transform: translateY(22px);
-            filter: drop-shadow(0 14px 18px rgba(0,0,0,.18));
+            filter: drop-shadow(0 16px 18px rgba(0,0,0,.2));
+        }
+
+        .mosque-dome {
+            position: absolute;
+            left: 50%;
+            bottom: 42px;
+            width: 94px;
+            height: 86px;
+            border-radius: 52px 52px 10px 10px;
+            background: #fff7d9;
+            transform: translateX(-50%);
+            border: 5px solid #eee2bd;
+        }
+
+        .mosque-dome::before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: -21px;
+            width: 12px;
+            height: 30px;
+            border-radius: 999px 999px 0 0;
+            background: #fff7d9;
+            border: 4px solid #eee2bd;
+            transform: translateX(-50%);
+        }
+
+        .mosque-dome::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: -33px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #f0a51d;
+            transform: translateX(-50%);
+        }
+
+        .mosque-body {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: 155px;
+            height: 60px;
+            border: 5px solid #eee2bd;
+            background: #fff7d9;
+            transform: translateX(-50%);
+        }
+
+        .mosque-door {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: 42px;
+            height: 42px;
+            border-radius: 22px 22px 0 0;
+            background: #8d7460;
+            border: 4px solid #d8c69f;
+            transform: translateX(-50%);
+        }
+
+        .mosque-minaret {
+            position: absolute;
+            bottom: 0;
+            width: 28px;
+            height: 118px;
+            background: #fff7d9;
+            border: 5px solid #eee2bd;
+        }
+
+        .mosque-minaret.left {
+            left: 32px;
+        }
+
+        .mosque-minaret.right {
+            right: 32px;
+        }
+
+        .mosque-minaret::before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: -23px;
+            width: 24px;
+            height: 30px;
+            border-radius: 14px 14px 0 0;
+            background: #fff7d9;
+            border: 5px solid #eee2bd;
+            transform: translateX(-50%);
+        }
+
+        .mosque-minaret::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: -33px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #f0a51d;
+            transform: translateX(-50%);
         }
 
         .upload-box {
@@ -274,6 +476,7 @@
 
         .bank-table table {
             margin: 0;
+            min-width: 760px;
         }
 
         .bank-table thead th {
@@ -350,11 +553,20 @@
     <div class="app-layout">
         <aside class="sidebar">
             <div class="brand">
-                <div class="brand-title">FUNDMIL SOREANG</div>
-                <div class="brand-subtitle">SISTEM AMANAH DIGITAL</div>
+                <div class="brand-icon">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </div>
+                <div class="brand-copy">
+                    <div class="brand-title">FUNDMIL SOREANG</div>
+                    <div class="brand-subtitle">SISTEM AMANAH DIGITAL</div>
+                </div>
             </div>
 
             <nav class="sidebar-nav" aria-label="Navigasi Admin Instansi">
+                <button id="sidebarToggle" class="sidebar-toggle" type="button">
+                    <i class="bi bi-list"></i>
+                    <span>Menu</span>
+                </button>
                 <a class="nav-item-link" href="{{ route('dashboard.admin') }}">
                     <i class="bi bi-grid-fill"></i>
                     <span>Beranda</span>
@@ -387,6 +599,10 @@
                     <i class="bi bi-bar-chart-fill"></i>
                     <span>Laporan</span>
                 </a>
+                <a class="nav-item-link" href="#">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Pengaturan</span>
+                </a>
             </nav>
 
             <div class="sidebar-footer">
@@ -394,13 +610,6 @@
                     <i class="bi bi-question-circle-fill"></i>
                     <span>Bantuan</span>
                 </a>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button class="nav-item-link logout-button" type="submit">
-                        <i class="bi bi-box-arrow-right"></i>
-                        <span>Keluar</span>
-                    </button>
-                </form>
             </div>
         </aside>
 
@@ -449,7 +658,13 @@
                     <div class="col-lg-6">
                         <div class="field-label invisible">Foto Instansi</div>
                         <div class="hero-visual">
-                            <i class="bi bi-bank2"></i>
+                            <div class="mosque-art" aria-hidden="true">
+                                <span class="mosque-minaret left"></span>
+                                <span class="mosque-minaret right"></span>
+                                <span class="mosque-body"></span>
+                                <span class="mosque-dome"></span>
+                                <span class="mosque-door"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -547,5 +762,12 @@
             </section>
         </main>
     </div>
+    <script>
+        const sidebarToggle = document.getElementById('sidebarToggle');
+
+        sidebarToggle.addEventListener('click', () => {
+            document.body.classList.toggle('sidebar-expanded');
+        });
+    </script>
 </body>
 </html>
