@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -413,11 +414,11 @@
             transition: transform .2s ease;
         }
 
-        .toggle-switch input:checked + .toggle-slider {
+        .toggle-switch input:checked+.toggle-slider {
             background: var(--green);
         }
 
-        .toggle-switch input:checked + .toggle-slider::after {
+        .toggle-switch input:checked+.toggle-slider::after {
             transform: translateX(16px);
         }
 
@@ -488,6 +489,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="admin-layout">
         <aside class="sidebar">
@@ -678,4 +680,5 @@
         });
     </script>
 </body>
+
 </html>
