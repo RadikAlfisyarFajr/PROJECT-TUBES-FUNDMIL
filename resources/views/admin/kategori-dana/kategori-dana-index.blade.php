@@ -58,7 +58,7 @@
         }
 
         body.sidebar-expanded .sidebar {
-            padding: 38px 18px 28px;
+            padding: 34px 18px 28px;
         }
 
         .brand {
@@ -97,9 +97,9 @@
         }
 
         .brand-title {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             color: var(--green-dark);
-            font-size: 1.25rem;
+            font-size: 1.28rem;
             font-weight: 900;
         }
 
@@ -107,28 +107,28 @@
             color: #9ba49e;
             font-size: .68rem;
             font-weight: 800;
-            letter-spacing: .32em;
+            letter-spacing: .28em;
         }
 
         .sidebar-nav {
-            margin-top: 52px;
+            margin-top: 34px;
             display: grid;
-            gap: 10px;
+            gap: 6px;
         }
 
         body.sidebar-expanded .sidebar-nav {
-            margin-top: 66px;
+            margin-top: 44px;
         }
 
         .sidebar-toggle,
         .nav-item-link {
             width: 58px;
-            height: 58px;
-            min-height: 58px;
+            height: 52px;
+            min-height: 52px;
             margin-left: auto;
             margin-right: auto;
             border: 0;
-            border-radius: 16px;
+            border-radius: 14px;
             background: transparent;
             color: #294158;
             display: flex;
@@ -145,19 +145,24 @@
         body.sidebar-expanded .sidebar-toggle,
         body.sidebar-expanded .nav-item-link {
             width: 100%;
-            padding: 0 18px;
+            padding: 0 16px;
             justify-content: flex-start;
         }
 
         .nav-item-link:hover,
-        .nav-item-link.active,
-        .sidebar-toggle:hover {
+        .nav-item-link.active {
             background: #fff;
             color: var(--green);
         }
 
+        .sidebar-toggle:hover {
+            background: rgba(8, 112, 38, .08);
+            color: var(--green);
+        }
+
         .nav-item-link.active {
-            background: #dceee2;
+            background: #fff;
+            box-shadow: inset 4px 0 0 var(--green);
         }
 
         .sidebar-toggle i,
@@ -181,8 +186,14 @@
 
         .sidebar-footer {
             margin-top: auto;
-            padding-top: 18px;
+            padding-top: 14px;
             border-top: 1px solid var(--line);
+        }
+
+        .sidebar-toggle {
+            color: var(--muted);
+            font-weight: 650;
+            margin-bottom: 10px;
         }
 
         .main-content {
@@ -490,7 +501,7 @@
     </style>
 </head>
 
-<body>
+<body class="sidebar-expanded">
     <div class="admin-layout">
         <aside class="sidebar">
             <div class="brand">

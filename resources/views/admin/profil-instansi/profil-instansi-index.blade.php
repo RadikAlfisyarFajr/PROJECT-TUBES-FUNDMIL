@@ -58,7 +58,7 @@
         }
 
         body.sidebar-expanded .sidebar {
-            padding: 38px 18px 28px;
+            padding: 34px 18px 28px;
         }
 
         .brand {
@@ -99,36 +99,36 @@
 
         .brand-title {
             color: var(--green-dark);
-            font-size: 1.45rem;
+            font-size: 1.28rem;
             font-weight: 900;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             white-space: nowrap;
         }
 
         .brand-subtitle {
             color: #a0a8a2;
-            font-size: .78rem;
+            font-size: .68rem;
             font-weight: 800;
-            letter-spacing: .35em;
+            letter-spacing: .28em;
             white-space: nowrap;
         }
 
         .sidebar-nav {
-            margin-top: 52px;
+            margin-top: 34px;
             display: grid;
-            gap: 10px;
+            gap: 6px;
             transition: margin-top .25s ease;
         }
 
         body.sidebar-expanded .sidebar-nav {
-            margin-top: 66px;
+            margin-top: 44px;
         }
 
         .sidebar-toggle,
         .nav-item-link {
             width: 58px;
-            height: 58px;
-            min-height: 58px;
+            height: 52px;
+            min-height: 52px;
             margin-left: auto;
             margin-right: auto;
             border: 0;
@@ -138,7 +138,7 @@
             justify-content: center;
             gap: 16px;
             padding: 0;
-            border-radius: 16px;
+            border-radius: 14px;
             color: var(--nav);
             font-weight: 600;
             text-decoration: none;
@@ -150,19 +150,24 @@
         body.sidebar-expanded .sidebar-toggle,
         body.sidebar-expanded .nav-item-link {
             width: 100%;
-            padding: 0 18px;
+            padding: 0 16px;
             justify-content: flex-start;
         }
 
         .nav-item-link:hover,
-        .nav-item-link.active,
-        .sidebar-toggle:hover {
+        .nav-item-link.active {
             background: #fff;
             color: var(--green);
         }
 
+        .sidebar-toggle:hover {
+            background: rgba(7, 101, 31, .08);
+            color: var(--green);
+        }
+
         .nav-item-link.active {
-            background: #dceee2;
+            background: #fff;
+            box-shadow: inset 4px 0 0 var(--green);
         }
 
         .sidebar-toggle i,
@@ -191,14 +196,15 @@
         .sidebar-footer {
             margin-top: auto;
             border-top: 1px solid var(--line);
-            padding-top: 18px;
+            padding-top: 14px;
             display: grid;
             gap: 8px;
         }
 
         .sidebar-toggle {
-            color: #315062;
-            font-weight: 700;
+            color: var(--muted);
+            font-weight: 650;
+            margin-bottom: 10px;
         }
 
         .sidebar-toggle i {
@@ -549,7 +555,7 @@
         }
     </style>
 </head>
-<body>
+<body class="sidebar-expanded">
     <div class="app-layout">
         <aside class="sidebar">
             <div class="brand">
@@ -598,10 +604,6 @@
                 <a class="nav-item-link" href="{{ route('laporan.index') }}">
                     <i class="bi bi-bar-chart-fill"></i>
                     <span>Laporan</span>
-                </a>
-                <a class="nav-item-link" href="#">
-                    <i class="bi bi-gear-fill"></i>
-                    <span>Pengaturan</span>
                 </a>
             </nav>
 
