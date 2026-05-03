@@ -339,6 +339,15 @@
             place-items: end center;
         }
 
+        .hero-visual img {
+            width: 100%;
+            height: 100%;
+            min-height: 138px;
+            object-fit: cover;
+            position: relative;
+            z-index: 1;
+        }
+
         .hero-visual::before {
             content: "";
             position: absolute;
@@ -472,6 +481,12 @@
             color: #8dbb9b;
             font-size: 2rem;
             margin-bottom: 12px;
+        }
+
+        .signature-img {
+            max-width: 100%;
+            max-height: 112px;
+            object-fit: contain;
         }
 
         .bank-table {
@@ -622,7 +637,7 @@
                     <p class="page-desc">Kelola informasi identitas, legalitas, dan kontak Masjid/Lembaga Anda</p>
                 </div>
                 <div class="top-actions">
-                    <a class="btn-update" href="{{ route('profil-instansi.edit', 1) }}">
+                    <a class="btn-update" href="{{ route('profil-instansi.edit', $instansi->id) }}">
                         <i class="bi bi-floppy-fill"></i>
                         <span>Update Profil</span>
                     </a>
@@ -631,42 +646,57 @@
                 </div>
             </header>
 
+            @if (session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
+
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <strong>Data belum bisa disimpan.</strong>
+                    <div>Periksa kembali input pada form.</div>
+                </div>
+            @endif
+
             <section class="profile-card mb-4">
                 <h2 class="section-title">Informasi Masjid/Lembaga</h2>
                 <div class="row g-4">
                     <div class="col-lg-6">
                         <div class="field-label">Nama Instansi</div>
-                        <div class="field-box">Masjid Jami Al-Ghozali</div>
+                        <div class="field-box">{{ $instansi->nama }}</div>
                     </div>
                     <div class="col-lg-6">
                         <div class="field-label">WhatsApp Admin</div>
-                        <div class="field-box"><span class="me-4">+62</span> 81234567890</div>
+                        <div class="field-box">{{ $instansi->kontak ?: '-' }}</div>
                     </div>
                     <div class="col-lg-6">
                         <div class="field-label">Tipe Instansi</div>
                         <div class="field-box justify-content-between">
-                            <span>Masjid</span>
+                            <span>{{ $instansi->tipe ?: '-' }}</span>
                             <i class="bi bi-chevron-down text-muted"></i>
                         </div>
                     </div>
                     <div class="col-lg-6">
                         <div class="field-label">Email Resmi</div>
-                        <div class="field-box">info@alghozalisoreang.org</div>
+                        <div class="field-box">{{ $instansi->email ?: '-' }}</div>
                     </div>
                     <div class="col-lg-6">
                         <div class="field-label">Alamat Lengkap</div>
-                        <div class="field-box tall">Jl. Raya Soreang No. 123, Kabupaten Bandung, Jawa Barat 40911</div>
+                        <div class="field-box tall">{{ $instansi->alamat ?: '-' }}</div>
                     </div>
                     <div class="col-lg-6">
                         <div class="field-label invisible">Foto Instansi</div>
                         <div class="hero-visual">
-                            <div class="mosque-art" aria-hidden="true">
-                                <span class="mosque-minaret left"></span>
-                                <span class="mosque-minaret right"></span>
-                                <span class="mosque-body"></span>
-                                <span class="mosque-dome"></span>
-                                <span class="mosque-door"></span>
-                            </div>
+                            @if ($instansi->logo)
+                                <img src="{{ asset('storage/'.$instansi->logo) }}" alt="Foto profil {{ $instansi->nama }}">
+                            @else
+                                <div class="mosque-art" aria-hidden="true">
+                                    <span class="mosque-minaret left"></span>
+                                    <span class="mosque-minaret right"></span>
+                                    <span class="mosque-body"></span>
+                                    <span class="mosque-dome"></span>
+                                    <span class="mosque-door"></span>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -678,12 +708,12 @@
                         <h2 class="section-title">Legalitas</h2>
                         <div class="mb-4">
                             <div class="field-label">Nomor SK/Izin Operasional</div>
-                            <div class="field-box">SK-BAZNAS/X/2023/004</div>
+                            <div class="field-box">{{ $instansi->nomor_sk ?: '-' }}</div>
                         </div>
                         <div>
                             <div class="field-label">Masa Berlaku</div>
                             <div class="field-box justify-content-between">
-                                <span>31 Desember 2028</span>
+                                <span>{{ $instansi->masa_berlaku ? $instansi->masa_berlaku->translatedFormat('d F Y') : '-' }}</span>
                                 <i class="bi bi-calendar-event-fill text-muted"></i>
                             </div>
                         </div>
@@ -695,16 +725,20 @@
                         <h2 class="section-title">Pimpinan</h2>
                         <div class="mb-4">
                             <div class="field-label">Nama Ketua/DKM</div>
-                            <div class="field-box">Ust. H. Ahmad Fauzi, Lc.</div>
+                            <div class="field-box">{{ $instansi->nama_pimpinan ?: '-' }}</div>
                         </div>
                         <div>
                             <div class="field-label">Tanda Tangan Digital</div>
                             <div class="upload-box">
-                                <div>
-                                    <i class="bi bi-vector-pen"></i>
-                                    <div class="fw-semibold mb-2">Upload Tanda Tangan Digital</div>
-                                    <small class="text-muted">Format PNG Transparan (Max 2MB)</small>
-                                </div>
+                                @if ($instansi->tanda_tangan)
+                                    <img class="signature-img" src="{{ asset('storage/'.$instansi->tanda_tangan) }}" alt="Tanda tangan digital">
+                                @else
+                                    <div>
+                                        <i class="bi bi-vector-pen"></i>
+                                        <div class="fw-semibold mb-2">Belum ada tanda tangan digital</div>
+                                        <small class="text-muted">Upload melalui tombol Update Profil</small>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </section>
@@ -714,7 +748,7 @@
             <section class="profile-card">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
                     <h2 class="section-title mb-0">Rekening Operasional</h2>
-                    <button class="btn btn-link text-success fw-bold text-decoration-none px-0">
+                    <button class="btn btn-link text-success fw-bold text-decoration-none px-0" type="button" data-bs-toggle="modal" data-bs-target="#modalTambahRekening">
                         <i class="bi bi-plus-circle-fill me-2"></i>Tambah Rekening
                     </button>
                 </div>
@@ -730,40 +764,103 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center gap-3">
-                                        <span class="bank-icon"><i class="bi bi-wallet2"></i></span>
-                                        <strong>BSI (Bank Syariah Indonesia)</strong>
-                                    </div>
-                                </td>
-                                <td>7001020304</td>
-                                <td>DKM AL-GHOZALI SOREANG</td>
-                                <td class="text-end">
-                                    <button class="action-link"><i class="bi bi-pencil-fill"></i></button>
-                                    <button class="action-link text-danger"><i class="bi bi-trash-fill"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center gap-3">
-                                        <span class="bank-icon"><i class="bi bi-wallet2"></i></span>
-                                        <strong>Bank Muamalat</strong>
-                                    </div>
-                                </td>
-                                <td>123-00-4567-89</td>
-                                <td>OPERASIONAL MASJID</td>
-                                <td class="text-end">
-                                    <button class="action-link"><i class="bi bi-pencil-fill"></i></button>
-                                    <button class="action-link text-danger"><i class="bi bi-trash-fill"></i></button>
-                                </td>
-                            </tr>
+                            @forelse ($instansi->rekening as $rekening)
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <span class="bank-icon"><i class="bi bi-wallet2"></i></span>
+                                            <strong>{{ $rekening->nama_bank }}</strong>
+                                        </div>
+                                    </td>
+                                    <td>{{ $rekening->nomor_rekening }}</td>
+                                    <td>{{ $rekening->nama_pemilik }}</td>
+                                    <td class="text-end">
+                                        <button class="action-link" type="button" data-bs-toggle="modal" data-bs-target="#modalEditRekening{{ $rekening->id }}">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </button>
+                                        <form class="d-inline" action="{{ route('profil-instansi.rekening.destroy', $rekening) }}" method="POST" onsubmit="return confirm('Hapus rekening ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="action-link text-danger" type="submit"><i class="bi bi-trash-fill"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">Belum ada rekening operasional.</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
             </section>
         </main>
     </div>
+
+    <div class="modal fade" id="modalTambahRekening" tabindex="-1" aria-labelledby="modalTambahRekeningLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content" action="{{ route('profil-instansi.rekening.store') }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTambahRekeningLabel">Tambah Rekening</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="nama_bank">Nama Bank</label>
+                        <input id="nama_bank" class="form-control" name="nama_bank" value="{{ old('nama_bank') }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="nomor_rekening">Nomor Rekening</label>
+                        <input id="nomor_rekening" class="form-control" name="nomor_rekening" value="{{ old('nomor_rekening') }}" required>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label" for="nama_pemilik">Nama Pemilik</label>
+                        <input id="nama_pemilik" class="form-control" name="nama_pemilik" value="{{ old('nama_pemilik') }}" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @foreach ($instansi->rekening as $rekening)
+        <div class="modal fade" id="modalEditRekening{{ $rekening->id }}" tabindex="-1" aria-labelledby="modalEditRekeningLabel{{ $rekening->id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <form class="modal-content" action="{{ route('profil-instansi.rekening.update', $rekening) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalEditRekeningLabel{{ $rekening->id }}">Edit Rekening</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label" for="nama_bank_{{ $rekening->id }}">Nama Bank</label>
+                            <input id="nama_bank_{{ $rekening->id }}" class="form-control" name="nama_bank" value="{{ old('nama_bank', $rekening->nama_bank) }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="nomor_rekening_{{ $rekening->id }}">Nomor Rekening</label>
+                            <input id="nomor_rekening_{{ $rekening->id }}" class="form-control" name="nomor_rekening" value="{{ old('nomor_rekening', $rekening->nomor_rekening) }}" required>
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label" for="nama_pemilik_{{ $rekening->id }}">Nama Pemilik</label>
+                            <input id="nama_pemilik_{{ $rekening->id }}" class="form-control" name="nama_pemilik" value="{{ old('nama_pemilik', $rekening->nama_pemilik) }}" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endforeach
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const sidebarToggle = document.getElementById('sidebarToggle');
 
