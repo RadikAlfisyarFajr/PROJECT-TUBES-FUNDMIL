@@ -54,6 +54,18 @@
             color: #0f722b;
             border-radius: 14px;
         }
+        .password-toggle-btn {
+            min-width: 52px;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            color: #324337;
+            background-color: #f8faf7;
+            border-color: rgba(51, 68, 58, .15);
+        }
+        .password-toggle-btn i {
+            font-size: 1.05rem;
+            color: inherit;
+        }
     </style>
 </head>
 <body>
@@ -82,7 +94,12 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-semibold" for="password">Password</label>
-                    <input id="password" type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Masukkan password">
+                    <div class="input-group">
+                        <input id="password" type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Masukkan password">
+                        <button type="button" class="btn btn-outline-secondary border-start-0 password-toggle-btn" id="togglePasswordLogin" aria-label="Tampilkan password">
+                            <i class="bi bi-eye-fill"></i>
+                        </button>
+                    </div>
                     @error('password')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -100,5 +117,20 @@
             </div>
         </section>
     </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var passwordInput = document.getElementById('password');
+            var toggle = document.getElementById('togglePasswordLogin');
+            if (passwordInput && toggle) {
+                toggle.addEventListener('click', function () {
+                    var visible = passwordInput.type === 'password';
+                    passwordInput.type = visible ? 'text' : 'password';
+                    var icon = this.querySelector('i');
+                    icon.classList.toggle('bi-eye-fill', !visible);
+                    icon.classList.toggle('bi-eye-slash-fill', visible);
+                });
+            }
+        });
+    </script>
 </body>
 </html>
