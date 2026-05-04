@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Instansi;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -122,7 +123,21 @@ class AuthController extends Controller
             abort(404);
         }
 
-        $user->update(['status' => 'active']);
+        $instansi = $user->instansi;
+
+        if (! $instansi) {
+            $instansi = Instansi::query()->create([
+                'nama' => $user->nama_instansi ?: $user->name,
+                'kelurahan' => $user->desa,
+                'email' => $user->email,
+                'status' => 'aktif',
+            ]);
+        }
+
+        $user->update([
+            'instansi_id' => $instansi->id,
+            'status' => 'active',
+        ]);
 
         return redirect()->route('dashboard.superadmin')->with('success', 'Akun instansi berhasil disetujui.');
     }
