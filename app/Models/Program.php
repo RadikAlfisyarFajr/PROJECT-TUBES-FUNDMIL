@@ -36,11 +36,6 @@ class Program extends Model
         return $this->hasMany(ProgramDana::class);
     }
 
-    public function distribusi(): HasMany
-    {
-        return $this->hasMany(Distribusi::class);
-    }
-
     public function kategoriDana(): HasManyThrough
     {
         return $this->hasManyThrough(

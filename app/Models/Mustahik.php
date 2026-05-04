@@ -20,6 +20,12 @@ class Mustahik extends Model
         'longitude'
     ];
 
+    protected $casts = [
+        'tanggal_verifikasi' => 'datetime',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
+    ];
+
     public function instansi(): BelongsTo
     {
         return $this->belongsTo(Instansi::class);

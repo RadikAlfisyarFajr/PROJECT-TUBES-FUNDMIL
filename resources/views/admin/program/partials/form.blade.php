@@ -6,106 +6,133 @@
     <title>{{ $title }} - Fundmil Soreang</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-[#1e241f]/45 font-sans text-[#122016] antialiased">
-<div class="fixed inset-0 -z-10 bg-[#f4f7f5] blur-[2px]">
-    <div class="ml-[254px] h-16 bg-white"></div>
+<body class="min-h-screen bg-[#9b9f9b] font-sans text-[#122016] antialiased">
+<div class="fixed inset-0 -z-10 overflow-hidden bg-[#f6f8f6]">
+    <div class="flex min-h-screen blur-[4px]">
+        <aside class="hidden w-[254px] shrink-0 bg-white lg:block">
+            <div class="px-8 pt-[38px]">
+                <h1 class="text-[20px] font-black leading-none tracking-wide text-[#0b751f]">FUNDMIL SOREANG</h1>
+                <p class="mt-[13px] text-[10px] font-black uppercase tracking-[0.34em] text-[#a3aaa5]">Sistem Amanah Digital</p>
+            </div>
+            <div class="mt-[70px] space-y-[26px] px-8 text-[14px] font-semibold text-[#41546a]">
+                <p>Beranda</p><p>Profil Instansi</p><p>Kategori Dana</p><p>Pemasukan Zakat</p><p>Data Mustahik</p>
+                <p class="rounded-[16px] bg-[#f4f8f6] px-4 py-3 font-black text-[#0b751f]">Program Penyaluran</p>
+            </div>
+        </aside>
+        <main class="flex-1">
+            <div class="h-[64px] bg-white"></div>
+            <div class="px-[34px] pt-[35px]">
+                <div class="h-[72px] w-[267px] rounded-[15px] bg-[#0b751f]"></div>
+            </div>
+        </main>
+    </div>
+    <div class="absolute inset-0 bg-black/35"></div>
 </div>
+
 <main class="flex min-h-screen items-center justify-center px-5 py-10">
     <form action="{{ $action }}" method="POST" class="w-full max-w-[670px] overflow-hidden rounded-[22px] bg-white shadow-2xl" onsubmit="if (!this.querySelector('[name=&quot;kategori_dana_ids[]&quot;]:checked')) { alert('Pilih minimal satu jenis dana.'); return false; }">
         @csrf
         @if ($method !== 'POST')
             @method($method)
         @endif
-        <div class="flex items-center justify-between border-b border-[#edf1ef] px-8 py-8">
-            <h1 class="text-xl font-black text-[#0b751f]">{{ $title }}</h1>
-            <a href="{{ route('program-penyaluran.index') }}" class="text-3xl leading-none text-[#1d2b22]">&times;</a>
+        <input type="hidden" name="status" value="{{ old('status', $program->status ?? 'aktif') }}">
+        <input type="hidden" name="tanggal_mulai" value="{{ old('tanggal_mulai', optional($program?->tanggal_mulai ?? now())->format('Y-m-d')) }}">
+
+        <div class="flex h-[95px] items-center justify-between border-b border-[#edf1ef] px-[33px]">
+            <h1 class="text-[20px] font-black text-[#0b751f]">{{ $title }}</h1>
+            <a href="{{ route('program-penyaluran.index') }}" class="text-[34px] font-light leading-none text-[#17231b]">&times;</a>
         </div>
 
         @if ($errors->any())
-            <div class="mx-8 mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">Lengkapi data yang masih belum valid.</div>
+            <div class="mx-[33px] mt-5 rounded-[12px] border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">Lengkapi data yang masih belum valid.</div>
         @endif
 
-        <div class="space-y-8 px-8 py-8">
+        <div class="px-[33px] py-[30px]">
             <section>
-                <h2 class="border-l-4 border-[#0b751f] pl-3 text-sm font-black uppercase tracking-[0.25em]">Identitas Program</h2>
-                <div class="mt-6 grid gap-7 md:grid-cols-2">
+                <h2 class="border-l-4 border-[#0b751f] pl-[10px] text-[13px] font-black uppercase tracking-[0.23em] text-[#303b34]">Identitas Program</h2>
+                <div class="mt-[24px] grid gap-[27px] md:grid-cols-2">
                     <label>
-                        <span class="text-xs font-black uppercase text-[#364238]">Nama Program</span>
-                        <input required name="nama_program" value="{{ old('nama_program', $program->nama_program ?? '') }}" class="mt-3 h-12 w-full rounded-xl border-0 bg-[#e8edeb] px-4 text-sm outline-none ring-1 ring-transparent placeholder:text-[#73818a] focus:bg-white focus:ring-[#0b751f]" placeholder="Contoh: Soreang Cerdas - Beasiswa SMP">
+                        <span class="text-[11px] font-black uppercase text-[#344038]">Nama Program</span>
+                        <input required name="nama_program" value="{{ old('nama_program', $program->nama_program ?? '') }}" class="mt-[11px] h-[44px] w-full rounded-[11px] border-0 bg-[#e6ebe8] px-[17px] text-[14px] outline-none placeholder:text-[#75818b] focus:bg-white focus:ring-2 focus:ring-[#0b751f]" placeholder="Contoh: Soreang Cerdas - Beasiswa SMP">
                         @error('nama_program') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
                     </label>
                     <label>
-                        <span class="text-xs font-black uppercase text-[#364238]">Status Program</span>
-                        <select required name="status" class="mt-3 h-12 w-full rounded-xl border-0 bg-[#e8edeb] px-4 text-sm outline-none focus:bg-white focus:ring-[#0b751f]">
-                            @foreach (['aktif' => 'Aktif', 'draft' => 'Draft', 'selesai' => 'Selesai'] as $value => $label)
-                                <option value="{{ $value }}" @selected(old('status', $program->status ?? 'aktif') === $value)>{{ $label }}</option>
+                        <span class="text-[11px] font-black uppercase text-[#344038]">Kategori Program</span>
+                        <select required name="kategori_program" class="mt-[11px] h-[44px] w-full rounded-[11px] border-0 bg-[#e6ebe8] px-[17px] text-[14px] outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]">
+                            <option value="">Pilih Kategori</option>
+                            @foreach (['Pendidikan', 'Kesehatan', 'Ekonomi', 'Sosial'] as $opsiKategoriProgram)
+                                <option value="{{ $opsiKategoriProgram }}" @selected(old('kategori_program', $kategoriProgram ?? null) === $opsiKategoriProgram)>{{ $opsiKategoriProgram }}</option>
                             @endforeach
                         </select>
                     </label>
                 </div>
             </section>
 
-            <section>
-                <h2 class="border-l-4 border-[#0b751f] pl-3 text-sm font-black uppercase tracking-[0.25em]">Target & Asnaf</h2>
-                <div class="mt-6 grid gap-7 md:grid-cols-2">
+            <section class="mt-[30px]">
+                <h2 class="border-l-4 border-[#0b751f] pl-[10px] text-[13px] font-black uppercase tracking-[0.23em] text-[#303b34]">Target & Asnaf</h2>
+                <div class="mt-[24px] grid gap-[27px] md:grid-cols-2">
                     <div>
-                        <span class="text-xs font-black uppercase text-[#364238]">Jenis Dana</span>
-                        <div class="mt-3 flex min-h-12 flex-wrap items-center gap-2 rounded-xl bg-[#e8edeb] px-3 py-2">
-                            @foreach ($kategoriDana as $kategori)
+                        <span class="text-[11px] font-black uppercase text-[#344038]">Target Asnaf</span>
+                        <div class="mt-[11px] flex h-[44px] items-center gap-[8px] rounded-[11px] bg-[#e6ebe8] px-[15px]">
+                            @foreach ($kategoriDana->take(2) as $kategori)
                                 <label class="cursor-pointer">
                                     <input type="checkbox" name="kategori_dana_ids[]" value="{{ $kategori->id }}" class="peer sr-only" @checked(in_array($kategori->id, $selectedKategori))>
-                                    <span class="inline-flex rounded bg-[#dce4df] px-3 py-2 text-[11px] font-black uppercase text-[#536058] peer-checked:bg-[#0b751f] peer-checked:text-white">{{ $kategori->nama }}</span>
+                                    <span class="inline-flex h-[22px] min-w-[62px] items-center justify-center rounded-[4px] bg-[#dce4df] px-2 text-[9px] font-black uppercase text-[#536058] peer-checked:bg-[#0b751f] peer-checked:text-white">{{ $kategori->nama }}</span>
                                 </label>
                             @endforeach
+                            @foreach ($kategoriDana->skip(2) as $kategori)
+                                <label class="hidden cursor-pointer">
+                                    <input type="checkbox" name="kategori_dana_ids[]" value="{{ $kategori->id }}" @checked(in_array($kategori->id, $selectedKategori))>
+                                </label>
+                            @endforeach
+                            <span class="ml-auto text-[14px] text-[#7b8580]">Pilih asnaf...</span>
+                            <span class="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-[#334238] text-[18px] font-black text-white">+</span>
                         </div>
                         @error('kategori_dana_ids') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
                     </div>
                     <label>
-                        <span class="text-xs font-black uppercase text-[#364238]">Estimasi Target Penerima</span>
-                        <div class="mt-3 flex h-12 items-center rounded-xl bg-[#e8edeb]">
-                            <input required type="number" min="1" name="target_mustahik" value="{{ old('target_mustahik', $program->target_mustahik ?? 100) }}" class="h-full w-full bg-transparent px-4 text-sm outline-none">
-                            <span class="pr-4 text-xs font-black uppercase">Jiwa</span>
+                        <span class="text-[11px] font-black uppercase text-[#344038]">Estimasi Target Penerima</span>
+                        <div class="mt-[11px] flex h-[44px] items-center rounded-[11px] bg-[#e6ebe8]">
+                            <input required type="number" min="1" name="target_mustahik" value="{{ old('target_mustahik', $program->target_mustahik ?? 100) }}" class="h-full w-full bg-transparent px-[17px] text-[14px] outline-none">
+                            <span class="pr-[17px] text-[11px] font-black uppercase">Jiwa</span>
                         </div>
                     </label>
                 </div>
             </section>
 
-            <section>
-                <h2 class="border-l-4 border-[#0b751f] pl-3 text-sm font-black uppercase tracking-[0.25em]">Anggaran & Waktu</h2>
-                <div class="mt-6 grid gap-7 md:grid-cols-2">
+            <section class="mt-[30px]">
+                <h2 class="border-l-4 border-[#0b751f] pl-[10px] text-[13px] font-black uppercase tracking-[0.23em] text-[#303b34]">Anggaran & Waktu</h2>
+                <div class="mt-[24px] grid gap-[27px] md:grid-cols-2">
                     <label>
-                        <span class="text-xs font-black uppercase text-[#364238]">Alokasi Anggaran</span>
-                        <div class="mt-3 flex h-12 items-center rounded-xl bg-[#e8edeb]">
-                            <span class="pl-4 text-sm font-black text-[#0b751f]">Rp</span>
-                            <input required type="number" min="0" step="1000" name="total_dana" x-model="dana" value="{{ old('total_dana', $program->total_dana ?? 0) }}" class="h-full w-full bg-transparent px-4 text-sm outline-none">
+                        <span class="text-[11px] font-black uppercase text-[#344038]">Alokasi Anggaran</span>
+                        <div class="mt-[11px] flex h-[44px] items-center rounded-[11px] bg-[#e6ebe8]">
+                            <span class="pl-[17px] text-[14px] font-black text-[#0b751f]">Rp</span>
+                            <input required type="number" min="0" step="1000" name="total_dana" value="{{ old('total_dana', $program->total_dana ?? 0) }}" class="h-full w-full bg-transparent px-[17px] text-[14px] outline-none">
                         </div>
                     </label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label>
-                            <span class="text-xs font-black uppercase text-[#364238]">Tanggal Mulai</span>
-                            <input required type="date" name="tanggal_mulai" value="{{ old('tanggal_mulai', optional($program?->tanggal_mulai ?? null)->format('Y-m-d')) }}" class="mt-3 h-12 w-full rounded-xl border-0 bg-[#e8edeb] px-4 text-sm outline-none focus:bg-white focus:ring-[#0b751f]">
-                        </label>
-                        <label>
-                            <span class="text-xs font-black uppercase text-[#364238]">Tanggal Selesai</span>
-                            <input required type="date" name="tanggal_selesai" value="{{ old('tanggal_selesai', optional($program?->tanggal_selesai ?? null)->format('Y-m-d')) }}" class="mt-3 h-12 w-full rounded-xl border-0 bg-[#e8edeb] px-4 text-sm outline-none focus:bg-white focus:ring-[#0b751f]">
-                        </label>
-                    </div>
+                    <label>
+                        <span class="text-[11px] font-black uppercase text-[#344038]">Target Tanggal Penyaluran</span>
+                        <input required type="date" name="tanggal_selesai" value="{{ old('tanggal_selesai', optional($program?->tanggal_selesai ?? null)->format('Y-m-d')) }}" class="mt-[11px] h-[44px] w-full rounded-[11px] border-0 bg-[#e6ebe8] px-[17px] text-[14px] outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]">
+                    </label>
                 </div>
-                <label class="mt-7 block">
-                    <span class="text-xs font-black uppercase text-[#364238]">Deskripsi Singkat Program</span>
-                    <textarea name="deskripsi" rows="4" class="mt-3 w-full rounded-xl border-0 bg-[#e8edeb] px-4 py-4 text-sm outline-none placeholder:text-[#73818a] focus:bg-white focus:ring-[#0b751f]" placeholder="Jelaskan detail program, tujuan, dan kriteria penerima manfaat...">{{ old('deskripsi', $program->deskripsi ?? '') }}</textarea>
+                <label class="mt-[24px] block">
+                    <span class="text-[11px] font-black uppercase text-[#344038]">Deskripsi Singkat Program</span>
+                    <textarea name="deskripsi" rows="4" class="mt-[11px] h-[84px] w-full resize-none rounded-[11px] border-0 bg-[#e6ebe8] px-[17px] py-[15px] text-[14px] outline-none placeholder:text-[#75818b] focus:bg-white focus:ring-2 focus:ring-[#0b751f]" placeholder="Jelaskan detail program, tujuan, dan kriteria penerima manfaat...">{{ old('deskripsi', $program->deskripsi ?? '') }}</textarea>
                 </label>
             </section>
         </div>
 
-        <div class="flex flex-col gap-5 border-t border-[#edf1ef] bg-[#f8faf9] px-8 py-7 sm:flex-row sm:items-center sm:justify-between">
-            <div class="text-[10px] font-black uppercase text-[#77827b]">
-                <p>Saldo Tersedia</p>
-                <p class="mt-1 text-[#0b751f]">Rp {{ number_format($saldoTersedia, 0, ',', '.') }}</p>
+        <div class="flex min-h-[96px] flex-col gap-5 border-t border-[#edf1ef] bg-[#f8faf9] px-[33px] py-[25px] sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-[10px] text-[9px] font-black uppercase text-[#77827b]">
+                <svg class="h-5 w-5 text-[#0b751f]" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2 2 7h16l-8-5ZM4 8h2v6H4V8Zm5 0h2v6H9V8Zm5 0h2v6h-2V8ZM3 15h14v2H3v-2Z"/></svg>
+                <div>
+                    <p>Saldo Tersedia</p>
+                    <p class="mt-[2px] text-[#0b751f]">Rp {{ number_format($saldoTersedia, 0, ',', '.') }}</p>
+                </div>
             </div>
-            <div class="flex items-center justify-end gap-4">
-                <a href="{{ route('program-penyaluran.index') }}" class="flex h-12 w-28 items-center justify-center rounded-xl border-2 border-[#0b751f] font-black text-[#0b751f]">Kembali</a>
-                <button class="h-12 rounded-xl bg-[#0b751f] px-8 font-black text-white shadow-[0_10px_20px_rgba(8,117,31,0.25)]">Simpan Program</button>
+            <div class="flex items-center justify-end gap-[13px]">
+                <a href="{{ route('program-penyaluran.index') }}" class="flex h-[48px] w-[100px] items-center justify-center rounded-[11px] border-2 border-[#0b751f] text-[14px] font-black text-[#0b751f]">Batal</a>
+                <button class="h-[48px] w-[194px] rounded-[11px] bg-[#0b751f] text-[14px] font-black text-white shadow-[0_10px_20px_rgba(8,117,31,0.25)]">Simpan Program</button>
             </div>
         </div>
     </form>

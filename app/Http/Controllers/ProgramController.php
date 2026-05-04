@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Distribusi;
 use App\Models\Instansi;
 use App\Models\KategoriDana;
-use App\Models\Mustahik;
 use App\Models\Program;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,7 +14,10 @@ class ProgramController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Program::with(['programDana.kategoriDana', 'distribusi'])->latest();
+        $instansi = $this->instansi();
+        $query = Program::with('programDana.kategoriDana')
+            ->where('instansi_id', $instansi->id)
+            ->latest();
 
         if ($request->filled('search')) {
             $search = $request->string('search');
@@ -30,12 +31,19 @@ class ProgramController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('kategori') && $request->kategori !== 'semua') {
+            $query->whereHas('programDana.kategoriDana', function ($builder) use ($request) {
+                $builder->where('nama', $request->kategori);
+            });
+        }
+
         $programs = $query->paginate(9)->withQueryString();
 
         return view('admin.program.index', [
             'programs' => $programs,
-            'totalDana' => Program::sum('total_dana') ?: 850000000,
-            'alokasiAktif' => Program::where('status', 'aktif')->sum('total_dana') ?: 425000000,
+            'totalDana' => Program::where('instansi_id', $instansi->id)->sum('total_dana') ?: 850000000,
+            'alokasiAktif' => Program::where('instansi_id', $instansi->id)->where('status', 'aktif')->sum('total_dana') ?: 425000000,
+            'kategoriDana' => $this->kategoriDanaOptions(),
         ]);
     }
 
@@ -44,6 +52,7 @@ class ProgramController extends Controller
         return view('admin.program.create', [
             'kategoriDana' => $this->kategoriDanaOptions(),
             'saldoTersedia' => 850000000,
+            'kategoriProgram' => null,
         ]);
     }
 
@@ -51,6 +60,7 @@ class ProgramController extends Controller
     {
         $validated = $request->validate([
             'nama_program' => ['required', 'string', 'max:255'],
+            'kategori_program' => ['nullable', 'in:Pendidikan,Kesehatan,Ekonomi,Sosial'],
             'tanggal_mulai' => ['required', 'date'],
             'tanggal_selesai' => ['required', 'date', 'after_or_equal:tanggal_mulai'],
             'kategori_dana_ids' => ['required', 'array', 'min:1'],
@@ -86,13 +96,17 @@ class ProgramController extends Controller
 
     public function edit(Program $programPenyaluran): View
     {
-        $programPenyaluran->load('programDana');
+        $programPenyaluran->load('programDana.kategoriDana');
+        $kategoriProgram = $programPenyaluran->programDana
+            ->pluck('kategoriDana.nama')
+            ->first(fn ($nama) => in_array($nama, ['Pendidikan', 'Kesehatan', 'Ekonomi', 'Sosial'], true));
 
         return view('admin.program.edit', [
             'program' => $programPenyaluran,
             'kategoriDana' => $this->kategoriDanaOptions(),
             'selectedKategori' => $programPenyaluran->programDana->pluck('kategori_dana_id')->all(),
             'saldoTersedia' => 850000000,
+            'kategoriProgram' => $kategoriProgram,
         ]);
     }
 
@@ -100,6 +114,7 @@ class ProgramController extends Controller
     {
         $validated = $request->validate([
             'nama_program' => ['required', 'string', 'max:255'],
+            'kategori_program' => ['nullable', 'in:Pendidikan,Kesehatan,Ekonomi,Sosial'],
             'tanggal_mulai' => ['required', 'date'],
             'tanggal_selesai' => ['required', 'date', 'after_or_equal:tanggal_mulai'],
             'kategori_dana_ids' => ['required', 'array', 'min:1'],
@@ -139,17 +154,6 @@ class ProgramController extends Controller
         $programPenyaluran->delete();
 
         return redirect()->route('program-penyaluran.index')->with('success', 'Program penyaluran berhasil dihapus.');
-    }
-
-    public function distribusi(Program $programPenyaluran): View
-    {
-        $programPenyaluran->load(['programDana.kategoriDana', 'distribusi.mustahik']);
-
-        return view('admin.program.distribusi', [
-            'program' => $programPenyaluran,
-            'mustahik' => Mustahik::orderBy('nama')->limit(50)->get(),
-            'distribusi' => Distribusi::where('program_id', $programPenyaluran->id)->latest()->get(),
-        ]);
     }
 
     private function instansi(): Instansi

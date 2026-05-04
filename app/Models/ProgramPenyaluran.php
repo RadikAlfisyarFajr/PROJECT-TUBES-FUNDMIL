@@ -17,12 +17,21 @@ class ProgramPenyaluran extends Model
         'tanggal_selesai',
         'metode_distribusi',
         'target_dana',
-        'status'
+        'status',
+        'approval_status',
+        'approved_by',
+        'approved_at',
+        'approval_note',
     ];
 
     public function instansi(): BelongsTo
     {
         return $this->belongsTo(Instansi::class);
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function penyaluran(): HasMany
