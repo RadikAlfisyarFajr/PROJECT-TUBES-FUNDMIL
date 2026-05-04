@@ -1,2 +1,6 @@
-{{-- Halaman form edit mustahik. --}}
-<h1>Edit Mustahik</h1>
+@include('admin.partials.simple-page', [
+    'title' => 'Edit Mustahik',
+    'description' => 'Form edit mustahik memakai sidebar dan tema admin instansi yang sama.',
+    'active' => 'mustahik',
+    'backRoute' => 'mustahik.index',
+])

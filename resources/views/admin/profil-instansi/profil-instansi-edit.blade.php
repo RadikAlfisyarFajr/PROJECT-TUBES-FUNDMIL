@@ -17,7 +17,7 @@
         .page-shell {
             max-width: 1080px;
             margin: 0 auto;
-            padding: 34px 18px 46px;
+            padding: 0;
         }
 
         .panel {
@@ -60,9 +60,14 @@
             background: #f7faf8;
         }
     </style>
+    <link href="{{ asset('css/admin-theme.css') }}" rel="stylesheet">
 </head>
-<body>
-    <main class="page-shell">
+<body class="sidebar-expanded">
+    <div class="admin-layout">
+        @include('admin.partials.sidebar', ['active' => 'profil'])
+
+        <main class="admin-page-content">
+            <div class="page-shell">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
             <div>
                 <h1 class="fw-black mb-1">Update Profil Instansi</h1>
@@ -154,6 +159,15 @@
                 </button>
             </div>
         </form>
+            </div>
     </main>
+    </div>
+    <script>
+        const sidebarToggle = document.getElementById('sidebarToggle');
+
+        sidebarToggle?.addEventListener('click', () => {
+            document.body.classList.toggle('sidebar-expanded');
+        });
+    </script>
 </body>
 </html>

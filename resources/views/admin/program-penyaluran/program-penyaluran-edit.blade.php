@@ -1,2 +1,6 @@
-{{-- Halaman form edit program penyaluran. --}}
-<h1>Edit Program Penyaluran</h1>
+@include('admin.partials.simple-page', [
+    'title' => 'Edit Program Penyaluran',
+    'description' => 'Form edit program penyaluran memakai sidebar dan tema admin instansi yang sama.',
+    'active' => 'program',
+    'backRoute' => 'program-penyaluran.index',
+])

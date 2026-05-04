@@ -488,67 +488,12 @@
             }
         }
     </style>
+    <link href="{{ asset('css/admin-theme.css') }}" rel="stylesheet">
 </head>
 
-<body>
+<body class="sidebar-expanded">
     <div class="admin-layout">
-        <aside class="sidebar">
-            <div class="brand">
-                <div class="brand-icon">
-                    <i class="bi bi-shield-lock-fill"></i>
-                </div>
-                <div class="brand-copy">
-                    <div class="brand-title">FUNDMIL SOREANG</div>
-                    <div class="brand-subtitle">SISTEM AMANAH DIGITAL</div>
-                </div>
-            </div>
-
-            <nav class="sidebar-nav" aria-label="Navigasi Admin Instansi">
-                <button id="sidebarToggle" class="sidebar-toggle" type="button">
-                    <i class="bi bi-list"></i>
-                    <span>Menu</span>
-                </button>
-                <a class="nav-item-link" href="{{ route('dashboard.admin') }}">
-                    <i class="bi bi-house-door-fill"></i>
-                    <span>Beranda</span>
-                </a>
-                <a class="nav-item-link" href="{{ route('profil-instansi.index') }}">
-                    <i class="bi bi-person-badge-fill"></i>
-                    <span>Profil Instansi</span>
-                </a>
-                <a class="nav-item-link active" href="{{ route('kategori-dana.index') }}">
-                    <i class="bi bi-tags-fill"></i>
-                    <span>Kategori Dana</span>
-                </a>
-                <a class="nav-item-link" href="{{ route('pemasukan.index') }}">
-                    <i class="bi bi-cash-stack"></i>
-                    <span>Pemasukan Zakat</span>
-                </a>
-                <a class="nav-item-link" href="{{ route('mustahik.index') }}">
-                    <i class="bi bi-people-fill"></i>
-                    <span>Data Mustahik</span>
-                </a>
-                <a class="nav-item-link" href="{{ route('program-penyaluran.index') }}">
-                    <i class="bi bi-box-seam"></i>
-                    <span>Program Penyaluran</span>
-                </a>
-                <a class="nav-item-link" href="{{ route('pengaturan-distribusi.index') }}">
-                    <i class="bi bi-sliders2-vertical"></i>
-                    <span>Pengaturan Distribusi</span>
-                </a>
-                <a class="nav-item-link" href="{{ route('laporan.index') }}">
-                    <i class="bi bi-bar-chart-fill"></i>
-                    <span>Laporan</span>
-                </a>
-            </nav>
-
-            <div class="sidebar-footer">
-                <a class="nav-item-link" href="#">
-                    <i class="bi bi-question-circle"></i>
-                    <span>Bantuan</span>
-                </a>
-            </div>
-        </aside>
+        @include('admin.partials.sidebar', ['active' => 'kategori'])
 
         <main class="main-content">
             <header class="topbar">

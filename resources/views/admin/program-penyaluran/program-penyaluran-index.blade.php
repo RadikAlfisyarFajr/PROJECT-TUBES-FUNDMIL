@@ -1,2 +1,5 @@
-{{-- Halaman daftar program penyaluran. --}}
-<h1>Program Penyaluran</h1>
+@include('admin.partials.simple-page', [
+    'title' => 'Program Penyaluran',
+    'description' => 'Kelola program penyaluran dengan antarmuka admin instansi yang konsisten.',
+    'active' => 'program',
+])

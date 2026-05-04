@@ -1,2 +1,7 @@
-{{-- Halaman daftar approval program penyaluran. --}}
-<h1>Approval Program Penyaluran</h1>
+@include('admin.partials.simple-page', [
+    'title' => 'Approval Program Penyaluran',
+    'description' => 'Kelola approval program penyaluran dengan antarmuka yang sama dengan admin instansi.',
+    'active' => 'approval-program',
+    'roleLabel' => 'Super Admin',
+    'sidebar' => 'superadmin.partials.sidebar',
+])

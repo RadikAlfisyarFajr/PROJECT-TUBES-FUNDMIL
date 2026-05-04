@@ -1,2 +1,6 @@
-{{-- Halaman form tambah mustahik. --}}
-<h1>Tambah Mustahik</h1>
+@include('admin.partials.simple-page', [
+    'title' => 'Tambah Mustahik',
+    'description' => 'Form tambah mustahik memakai sidebar dan tema admin instansi yang sama.',
+    'active' => 'mustahik',
+    'backRoute' => 'mustahik.index',
+])
