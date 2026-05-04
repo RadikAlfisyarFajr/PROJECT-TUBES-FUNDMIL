@@ -25,7 +25,12 @@ Route::middleware('auth')->group(function () {
         if ($user->role !== 'admin_instansi') {
             abort(403, 'Unauthorized');
         }
-        return view('dashboard.admin');
+
+        $user->load('instansi');
+
+        return view('dashboard.admin', [
+            'instansi' => $user->instansi,
+        ]);
     })->name('dashboard.admin');
 
     Route::get('/dashboard/superadmin', [AuthController::class, 'showSuperAdminDashboard'])

@@ -117,6 +117,14 @@
             display: grid;
             place-items: center;
             font-weight: 900;
+            overflow: hidden;
+            flex: 0 0 auto;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .content-wrap {
@@ -422,6 +430,20 @@
     <link href="{{ asset('css/admin-theme.css') }}" rel="stylesheet">
 </head>
 <body class="sidebar-expanded">
+    @php
+        $user = auth()->user();
+        $dashboardInstansi = $instansi ?? $user?->instansi;
+        $instansiName = $dashboardInstansi?->nama ?: ($user?->nama_instansi ?: $user?->name ?: 'Admin Instansi');
+        $instansiRole = $dashboardInstansi?->tipe ?: 'Admin Instansi';
+        $instansiLogo = $dashboardInstansi?->logo;
+        $initials = collect(preg_split('/\s+/', trim($instansiName)))
+            ->filter()
+            ->take(2)
+            ->map(fn ($word) => mb_strtoupper(mb_substr($word, 0, 1)))
+            ->implode('');
+        $initials = $initials ?: 'A';
+    @endphp
+
     <div class="admin-layout">
         @include('admin.partials.sidebar', ['active' => 'dashboard'])
 
@@ -429,7 +451,7 @@
             <header class="dashboard-topbar">
                 <div>
                     <h1 class="page-title">Beranda</h1>
-                    <p class="page-desc">Ringkasan operasional zakat dan penyaluran Masjid Alghozali.</p>
+                    <p class="page-desc">Ringkasan operasional zakat dan penyaluran {{ $instansiName }}.</p>
                 </div>
                 <div class="top-actions">
                     <div class="search-box">
@@ -440,17 +462,23 @@
                         <i class="bi bi-bell-fill"></i>
                     </button>
                     <div class="admin-name">
-                        <strong>Admin Soreang</strong>
-                        <div class="admin-role">Amil Utama</div>
+                        <strong>{{ $instansiName }}</strong>
+                        <div class="admin-role">{{ $instansiRole }}</div>
                     </div>
-                    <div class="avatar">A</div>
+                    <div class="avatar">
+                        @if ($instansiLogo)
+                            <img src="{{ asset('storage/'.$instansiLogo) }}" alt="Logo {{ $instansiName }}">
+                        @else
+                            {{ $initials }}
+                        @endif
+                    </div>
                 </div>
             </header>
 
             <div class="content-wrap">
                 <section class="welcome-panel">
                     <div>
-                        <h2 class="welcome-title">Selamat Datang, Admin Masjid Alghozali</h2>
+                        <h2 class="welcome-title">Selamat Datang, Admin {{ $instansiName }}</h2>
                         <p class="welcome-text">Pantau pengumpulan, saldo siap salur, wilayah prioritas, dan aktivitas transaksi terbaru dalam satu tampilan yang konsisten dengan halaman admin lainnya.</p>
                     </div>
                     <a class="quick-action" href="{{ route('pemasukan.index') }}">
