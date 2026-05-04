@@ -1,2 +1,5 @@
-{{-- Halaman daftar pengaturan distribusi. --}}
-<h1>Pengaturan Distribusi</h1>
+@include('admin.partials.simple-page', [
+    'title' => 'Pengaturan Distribusi',
+    'description' => 'Kelola aturan distribusi dengan antarmuka admin instansi yang konsisten.',
+    'active' => 'distribusi',
+])

@@ -1,2 +1,6 @@
-{{-- Halaman form edit penyaluran zakat. --}}
-<h1>Edit Penyaluran Zakat</h1>
+@include('admin.partials.simple-page', [
+    'title' => 'Edit Penyaluran Zakat',
+    'description' => 'Form edit penyaluran zakat memakai sidebar dan tema admin instansi yang sama.',
+    'active' => 'penyaluran',
+    'backRoute' => 'penyaluran.index',
+])

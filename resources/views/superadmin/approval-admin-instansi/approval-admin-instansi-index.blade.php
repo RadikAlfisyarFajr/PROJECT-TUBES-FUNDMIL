@@ -37,12 +37,6 @@
             font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
-        .super-layout {
-            min-height: 100vh;
-            display: grid;
-            grid-template-columns: 320px minmax(0, 1fr);
-        }
-
         .sidebar {
             background: #f0f3f1;
             border-right: 1px solid var(--line);
@@ -311,10 +305,6 @@
         }
 
         @media (max-width: 991px) {
-            .super-layout {
-                grid-template-columns: 1fr;
-            }
-
             .sidebar {
                 min-height: auto;
                 padding: 28px 18px;
@@ -365,38 +355,17 @@
             }
         }
     </style>
+    <link href="{{ asset('css/admin-theme.css') }}" rel="stylesheet">
 </head>
-<body>
-    <div class="super-layout">
-        <aside class="sidebar">
-            <div class="brand">
-                <div class="brand-title">FUNDMIL SOREANG</div>
-                <div class="brand-subtitle">SISTEM AMANAH DIGITAL</div>
-            </div>
+<body class="sidebar-expanded">
+    <div class="admin-layout">
+        @include('superadmin.partials.sidebar', ['active' => 'approval-admin'])
 
-            <nav class="sidebar-nav" aria-label="Navigasi Super Admin">
-                <a href="{{ route('dashboard.superadmin') }}" class="nav-item-link active">
-                    <i class="bi bi-person-check-fill"></i>
-                    <span>Approval Admin</span>
-                </a>
-            </nav>
-
-            <div class="sidebar-footer">
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="logout-button">
-                        <i class="bi bi-box-arrow-right"></i>
-                        <span>Keluar</span>
-                    </button>
-                </form>
-            </div>
-        </aside>
-
-        <main class="main-content">
-            <header class="page-header">
+        <main class="admin-page-content">
+            <header class="admin-page-topbar">
                 <div>
-                    <h1 class="page-title">Approval Admin Instansi</h1>
-                    <p class="page-description">Monitoring dan aktivasi akun admin instansi yang menunggu persetujuan.</p>
+                    <h1 class="admin-page-title">Approval Admin Instansi</h1>
+                    <p class="admin-page-desc">Monitoring dan aktivasi akun admin instansi yang menunggu persetujuan.</p>
                 </div>
                 <div class="summary-card">
                     <div class="text-uppercase fw-bold small mb-2">Menunggu Approval</div>
@@ -404,106 +373,115 @@
                 </div>
             </header>
 
-            @if(session('success'))
-                <div class="alert alert-success border-0 rounded-4 shadow-sm mb-4">{{ session('success') }}</div>
-            @endif
+            <div class="admin-content-wrap">
+                @if(session('success'))
+                    <div class="alert alert-success border-0 rounded-4 shadow-sm mb-4">{{ session('success') }}</div>
+                @endif
 
-            <section class="toolbar">
-                <div class="row g-3">
-                    <div class="col-lg-8">
-                        <div class="search-wrap">
-                            <i class="bi bi-search"></i>
-                            <input type="search" class="form-control search-input" placeholder="Cari nama instansi, desa, email, atau username...">
+                <section class="toolbar">
+                    <div class="row g-3">
+                        <div class="col-lg-8">
+                            <div class="search-wrap">
+                                <i class="bi bi-search"></i>
+                                <input type="search" class="form-control search-input" placeholder="Cari nama instansi, desa, email, atau username...">
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <select class="form-select">
+                                <option>Semua akun pending</option>
+                                <option>Registrasi terbaru</option>
+                                <option>Registrasi terlama</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="col-lg-4">
-                        <select class="form-select">
-                            <option>Semua akun pending</option>
-                            <option>Registrasi terbaru</option>
-                            <option>Registrasi terlama</option>
-                        </select>
-                    </div>
-                </div>
-            </section>
+                </section>
 
-            @if($pendingUsers->isEmpty())
-                <section class="empty-card">
-                    <div class="empty-icon">
-                        <i class="bi bi-check2-circle"></i>
-                    </div>
-                    <h2 class="h4 fw-bold mb-2">Tidak Ada Approval Baru</h2>
-                    <p class="text-muted mb-0">Semua akun admin instansi sudah ditinjau.</p>
-                </section>
-            @else
-                <section class="table-card">
-                    <div class="table-responsive">
-                        <table class="table approval-table align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Nama Instansi</th>
-                                    <th>Wilayah</th>
-                                    <th>Akun Admin</th>
-                                    <th>Status</th>
-                                    <th>Daftar</th>
-                                    <th class="text-end">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($pendingUsers as $user)
+                @if($pendingUsers->isEmpty())
+                    <section class="empty-card">
+                        <div class="empty-icon">
+                            <i class="bi bi-check2-circle"></i>
+                        </div>
+                        <h2 class="h4 fw-bold mb-2">Tidak Ada Approval Baru</h2>
+                        <p class="text-muted mb-0">Semua akun admin instansi sudah ditinjau.</p>
+                    </section>
+                @else
+                    <section class="table-card">
+                        <div class="table-responsive">
+                            <table class="table approval-table align-middle">
+                                <thead>
                                     <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <div class="instansi-icon">
-                                                    <i class="bi bi-bank2"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="instansi-name">{{ $user->nama_instansi ?? $user->name }}</div>
-                                                    <div class="muted-small">{{ $user->username }}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="fw-semibold">{{ $user->desa ?? '-' }}</div>
-                                            <div class="muted-small">Wilayah operasional</div>
-                                        </td>
-                                        <td>
-                                            <div class="fw-semibold">{{ $user->name }}</div>
-                                            <div class="muted-small">{{ $user->email }}</div>
-                                        </td>
-                                        <td>
-                                            <span class="status-pill">
-                                                <i class="bi bi-clock-history"></i>
-                                                Pending
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="fw-semibold">{{ optional($user->created_at)->format('d M Y') ?? '-' }}</div>
-                                            <div class="muted-small">{{ optional($user->created_at)->format('H:i') ?? '--:--' }} WIB</div>
-                                        </td>
-                                        <td>
-                                            <div class="action-stack">
-                                                <form method="POST" action="{{ route('superadmin.approve', $user) }}">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-approve">
-                                                        <i class="bi bi-check2 me-1"></i> Setujui
-                                                    </button>
-                                                </form>
-                                                <form method="POST" action="{{ route('superadmin.reject', $user) }}">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-reject">
-                                                        <i class="bi bi-x-lg me-1"></i> Tolak
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
+                                        <th>Nama Instansi</th>
+                                        <th>Wilayah</th>
+                                        <th>Akun Admin</th>
+                                        <th>Status</th>
+                                        <th>Daftar</th>
+                                        <th class="text-end">Aksi</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            @endif
+                                </thead>
+                                <tbody>
+                                    @foreach($pendingUsers as $user)
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="instansi-icon">
+                                                        <i class="bi bi-bank2"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="instansi-name">{{ $user->nama_instansi ?? $user->name }}</div>
+                                                        <div class="muted-small">{{ $user->username }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="fw-semibold">{{ $user->desa ?? '-' }}</div>
+                                                <div class="muted-small">Wilayah operasional</div>
+                                            </td>
+                                            <td>
+                                                <div class="fw-semibold">{{ $user->name }}</div>
+                                                <div class="muted-small">{{ $user->email }}</div>
+                                            </td>
+                                            <td>
+                                                <span class="status-pill">
+                                                    <i class="bi bi-clock-history"></i>
+                                                    Pending
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="fw-semibold">{{ optional($user->created_at)->format('d M Y') ?? '-' }}</div>
+                                                <div class="muted-small">{{ optional($user->created_at)->format('H:i') ?? '--:--' }} WIB</div>
+                                            </td>
+                                            <td>
+                                                <div class="action-stack">
+                                                    <form method="POST" action="{{ route('superadmin.approve', $user) }}">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-approve">
+                                                            <i class="bi bi-check2 me-1"></i> Setujui
+                                                        </button>
+                                                    </form>
+                                                    <form method="POST" action="{{ route('superadmin.reject', $user) }}">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-reject">
+                                                            <i class="bi bi-x-lg me-1"></i> Tolak
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                @endif
+            </div>
         </main>
     </div>
+    <script>
+        const sidebarToggle = document.getElementById('sidebarToggle');
+
+        sidebarToggle?.addEventListener('click', () => {
+            document.body.classList.toggle('sidebar-expanded');
+        });
+    </script>
 </body>
 </html>

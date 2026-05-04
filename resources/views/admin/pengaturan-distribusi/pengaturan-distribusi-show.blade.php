@@ -1,2 +1,6 @@
-{{-- Halaman detail pengaturan distribusi. --}}
-<h1>Detail Pengaturan Distribusi</h1>
+@include('admin.partials.simple-page', [
+    'title' => 'Detail Pengaturan Distribusi',
+    'description' => 'Detail pengaturan distribusi memakai sidebar dan tema admin instansi yang sama.',
+    'active' => 'distribusi',
+    'backRoute' => 'pengaturan-distribusi.index',
+])

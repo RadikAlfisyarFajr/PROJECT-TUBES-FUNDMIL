@@ -1,2 +1,7 @@
-{{-- Halaman daftar nishab. --}}
-<h1>Nishab</h1>
+@include('admin.partials.simple-page', [
+    'title' => 'Nishab',
+    'description' => 'Kelola nishab dengan antarmuka yang sama dengan admin instansi.',
+    'active' => 'nishab',
+    'roleLabel' => 'Super Admin',
+    'sidebar' => 'superadmin.partials.sidebar',
+])

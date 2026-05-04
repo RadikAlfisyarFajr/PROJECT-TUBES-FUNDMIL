@@ -1,2 +1,6 @@
-{{-- Halaman form tambah pengaturan distribusi. --}}
-<h1>Tambah Pengaturan Distribusi</h1>
+@include('admin.partials.simple-page', [
+    'title' => 'Tambah Pengaturan Distribusi',
+    'description' => 'Form tambah pengaturan distribusi memakai sidebar dan tema admin instansi yang sama.',
+    'active' => 'distribusi',
+    'backRoute' => 'pengaturan-distribusi.index',
+])
