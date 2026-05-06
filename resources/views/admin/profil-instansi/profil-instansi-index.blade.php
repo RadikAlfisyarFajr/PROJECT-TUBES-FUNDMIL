@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -440,8 +441,8 @@
             position: absolute;
             inset: 0;
             background:
-                radial-gradient(circle at 18% 22%, rgba(255,255,255,.08), transparent 22%),
-                radial-gradient(circle at 82% 18%, rgba(255,218,124,.14), transparent 20%);
+                radial-gradient(circle at 18% 22%, rgba(255, 255, 255, .08), transparent 22%),
+                radial-gradient(circle at 82% 18%, rgba(255, 218, 124, .14), transparent 20%);
         }
 
         .mosque-art {
@@ -449,7 +450,7 @@
             width: 250px;
             height: 138px;
             transform: translateY(22px);
-            filter: drop-shadow(0 16px 18px rgba(0,0,0,.2));
+            filter: drop-shadow(0 16px 18px rgba(0, 0, 0, .2));
         }
 
         .mosque-dome {
@@ -658,6 +659,7 @@
     </style>
     <link href="{{ asset('css/admin-theme.css') }}" rel="stylesheet">
 </head>
+
 <body class="sidebar-expanded">
     <div class="app-layout">
         @include('admin.partials.sidebar', ['active' => 'profil'])
@@ -681,47 +683,46 @@
                             data-bs-toggle="dropdown"
                             data-bs-auto-close="outside"
                             aria-expanded="false"
-                            aria-label="Notifikasi profil instansi"
-                        >
+                            aria-label="Notifikasi profil instansi">
                             <i class="bi bi-bell-fill fs-5"></i>
                             @if ($unreadNotifications > 0)
-                                <span id="notificationBadge" class="notification-badge">{{ $unreadNotifications > 9 ? '9+' : $unreadNotifications }}</span>
+                            <span id="notificationBadge" class="notification-badge">{{ $unreadNotifications > 9 ? '9+' : $unreadNotifications }}</span>
                             @endif
                         </button>
                         <div class="dropdown-menu dropdown-menu-end notification-menu" aria-labelledby="notificationToggle">
                             <div class="notification-header">Notifikasi Pembaruan</div>
                             @forelse ($notifications as $notification)
-                                <div class="notification-item">
-                                    <div class="notification-title">{{ $notification->title }}</div>
-                                    <div class="notification-text">{{ $notification->message }}</div>
-                                    <div class="notification-time">{{ $notification->created_at->diffForHumans() }}</div>
-                                </div>
+                            <div class="notification-item">
+                                <div class="notification-title">{{ $notification->title }}</div>
+                                <div class="notification-text">{{ $notification->message }}</div>
+                                <div class="notification-time">{{ $notification->created_at->diffForHumans() }}</div>
+                            </div>
                             @empty
-                                <div class="notification-item text-center text-muted">
-                                    Belum ada pembaruan profil.
-                                </div>
+                            <div class="notification-item text-center text-muted">
+                                Belum ada pembaruan profil.
+                            </div>
                             @endforelse
                         </div>
                     </div>
                     <div class="avatar">
                         @if ($instansi->logo)
-                            <img src="{{ asset('storage/'.$instansi->logo) }}" alt="Logo {{ $instansi->nama }}">
+                        <img src="{{ asset('storage/'.$instansi->logo) }}" alt="Logo {{ $instansi->nama }}">
                         @else
-                            {{ strtoupper(substr($instansi->nama, 0, 1)) }}{{ strtoupper(substr(strstr($instansi->nama, ' ') ?: '', 1, 1)) }}
+                        {{ strtoupper(substr($instansi->nama, 0, 1)) }}{{ strtoupper(substr(strstr($instansi->nama, ' ') ?: '', 1, 1)) }}
                         @endif
                     </div>
                 </div>
             </header>
 
             @if (session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
+            <div class="alert alert-success">{{ session('success') }}</div>
             @endif
 
             @if ($errors->any())
-                <div class="alert alert-danger">
-                    <strong>Data belum bisa disimpan.</strong>
-                    <div>Periksa kembali input pada form.</div>
-                </div>
+            <div class="alert alert-danger">
+                <strong>Data belum bisa disimpan.</strong>
+                <div>Periksa kembali input pada form.</div>
+            </div>
             @endif
 
             <section class="profile-card mb-4">
@@ -754,15 +755,15 @@
                         <div class="field-label invisible">Foto Instansi</div>
                         <div class="hero-visual">
                             @if ($instansi->logo)
-                                <img src="{{ asset('storage/'.$instansi->logo) }}" alt="Foto profil {{ $instansi->nama }}">
+                            <img src="{{ asset('storage/'.$instansi->logo) }}" alt="Foto profil {{ $instansi->nama }}">
                             @else
-                                <div class="mosque-art" aria-hidden="true">
-                                    <span class="mosque-minaret left"></span>
-                                    <span class="mosque-minaret right"></span>
-                                    <span class="mosque-body"></span>
-                                    <span class="mosque-dome"></span>
-                                    <span class="mosque-door"></span>
-                                </div>
+                            <div class="mosque-art" aria-hidden="true">
+                                <span class="mosque-minaret left"></span>
+                                <span class="mosque-minaret right"></span>
+                                <span class="mosque-body"></span>
+                                <span class="mosque-dome"></span>
+                                <span class="mosque-door"></span>
+                            </div>
                             @endif
                         </div>
                     </div>
@@ -798,13 +799,13 @@
                             <div class="field-label">Tanda Tangan Digital</div>
                             <div class="upload-box">
                                 @if ($instansi->tanda_tangan)
-                                    <img class="signature-img" src="{{ asset('storage/'.$instansi->tanda_tangan) }}" alt="Tanda tangan digital">
+                                <img class="signature-img" src="{{ asset('storage/'.$instansi->tanda_tangan) }}" alt="Tanda tangan digital">
                                 @else
-                                    <div>
-                                        <i class="bi bi-vector-pen"></i>
-                                        <div class="fw-semibold mb-2">Belum ada tanda tangan digital</div>
-                                        <small class="text-muted">Upload melalui tombol Update Profil</small>
-                                    </div>
+                                <div>
+                                    <i class="bi bi-vector-pen"></i>
+                                    <div class="fw-semibold mb-2">Belum ada tanda tangan digital</div>
+                                    <small class="text-muted">Upload melalui tombol Update Profil</small>
+                                </div>
                                 @endif
                             </div>
                         </div>
@@ -832,30 +833,30 @@
                         </thead>
                         <tbody>
                             @forelse ($instansi->rekening as $rekening)
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-3">
-                                            <span class="bank-icon"><i class="bi bi-wallet2"></i></span>
-                                            <strong>{{ $rekening->nama_bank }}</strong>
-                                        </div>
-                                    </td>
-                                    <td>{{ $rekening->nomor_rekening }}</td>
-                                    <td>{{ $rekening->nama_pemilik }}</td>
-                                    <td class="text-end">
-                                        <button class="action-link" type="button" data-bs-toggle="modal" data-bs-target="#modalEditRekening{{ $rekening->id }}">
-                                            <i class="bi bi-pencil-fill"></i>
-                                        </button>
-                                        <form class="d-inline" action="{{ route('profil-instansi.rekening.destroy', $rekening) }}" method="POST" onsubmit="return confirm('Hapus rekening ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="action-link text-danger" type="submit"><i class="bi bi-trash-fill"></i></button>
-                                        </form>
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="bank-icon"><i class="bi bi-wallet2"></i></span>
+                                        <strong>{{ $rekening->nama_bank }}</strong>
+                                    </div>
+                                </td>
+                                <td>{{ $rekening->nomor_rekening }}</td>
+                                <td>{{ $rekening->nama_pemilik }}</td>
+                                <td class="text-end">
+                                    <button class="action-link" type="button" data-bs-toggle="modal" data-bs-target="#modalEditRekening{{ $rekening->id }}">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </button>
+                                    <form class="d-inline" action="{{ route('profil-instansi.rekening.destroy', $rekening) }}" method="POST" onsubmit="return confirm('Hapus rekening ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="action-link text-danger" type="submit"><i class="bi bi-trash-fill"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
                             @empty
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted py-4">Belum ada rekening operasional.</td>
-                                </tr>
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">Belum ada rekening operasional.</td>
+                            </tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -895,43 +896,43 @@
     </div>
 
     @foreach ($instansi->rekening as $rekening)
-        <div class="modal fade" id="modalEditRekening{{ $rekening->id }}" tabindex="-1" aria-labelledby="modalEditRekeningLabel{{ $rekening->id }}" aria-hidden="true">
-            <div class="modal-dialog">
-                <form class="modal-content" action="{{ route('profil-instansi.rekening.update', $rekening) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalEditRekeningLabel{{ $rekening->id }}">Edit Rekening</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+    <div class="modal fade" id="modalEditRekening{{ $rekening->id }}" tabindex="-1" aria-labelledby="modalEditRekeningLabel{{ $rekening->id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content" action="{{ route('profil-instansi.rekening.update', $rekening) }}" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalEditRekeningLabel{{ $rekening->id }}">Edit Rekening</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="nama_bank_{{ $rekening->id }}">Nama Bank</label>
+                        <input id="nama_bank_{{ $rekening->id }}" class="form-control" name="nama_bank" value="{{ old('nama_bank', $rekening->nama_bank) }}" required>
                     </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label" for="nama_bank_{{ $rekening->id }}">Nama Bank</label>
-                            <input id="nama_bank_{{ $rekening->id }}" class="form-control" name="nama_bank" value="{{ old('nama_bank', $rekening->nama_bank) }}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="nomor_rekening_{{ $rekening->id }}">Nomor Rekening</label>
-                            <input id="nomor_rekening_{{ $rekening->id }}" class="form-control" name="nomor_rekening" value="{{ old('nomor_rekening', $rekening->nomor_rekening) }}" required>
-                        </div>
-                        <div class="mb-0">
-                            <label class="form-label" for="nama_pemilik_{{ $rekening->id }}">Nama Pemilik</label>
-                            <input id="nama_pemilik_{{ $rekening->id }}" class="form-control" name="nama_pemilik" value="{{ old('nama_pemilik', $rekening->nama_pemilik) }}" required>
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="nomor_rekening_{{ $rekening->id }}">Nomor Rekening</label>
+                        <input id="nomor_rekening_{{ $rekening->id }}" class="form-control" name="nomor_rekening" value="{{ old('nomor_rekening', $rekening->nomor_rekening) }}" required>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-success">Simpan Perubahan</button>
+                    <div class="mb-0">
+                        <label class="form-label" for="nama_pemilik_{{ $rekening->id }}">Nama Pemilik</label>
+                        <input id="nama_pemilik_{{ $rekening->id }}" class="form-control" name="nama_pemilik" value="{{ old('nama_pemilik', $rekening->nama_pemilik) }}" required>
                     </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">Simpan Perubahan</button>
+                </div>
+            </form>
         </div>
+    </div>
     @endforeach
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const sidebarToggle = document.getElementById('sidebarToggle');
 
-        sidebarToggle.addEventListener('click', () => {
+        sidebarToggle?.addEventListener('click', () => {
             document.body.classList.toggle('sidebar-expanded');
         });
 
@@ -941,14 +942,29 @@
             const badge = document.getElementById('notificationBadge');
             badge?.remove();
 
-            fetch('{{ route('profil-instansi.notifications.read') }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
-                }
-            });
+            fetch('{{ route("profil-instansi.notifications.read") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    const badge = document.getElementById('notificationBadge');
+                    if (badge) {
+                        badge.remove();
+                    }
+                })
+                .catch(error => {
+                    console.error('Gagal menandai notifikasi sebagai terbaca:', error);
+                });
         });
     </script>
 </body>
+
 </html>
