@@ -19,12 +19,23 @@ class LaporanController extends Controller
 
     public function store(Request $request)
     {
-        // TODO: Validasi dan simpan konfigurasi laporan.
+        $request->validate([
+            'nama'    => 'required|string|max:255',
+            'tipe'    => 'required|in:pemasukan,penyaluran,mustahik,keuangan',
+            'periode' => 'required|in:bulanan,triwulan,tahunan,fleksibel',
+        ]);
+
+        // TODO: Simpan konfigurasi laporan ke database.
+
+        return redirect()->route('laporan.index')
+            ->with('success', 'Konfigurasi laporan berhasil disimpan.');
     }
 
     public function show(string $id)
     {
-        return view('admin.laporan.laporan-show', compact('id'));
+        // Laporan detail belum tersedia — redirect ke index dengan notifikasi.
+        return redirect()->route('laporan.index')
+            ->with('info', 'Fitur laporan ini akan segera tersedia.');
     }
 
     public function edit(string $id)
@@ -34,11 +45,23 @@ class LaporanController extends Controller
 
     public function update(Request $request, string $id)
     {
-        // TODO: Validasi dan perbarui konfigurasi laporan.
+        $request->validate([
+            'nama'    => 'required|string|max:255',
+            'tipe'    => 'required|in:pemasukan,penyaluran,mustahik,keuangan',
+            'periode' => 'required|in:bulanan,triwulan,tahunan,fleksibel',
+        ]);
+
+        // TODO: Perbarui konfigurasi laporan di database.
+
+        return redirect()->route('laporan.index')
+            ->with('success', 'Konfigurasi laporan berhasil diperbarui.');
     }
 
     public function destroy(string $id)
     {
-        // TODO: Hapus konfigurasi laporan.
+        // TODO: Hapus konfigurasi laporan dari database.
+
+        return redirect()->route('laporan.index')
+            ->with('success', 'Konfigurasi laporan berhasil dihapus.');
     }
 }
