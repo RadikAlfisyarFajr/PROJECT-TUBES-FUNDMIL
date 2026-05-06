@@ -1,116 +1,239 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title }} | Admin Instansi</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        :root { --green:#087026; --green-dark:#06451f; --ink:#17211b; --muted:#748077; --surface:#f5f8f5; --line:#e2ebe4; --shadow:0 16px 34px rgba(18,55,28,.07); }
-        * { box-sizing:border-box; letter-spacing:0; }
-        body { min-height:100vh; margin:0; background:var(--surface); color:var(--ink); font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
-        .shell { min-height:100vh; display:grid; place-items:center; padding:36px 18px; position:relative; overflow:hidden; }
-        .shell::before { content:""; position:absolute; inset:0; background:linear-gradient(135deg,rgba(8,112,38,.12),rgba(255,255,255,.8)); }
-        .form-card { width:min(760px,100%); border:1px solid var(--line); border-radius:22px; background:#fff; box-shadow:var(--shadow); position:relative; overflow:hidden; }
-        .form-head { min-height:88px; padding:24px 30px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:18px; }
-        .form-title { margin:0; color:var(--green); font-size:1.35rem; font-weight:900; }
-        .close-link { width:42px; height:42px; border-radius:14px; display:grid; place-items:center; color:#17231b; text-decoration:none; font-size:1.8rem; line-height:1; }
-        .form-body { padding:30px; }
-        .section-title { margin:0 0 22px; padding-left:12px; border-left:4px solid var(--green); color:#303b34; font-size:.82rem; font-weight:900; letter-spacing:.2em; text-transform:uppercase; }
-        .field-label { color:#344038; font-size:.72rem; font-weight:900; letter-spacing:.14em; margin-bottom:10px; text-transform:uppercase; }
-        .form-control,.form-select { border:0; background:#e9eeeb; min-height:46px; border-radius:12px; }
-        .form-control:focus,.form-select:focus { border:0; box-shadow:0 0 0 .2rem rgba(8,112,38,.16); background:#fff; }
-        textarea.form-control { min-height:116px; resize:vertical; }
-        .form-foot { min-height:92px; padding:22px 30px; border-top:1px solid var(--line); background:#f8faf9; display:flex; align-items:center; justify-content:space-between; gap:18px; }
-        .muted-note { color:var(--muted); font-size:.76rem; line-height:1.5; }
-        .btn-cancel { min-height:48px; padding:0 22px; border:2px solid var(--green); border-radius:12px; color:var(--green); display:inline-flex; align-items:center; font-weight:900; text-decoration:none; }
-        .btn-save { min-height:48px; padding:0 28px; border:0; border-radius:12px; background:var(--green); color:#fff; box-shadow:0 10px 20px rgba(8,112,38,.25); font-weight:900; }
-        @media (max-width:640px) { .form-head,.form-body,.form-foot{padding-inline:20px}.form-foot{align-items:stretch;flex-direction:column}.btn-cancel,.btn-save{justify-content:center;width:100%} }
-    </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ $title }} - Fundmil Soreang</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body>
-<main class="shell">
-    <form class="form-card" action="{{ $action }}" method="POST">
-        @csrf
-        @if ($method !== 'POST')
-            @method($method)
-        @endif
-        <div class="form-head">
-            <h1 class="form-title">{{ $title }}</h1>
-            <a class="close-link" href="{{ route('mustahik.index') }}" aria-label="Tutup">&times;</a>
+<body class="bg-[#f6f8f6] font-sans text-[#111813] antialiased">
+@php
+    $menuItems = [
+        ['Beranda', 'grid', route('dashboard.admin')],
+        ['Profil Instansi', 'bank', route('profil-instansi.index')],
+        ['Kategori Dana', 'shapes', route('kategori-dana.index')],
+        ['Pemasukan Zakat', 'cash', route('pemasukan.index')],
+        ['Data Mustahik', 'users', route('mustahik.index')],
+        ['Program Penyaluran', 'spark', route('program-penyaluran.index')],
+        ['Pengaturan Distribusi', 'sliders', route('pengaturan-distribusi.index')],
+        ['Laporan', 'report', route('laporan.index')],
+        ['Pengaturan', 'gear', '#'],
+    ];
+@endphp
+<div class="min-h-screen lg:flex">
+    <aside class="fixed inset-y-0 left-0 z-20 hidden w-[286px] bg-white lg:block">
+        <div class="px-8 pt-[38px]">
+            <h1 class="text-[20px] font-black leading-none tracking-wide text-[#0b751f]">FUNDMIL SOREANG</h1>
+            <p class="mt-[13px] text-[10px] font-black uppercase tracking-[0.34em] text-[#a3aaa5]">Sistem Amanah Digital</p>
         </div>
+        <nav class="mt-[62px] space-y-[9px] px-4 text-[14px] font-semibold text-[#41546a]">
+            @foreach ($menuItems as [$label, $icon, $url])
+                <a href="{{ $url }}" class="flex h-[48px] items-center gap-[17px] rounded-[16px] px-[18px] {{ $label === 'Data Mustahik' ? 'bg-[#f4f8f6] font-black text-[#0b751f] shadow-[inset_4px_0_0_#0b751f]' : '' }}">
+                    <span class="flex h-5 w-5 items-center justify-center">
+                        @if ($icon === 'grid')
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M3 3h6v6H3V3Zm8 0h6v6h-6V3ZM3 11h6v6H3v-6Zm8 0h6v6h-6v-6Z"/></svg>
+                        @elseif ($icon === 'bank')
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2 2 6v2h16V6l-8-4ZM4 9h2v6H4V9Zm5 0h2v6H9V9Zm5 0h2v6h-2V9ZM3 16h14v2H3v-2Z"/></svg>
+                        @elseif ($icon === 'users')
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm6.5 1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM1.5 17c.5-3.3 2.4-5.5 5.5-5.5s5 2.2 5.5 5.5h-11Zm10.7 0a7.7 7.7 0 0 0-1.5-3.7 4.6 4.6 0 0 1 2.8-.8c2.6 0 4.2 1.8 4.6 4.5h-5.9Z"/></svg>
+                        @elseif ($icon === 'spark')
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="m10 2 1.4 4.2L16 8l-4.6 1.8L10 14 8.6 9.8 4 8l4.6-1.8L10 2Zm-5 9 1 2.5L8.5 15 6 16l-1 2.5L4 16l-2.5-1L4 13.5 5 11Zm11 1 1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2Z"/></svg>
+                        @elseif ($icon === 'sliders')
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3h2v14H4V3Zm5 0h2v14H9V3Zm5 0h2v14h-2V3ZM2 6h6v2H2V6Zm5 6h6v2H7v-2Zm5-7h6v2h-6V5Z"/></svg>
+                        @else
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4h12v12H4V4Zm3 3v2h6V7H7Zm0 4v2h4v-2H7Z"/></svg>
+                        @endif
+                    </span>
+                    {{ $label }}
+                </a>
+            @endforeach
+        </nav>
+        <div class="absolute bottom-[55px] left-4 right-4 border-t border-[#e9eeeb] pt-[30px]">
+            <a class="flex items-center gap-[17px] px-[18px] text-[14px] font-semibold text-[#41546a]" href="#">
+                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-[#41546a] text-[11px] font-black text-white">?</span>
+                Bantuan
+            </a>
+        </div>
+    </aside>
 
-        @if ($errors->any())
-            <div class="mx-4 mt-4 alert alert-danger border-0 rounded-4 fw-bold">Lengkapi data yang masih belum valid.</div>
-        @endif
+    <main class="min-h-screen flex-1 lg:ml-[286px]">
+        <header class="flex h-[66px] items-center justify-between bg-white px-6 lg:px-[56px]">
+            <a href="{{ route('mustahik.index') }}" class="inline-flex items-center gap-3 text-[14px] font-semibold text-[#6c756f]">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5m6-7-7 7 7 7"/></svg>
+                Kembali ke Database
+            </a>
+            <div class="hidden items-center gap-[24px] md:flex">
+                <svg class="h-5 w-5 text-[#71807a]" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a2.5 2.5 0 0 0 2.4-2H7.6A2.5 2.5 0 0 0 10 18ZM4 14h12l-1.4-2.3V8a4.6 4.6 0 1 0-9.2 0v3.7L4 14Z"/></svg>
+                <div class="h-[44px] w-px bg-[#e2e8e5]"></div>
+                <div class="text-right">
+                    <p class="text-[13px] font-black">Amil Soreang</p>
+                    <p class="mt-1 text-[9px] font-bold text-[#9ba49e]">Petugas Lapangan</p>
+                </div>
+                <div class="h-[38px] w-[38px] rounded-full bg-[linear-gradient(135deg,#142b22,#f0b98d)]"></div>
+            </div>
+        </header>
 
-        <div class="form-body">
-            <section>
-                <h2 class="section-title">Identitas Mustahik</h2>
-                <div class="row g-4">
-                    <div class="col-md-7">
-                        <label class="field-label" for="nama">Nama Lengkap</label>
-                        <input id="nama" class="form-control" name="nama" value="{{ old('nama', $mustahik->nama ?? '') }}" required placeholder="Contoh: Ahmad Fauzi">
-                        @error('nama') <div class="text-danger small fw-bold mt-2">{{ $message }}</div> @enderror
+        <section class="px-6 pb-12 pt-[38px] lg:px-[56px]">
+            <div>
+                <h1 class="text-[34px] font-black leading-tight">{{ $title }}</h1>
+                <p class="mt-[9px] text-[17px] text-[#758078]">Input data lengkap warga penerima manfaat baru untuk proses verifikasi asnaf.</p>
+            </div>
+
+            <form action="{{ $action }}" method="POST" class="mt-[38px] max-w-[1040px] rounded-[15px] bg-white px-[44px] py-[42px] shadow-sm ring-1 ring-[#e6ece9]">
+                @csrf
+                @if ($method !== 'POST')
+                    @method($method)
+                @endif
+
+                @if ($errors->any())
+                    <div class="mb-7 rounded-[12px] border border-red-200 bg-red-50 px-5 py-3 text-sm font-bold text-red-700">Lengkapi data yang masih belum valid.</div>
+                @endif
+
+                <section>
+                    <h2 class="flex items-center gap-3 text-[20px] font-black">
+                        <span class="grid h-[30px] w-[30px] place-items-center rounded-[8px] bg-green-50 text-[#0b751f]">
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="M7 2h6v4h3v12H4V6h3V2Zm2 4h2V4H9v2Z"/></svg>
+                        </span>
+                        Identitas Pribadi
+                    </h2>
+                    <div class="mt-[27px] grid gap-[24px] md:grid-cols-2">
+                        <label>
+                            <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Nama Lengkap</span>
+                            <input required name="nama_lengkap" value="{{ old('nama_lengkap', $mustahik->nama ?? '') }}" class="mt-[10px] h-[48px] w-full rounded-[11px] bg-[#e5eae7] px-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]" placeholder="Sesuai KTP">
+                            @error('nama_lengkap') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
+                        </label>
+                        <label>
+                            <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">NIK (Nomor Induk Kependudukan)</span>
+                            <input name="nik" value="{{ old('nik', $mustahik->nik ?? '') }}" maxlength="16" inputmode="numeric" class="mt-[10px] h-[48px] w-full rounded-[11px] bg-[#e5eae7] px-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]" placeholder="16 digit angka">
+                            @error('nik') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
+                        </label>
+                        <label>
+                            <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">No. Kartu Keluarga</span>
+                            <input class="mt-[10px] h-[48px] w-full rounded-[11px] bg-[#e5eae7] px-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]" placeholder="16 digit angka">
+                        </label>
+                        <div class="grid gap-[24px] md:grid-cols-2">
+                            <label>
+                                <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Tempat Lahir</span>
+                                <input class="mt-[10px] h-[48px] w-full rounded-[11px] bg-[#e5eae7] px-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]" placeholder="Kota/Kab">
+                            </label>
+                            <label>
+                                <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Tgl Lahir</span>
+                                <input type="date" class="mt-[10px] h-[48px] w-full rounded-[11px] bg-[#e5eae7] px-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]">
+                            </label>
+                        </div>
+                        <div>
+                            <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Jenis Kelamin</span>
+                            <div class="mt-[10px] grid grid-cols-2 gap-4">
+                                <button type="button" class="h-[48px] rounded-[11px] border-2 border-[#0b751f] bg-white text-sm font-bold">Laki-laki</button>
+                                <button type="button" class="h-[48px] rounded-[11px] bg-[#e5eae7] text-sm font-bold">Perempuan</button>
+                            </div>
+                        </div>
+                        <label>
+                            <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Nomor Telepon</span>
+                            <input name="kontak" value="{{ old('kontak', $mustahik->kontak ?? '') }}" class="mt-[10px] h-[48px] w-full rounded-[11px] bg-[#e5eae7] px-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]" placeholder="08xxxxxxxxxx">
+                            @error('kontak') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
+                        </label>
+                        <label>
+                            <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Status</span>
+                            <select name="status" class="mt-[10px] h-[48px] w-full rounded-[11px] bg-[#e5eae7] px-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]">
+                                <option value="aktif" @selected(old('status', $mustahik->status ?? 'aktif') === 'aktif')>Aktif</option>
+                                <option value="tidak_aktif" @selected(old('status', $mustahik->status ?? '') === 'tidak_aktif')>Tidak Aktif</option>
+                            </select>
+                        </label>
                     </div>
-                    <div class="col-md-5">
-                        <label class="field-label" for="nik">NIK</label>
-                        <input id="nik" class="form-control" name="nik" value="{{ old('nik', $mustahik->nik ?? '') }}" inputmode="numeric" maxlength="16" placeholder="16 digit">
-                        @error('nik') <div class="text-danger small fw-bold mt-2">{{ $message }}</div> @enderror
-                    </div>
-                    <div class="col-md-6">
-                        <label class="field-label" for="kategori_asnaf">Kategori Asnaf</label>
-                        <select id="kategori_asnaf" class="form-select" name="kategori_asnaf" required>
-                            <option value="">Pilih kategori</option>
+                </section>
+
+                <section class="mt-[42px]">
+                    <h2 class="flex items-center gap-3 text-[20px] font-black">
+                        <span class="grid h-[30px] w-[30px] place-items-center rounded-[8px] bg-green-50 text-[#0b751f]">
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="m10 2 8 4-8 4-8-4 8-4Zm-5 7.2 5 2.5 5-2.5V14l-5 2.5L5 14V9.2Z"/></svg>
+                        </span>
+                        Kategori Asnaf
+                    </h2>
+                    <label class="mt-[24px] block">
+                        <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Pilih Kategori Utama</span>
+                        <select required name="kategori" class="mt-[10px] h-[48px] w-full rounded-[11px] bg-[#e5eae7] px-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]">
+                            <option value="">Pilih Asnaf</option>
                             @foreach ($kategoriAsnaf as $value => $label)
-                                <option value="{{ $value }}" @selected(old('kategori_asnaf', $mustahik->kategori_asnaf ?? '') === $value)>{{ $label }}</option>
+                                <option value="{{ $value }}" @selected(old('kategori', $mustahik->kategori_asnaf ?? '') === $value)>{{ $label }}</option>
                             @endforeach
                         </select>
-                        @error('kategori_asnaf') <div class="text-danger small fw-bold mt-2">{{ $message }}</div> @enderror
-                    </div>
-                    <div class="col-md-6">
-                        <label class="field-label" for="status">Status Verifikasi</label>
-                        <select id="status" class="form-select" name="status" required>
-                            <option value="pending" @selected(old('status', $mustahik->status ?? 'pending') === 'pending')>Pending</option>
-                            <option value="verified" @selected(old('status', $mustahik->status ?? '') === 'verified')>Verified</option>
-                            <option value="rejected" @selected(old('status', $mustahik->status ?? '') === 'rejected')>Rejected</option>
-                        </select>
-                        @error('status') <div class="text-danger small fw-bold mt-2">{{ $message }}</div> @enderror
-                    </div>
-                    <div class="col-12">
-                        <label class="field-label" for="alamat">Alamat</label>
-                        <textarea id="alamat" class="form-control" name="alamat" placeholder="Alamat lengkap mustahik">{{ old('alamat', $mustahik->alamat ?? '') }}</textarea>
-                        @error('alamat') <div class="text-danger small fw-bold mt-2">{{ $message }}</div> @enderror
-                    </div>
-                </div>
-            </section>
+                        @error('kategori') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
+                        <span class="mt-2 block text-[11px] italic text-[#8a948e]">Pastikan pemilihan asnaf sesuai dengan hasil survey lapangan terakhir.</span>
+                    </label>
+                </section>
 
-            <section class="mt-5">
-                <h2 class="section-title">Titik Lokasi</h2>
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <label class="field-label" for="latitude">Latitude</label>
-                        <input id="latitude" class="form-control" name="latitude" value="{{ old('latitude', $mustahik->latitude ?? '') }}" placeholder="-7.02500000">
-                        @error('latitude') <div class="text-danger small fw-bold mt-2">{{ $message }}</div> @enderror
+                <section class="mt-[42px]">
+                    <h2 class="flex items-center gap-3 text-[20px] font-black">
+                        <span class="grid h-[30px] w-[30px] place-items-center rounded-[8px] bg-green-50 text-[#0b751f]">
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18s6-5.4 6-10A6 6 0 1 0 4 8c0 4.6 6 10 6 10Zm0-7.5A2.5 2.5 0 1 1 10 5a2.5 2.5 0 0 1 0 5.5Z"/></svg>
+                        </span>
+                        Alamat Lengkap (Soreang)
+                    </h2>
+                    <div class="mt-[24px] grid gap-[24px] md:grid-cols-3">
+                        <label>
+                            <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Desa/Kelurahan</span>
+                            <select class="mt-[10px] h-[48px] w-full rounded-[11px] bg-[#e5eae7] px-4 text-sm outline-none">
+                                <option>Cingcin</option>
+                                <option>Soreang</option>
+                                <option>Pamekaran</option>
+                            </select>
+                        </label>
+                        <label>
+                            <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">RW</span>
+                            <input class="mt-[10px] h-[48px] w-full rounded-[11px] bg-[#e5eae7] px-4 text-sm outline-none" placeholder="00">
+                        </label>
+                        <label>
+                            <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">RT</span>
+                            <input class="mt-[10px] h-[48px] w-full rounded-[11px] bg-[#e5eae7] px-4 text-sm outline-none" placeholder="00">
+                        </label>
                     </div>
-                    <div class="col-md-6">
-                        <label class="field-label" for="longitude">Longitude</label>
-                        <input id="longitude" class="form-control" name="longitude" value="{{ old('longitude', $mustahik->longitude ?? '') }}" placeholder="107.52000000">
-                        @error('longitude') <div class="text-danger small fw-bold mt-2">{{ $message }}</div> @enderror
-                    </div>
-                </div>
-            </section>
-        </div>
+                    <label class="mt-[24px] block">
+                        <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Alamat Detail</span>
+                        <textarea required name="alamat" rows="4" class="mt-[10px] w-full resize-y rounded-[11px] bg-[#e5eae7] px-4 py-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]" placeholder="Nama Jalan, No. Rumah, Patokan, dll.">{{ old('alamat', $mustahik->alamat ?? '') }}</textarea>
+                        @error('alamat') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
+                    </label>
+                    <label class="mt-[24px] block">
+                        <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Keterangan</span>
+                        <textarea name="keterangan" rows="3" class="mt-[10px] w-full resize-y rounded-[11px] bg-[#e5eae7] px-4 py-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]" placeholder="Catatan tambahan kondisi mustahik">{{ old('keterangan', $mustahik->keterangan ?? '') }}</textarea>
+                    </label>
+                </section>
 
-        <div class="form-foot">
-            <div class="muted-note"><i class="bi bi-info-circle-fill text-success me-2"></i>Status verified otomatis mencatat waktu verifikasi.</div>
-            <div class="d-flex gap-3 flex-column flex-sm-row">
-                <a class="btn-cancel" href="{{ route('mustahik.index') }}">Batal</a>
-                <button class="btn-save" type="submit">Simpan Data</button>
+                <section class="mt-[42px]">
+                    <h2 class="flex items-center gap-3 text-[20px] font-black">
+                        <span class="grid h-[30px] w-[30px] place-items-center rounded-[8px] bg-green-50 text-[#0b751f]">
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4h12v12H4V4Zm3 3h6v2H7V7Zm0 4h6v2H7v-2Z"/></svg>
+                        </span>
+                        Foto Dokumen
+                    </h2>
+                    <div class="mt-[24px] grid gap-[30px] md:grid-cols-2">
+                        <div class="grid h-[140px] place-items-center rounded-[12px] border-2 border-dashed border-[#c8d6ce] bg-[#fbfcfb] text-center text-[#6c756f]">
+                            <div>
+                                <svg class="mx-auto h-8 w-8" fill="currentColor" viewBox="0 0 20 20"><path d="M4 5h3l1-2h4l1 2h3v11H4V5Zm6 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></svg>
+                                <p class="mt-3 text-[11px] font-black uppercase tracking-[.18em]">Unggah Foto KTP</p>
+                            </div>
+                        </div>
+                        <div class="grid h-[140px] place-items-center rounded-[12px] border-2 border-dashed border-[#c8d6ce] bg-[#fbfcfb] text-center text-[#6c756f]">
+                            <div>
+                                <svg class="mx-auto h-8 w-8" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3h12v14H4V3Zm3 4h6V5H7v2Zm0 4h6V9H7v2Zm0 4h4v-2H7v2Z"/></svg>
+                                <p class="mt-3 text-[11px] font-black uppercase tracking-[.18em]">Unggah Foto KK</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="mt-[48px] flex items-center justify-end gap-8 border-t border-[#e7eeea] pt-[32px]">
+                    <a href="{{ route('mustahik.index') }}" class="text-sm font-black text-[#6c756f]">{{ $method === 'POST' ? 'Batal' : 'Kembali' }}</a>
+                    <button class="h-[52px] min-w-[230px] rounded-[11px] bg-[#0b751f] px-8 text-sm font-black text-white shadow-[0_10px_20px_rgba(8,117,31,0.24)]" type="submit">{{ $method === 'POST' ? 'Simpan Data Mustahik' : 'Update Data Mustahik' }}</button>
+                </div>
+            </form>
+
+            <div class="mt-[35px] flex max-w-[1040px] items-center justify-between text-[10px] font-black uppercase tracking-[.16em] text-[#8a948e]">
+                <span>Data dienkripsi & amanah digital sesuai syariat</span>
+                <span>Versi 2.4.0 - Fundmil Soreang</span>
             </div>
-        </div>
-    </form>
-</main>
+        </section>
+    </main>
+</div>
 </body>
 </html>

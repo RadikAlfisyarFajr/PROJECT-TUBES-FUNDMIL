@@ -1,6 +1,6 @@
-@include('admin.partials.simple-page', [
+@include('admin.program-penyaluran.partials.form', [
     'title' => 'Edit Program Penyaluran',
-    'description' => 'Form edit program penyaluran memakai sidebar dan tema admin instansi yang sama.',
-    'active' => 'program',
-    'backRoute' => 'program-penyaluran.index',
+    'action' => route('program-penyaluran.update', $program),
+    'method' => 'PUT',
+    'buttonLabel' => 'Update',
 ])

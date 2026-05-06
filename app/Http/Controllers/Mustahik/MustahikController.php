@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Mustahik;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\MustahikRequest;
 use App\Models\Instansi;
 use App\Models\Mustahik;
 use Illuminate\Http\RedirectResponse;
@@ -19,9 +20,7 @@ class MustahikController extends Controller
             $search = $request->string('search');
             $query->where(function ($builder) use ($search) {
                 $builder->where('nama', 'like', "%{$search}%")
-                    ->orWhere('nik', 'like', "%{$search}%")
-                    ->orWhere('alamat', 'like', "%{$search}%")
-                    ->orWhere('kategori_asnaf', 'like', "%{$search}%");
+                    ->orWhere('alamat', 'like', "%{$search}%");
             });
         }
 
@@ -38,8 +37,9 @@ class MustahikController extends Controller
         return view('admin.mustahik.mustahik-index', [
             'mustahik' => $mustahik,
             'totalMustahik' => Mustahik::where('instansi_id', $this->instansi()->id)->count(),
-            'verifiedMustahik' => Mustahik::where('instansi_id', $this->instansi()->id)->where('status', 'verified')->count(),
-            'pendingMustahik' => Mustahik::where('instansi_id', $this->instansi()->id)->where('status', 'pending')->count(),
+            'aktifMustahik' => Mustahik::where('instansi_id', $this->instansi()->id)->where('status', 'aktif')->count(),
+            'tidakAktifMustahik' => Mustahik::where('instansi_id', $this->instansi()->id)->where('status', 'tidak_aktif')->count(),
+            'kategoriTerbanyak' => $this->kategoriTerbanyak(),
             'kategoriAsnaf' => $this->kategoriAsnaf(),
         ]);
     }
@@ -52,13 +52,13 @@ class MustahikController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(MustahikRequest $request): RedirectResponse
     {
-        $validated = $this->validated($request);
+        $validated = $this->payload($request);
 
         Mustahik::create($validated + [
             'instansi_id' => $this->instansi()->id,
-            'tanggal_verifikasi' => $validated['status'] === 'verified' ? now() : null,
+            'tanggal_verifikasi' => $validated['status'] === 'aktif' ? now() : null,
         ]);
 
         return redirect()->route('mustahik.index')->with('success', 'Data mustahik berhasil ditambahkan.');
@@ -81,16 +81,16 @@ class MustahikController extends Controller
         ]);
     }
 
-    public function update(Request $request, Mustahik $mustahik): RedirectResponse
+    public function update(MustahikRequest $request, Mustahik $mustahik): RedirectResponse
     {
         $this->authorizeInstansi($mustahik);
 
-        $validated = $this->validated($request, $mustahik);
-        $wasVerified = $mustahik->status === 'verified';
+        $validated = $this->payload($request);
+        $wasActive = $mustahik->status === 'aktif';
 
         $mustahik->update($validated + [
-            'tanggal_verifikasi' => $validated['status'] === 'verified'
-                ? ($wasVerified ? $mustahik->tanggal_verifikasi : now())
+            'tanggal_verifikasi' => $validated['status'] === 'aktif'
+                ? ($wasActive ? $mustahik->tanggal_verifikasi : now())
                 : null,
         ]);
 
@@ -105,17 +105,19 @@ class MustahikController extends Controller
         return redirect()->route('mustahik.index')->with('success', 'Data mustahik berhasil dihapus.');
     }
 
-    private function validated(Request $request, ?Mustahik $mustahik = null): array
+    private function payload(MustahikRequest $request): array
     {
-        return $request->validate([
-            'nama' => ['required', 'string', 'max:255'],
-            'nik' => ['nullable', 'digits:16', 'unique:mustahik,nik,'.($mustahik?->id ?? 'NULL')],
-            'alamat' => ['nullable', 'string'],
-            'kategori_asnaf' => ['required', 'in:'.implode(',', array_keys($this->kategoriAsnaf()))],
-            'status' => ['required', 'in:pending,verified,rejected'],
-            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
-            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
-        ]);
+        $validated = $request->validated();
+
+        return [
+            'nama' => $validated['nama_lengkap'],
+            'nik' => $validated['nik'] ?? null,
+            'alamat' => $validated['alamat'],
+            'kategori_asnaf' => $validated['kategori'],
+            'kontak' => $validated['kontak'] ?? null,
+            'keterangan' => $validated['keterangan'] ?? null,
+            'status' => $validated['status'],
+        ];
     }
 
     private function instansi(): Instansi
@@ -137,15 +139,17 @@ class MustahikController extends Controller
 
     private function kategoriAsnaf(): array
     {
-        return [
-            'fakir' => 'Fakir',
-            'miskin' => 'Miskin',
-            'amil' => 'Amil',
-            'muallaf' => 'Muallaf',
-            'riqab' => 'Riqab',
-            'gharimin' => 'Gharimin',
-            'fisabilillah' => 'Fisabilillah',
-            'ibnu sabil' => 'Ibnu Sabil',
-        ];
+        return Mustahik::KATEGORI;
+    }
+
+    private function kategoriTerbanyak(): string
+    {
+        $top = Mustahik::where('instansi_id', $this->instansi()->id)
+            ->selectRaw('kategori_asnaf, count(*) as total')
+            ->groupBy('kategori_asnaf')
+            ->orderByDesc('total')
+            ->first();
+
+        return $top ? ($this->kategoriAsnaf()[$top->kategori_asnaf] ?? 'Fakir Miskin') : 'Fakir Miskin';
     }
 }
