@@ -266,6 +266,18 @@
             white-space: nowrap;
         }
 
+        .admin-name {
+            font-size: .78rem;
+            line-height: 1.15;
+            text-align: right;
+        }
+
+        .admin-role {
+            color: var(--muted);
+            font-size: .68rem;
+            margin-top: 3px;
+        }
+
         .avatar {
             width: 44px;
             height: 44px;
@@ -704,13 +716,11 @@
                             @endforelse
                         </div>
                     </div>
-                    <div class="avatar">
-                        @if ($instansi->logo)
-                        <img src="{{ asset('storage/'.$instansi->logo) }}" alt="Logo {{ $instansi->nama }}">
-                        @else
-                        {{ strtoupper(substr($instansi->nama, 0, 1)) }}{{ strtoupper(substr(strstr($instansi->nama, ' ') ?: '', 1, 1)) }}
-                        @endif
-                    </div>
+                    @include('admin.partials.account-identity', [
+                        'nameClass' => 'admin-name',
+                        'roleClass' => 'admin-role',
+                        'avatarClass' => 'avatar',
+                    ])
                 </div>
             </header>
 

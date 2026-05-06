@@ -37,11 +37,7 @@
                     <button class="admin-icon-btn has-dot" type="button" aria-label="Notifikasi">
                         <i class="bi bi-bell-fill"></i>
                     </button>
-                    <div class="admin-user-name">
-                        <strong>{{ $roleLabel }}</strong>
-                        <div class="admin-user-role">FUNDMIL Soreang</div>
-                    </div>
-                    <div class="admin-avatar">{{ $roleLabel === 'Super Admin' ? 'S' : 'A' }}</div>
+                    @include('admin.partials.account-identity')
                 </div>
             </header>
 

@@ -18,9 +18,12 @@ return new class extends Migration
             $table->string('nama_program');
             $table->date('tanggal_mulai')->nullable();
             $table->date('tanggal_selesai')->nullable();
+            $table->text('deskripsi')->nullable();
             $table->string('metode_distribusi')->nullable(); // langsung, bank, pooling
             $table->decimal('target_dana', 15, 2)->nullable();
-            $table->enum('status', ['draft', 'aktif', 'selesai'])->default('draft');
+            $table->decimal('total_dana', 15, 2)->default(0);
+            $table->unsignedInteger('target_mustahik')->default(0);
+            $table->enum('status', ['draft', 'aktif', 'selesai'])->default('aktif');
             $table->timestamps();
         });
     }

@@ -1,6 +1,6 @@
-@include('admin.partials.simple-page', [
+@include('admin.program-penyaluran.partials.form', [
     'title' => 'Tambah Program Penyaluran',
-    'description' => 'Form tambah program penyaluran memakai sidebar dan tema admin instansi yang sama.',
-    'active' => 'program',
-    'backRoute' => 'program-penyaluran.index',
+    'action' => route('program-penyaluran.store'),
+    'method' => 'POST',
+    'buttonLabel' => 'Simpan',
 ])

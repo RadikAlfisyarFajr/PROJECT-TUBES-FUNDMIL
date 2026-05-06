@@ -28,7 +28,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard/admin', function () {
         $user = Auth::user();
-
         if (! $user instanceof User || $user->role !== 'admin_instansi') {
             abort(403, 'Unauthorized');
         }

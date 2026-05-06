@@ -10,9 +10,12 @@ class TransaksiZakat extends Model
     protected $table = 'transaksi_zakat';
     protected $fillable = [
         'instansi_id',
+        'admin_id',
         'kategori_id',
         'nomor_kuitansi',
         'nama_muzakki',
+        'nomor_wa',
+        'desa',
         'jenis',
         'sub_jenis',
         'jumlah',

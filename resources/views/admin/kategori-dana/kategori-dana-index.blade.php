@@ -509,11 +509,11 @@
                     <button class="icon-btn" type="button" aria-label="Bantuan">
                         <i class="bi bi-question-circle-fill"></i>
                     </button>
-                    <div class="admin-name">
-                        <strong>Admin Soreang</strong>
-                        <div class="admin-role">Amil Utama</div>
-                    </div>
-                    <div class="avatar">A</div>
+                    @include('admin.partials.account-identity', [
+                        'nameClass' => 'admin-name',
+                        'roleClass' => 'admin-role',
+                        'avatarClass' => 'avatar',
+                    ])
                 </div>
             </header>
 
