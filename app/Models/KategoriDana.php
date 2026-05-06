@@ -11,6 +11,15 @@ class KategoriDana extends Model
     protected $table = 'kategori_dana';
     protected $fillable = ['instansi_id', 'parent_id', 'nama', 'is_active', 'start_date', 'end_date'];
 
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+            'start_date' => 'date',
+            'end_date' => 'date',
+        ];
+    }
+
     public function instansi(): BelongsTo
     {
         return $this->belongsTo(Instansi::class);

@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Pemasukan;
 
 use App\Http\Controllers\Controller;
+use App\Models\Instansi;
+use App\Models\KategoriDana;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PemasukanController extends Controller
 {
@@ -14,7 +17,9 @@ class PemasukanController extends Controller
 
     public function create()
     {
-        return view('admin.pemasukan.pemasukan-create');
+        $kategoriDropdown = $this->kategoriDropdown();
+
+        return view('admin.pemasukan.pemasukan-create', compact('kategoriDropdown'));
     }
 
     public function store(Request $request)
@@ -29,7 +34,9 @@ class PemasukanController extends Controller
 
     public function edit(string $id)
     {
-        return view('admin.pemasukan.pemasukan-edit', compact('id'));
+        $kategoriDropdown = $this->kategoriDropdown();
+
+        return view('admin.pemasukan.pemasukan-edit', compact('id', 'kategoriDropdown'));
     }
 
     public function update(Request $request, string $id)
@@ -40,5 +47,79 @@ class PemasukanController extends Controller
     public function destroy(string $id)
     {
         // TODO: Hapus data pemasukan zakat.
+    }
+
+    private function kategoriDropdown()
+    {
+        $instansi = $this->resolveInstansi();
+        $this->syncDefaultCategories($instansi);
+
+        return KategoriDana::query()
+            ->where('instansi_id', $instansi->id)
+            ->whereNull('parent_id')
+            ->where('is_active', true)
+            ->with(['children' => function ($query) {
+                $query->where('is_active', true)->orderBy('nama');
+            }])
+            ->orderBy('nama')
+            ->get()
+            ->filter(fn (KategoriDana $category) => $category->children->isNotEmpty());
+    }
+
+    private function resolveInstansi(): Instansi
+    {
+        $user = Auth::user();
+
+        if ($user?->isAdminInstansi()) {
+            if (! $user->instansi_id || ! Instansi::query()->whereKey($user->instansi_id)->exists()) {
+                $instansi = Instansi::query()->create([
+                    'nama' => $user->nama_instansi ?: $user->name,
+                    'kelurahan' => $user->desa,
+                    'email' => $user->email,
+                    'status' => 'aktif',
+                ]);
+
+                $user->forceFill(['instansi_id' => $instansi->id])->save();
+
+                return $instansi;
+            }
+
+            return Instansi::query()->findOrFail($user->instansi_id);
+        }
+
+        return Instansi::query()->firstOrFail();
+    }
+
+    private function syncDefaultCategories(Instansi $instansi): void
+    {
+        foreach ($this->defaultCategories() as $parentName => $children) {
+            $parent = KategoriDana::query()->firstOrCreate([
+                'instansi_id' => $instansi->id,
+                'parent_id' => null,
+                'nama' => $parentName,
+            ], [
+                'is_active' => true,
+            ]);
+
+            foreach ($children as $childName) {
+                KategoriDana::query()->firstOrCreate([
+                    'instansi_id' => $instansi->id,
+                    'parent_id' => $parent->id,
+                    'nama' => $childName,
+                ], [
+                    'is_active' => $parent->is_active,
+                ]);
+            }
+        }
+    }
+
+    private function defaultCategories(): array
+    {
+        return [
+            'Zakat Fitrah' => ['Beras', 'Uang'],
+            'Zakat Maal' => ['Tabungan', 'Profesi', 'Perdagangan', 'EMAS/LM', 'Pertanian', 'Peternakan', 'Investasi', 'Lainnya'],
+            'Infaq & Sedekah' => ['Infaq', 'Sedekah', 'Wakaf Tunai'],
+            'Fidyah / Kaffarah' => ['Fidyah', 'Kaffarah'],
+        ];
     }
 }
