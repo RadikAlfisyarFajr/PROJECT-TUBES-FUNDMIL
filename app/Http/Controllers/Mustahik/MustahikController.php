@@ -8,6 +8,7 @@ use App\Models\Instansi;
 use App\Models\Mustahik;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class MustahikController extends Controller
@@ -116,15 +117,18 @@ class MustahikController extends Controller
             'kategori_asnaf' => $validated['kategori'],
             'kontak' => $validated['kontak'] ?? null,
             'keterangan' => $validated['keterangan'] ?? null,
-            'status' => $validated['status'],
+            'status' => $validated['status'] ?? 'tidak_aktif',
         ];
     }
 
     private function instansi(): Instansi
     {
-        if (auth()->check() && auth()->user()->instansi_id) {
-            return auth()->user()->instansi;
+
+        $user = Auth::user();
+        if ($user && $user->instansi_id) {
+            return $user->instansi;
         }
+
 
         return Instansi::firstOrCreate(
             ['nama' => 'FUNDMIL SOREANG'],

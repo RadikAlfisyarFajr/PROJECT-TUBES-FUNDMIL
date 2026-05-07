@@ -23,7 +23,7 @@ class ProgramPenyaluranController extends Controller
             ->latest();
 
         if ($request->filled('search')) {
-            $query->where('nama_program', 'like', '%'.$request->search.'%');
+            $query->where('nama_program', 'like', '%' . $request->search . '%');
         }
 
         if ($request->filled('status') && $request->status !== 'semua') {
@@ -82,9 +82,14 @@ class ProgramPenyaluranController extends Controller
             ->with('success', 'Program penyaluran berhasil dibuat.');
     }
 
-    public function show(string $id)
+    public function show(ProgramPenyaluran $programPenyaluran): View
     {
-        return view('admin.program-penyaluran.program-penyaluran-show', compact('id'));
+        $this->authorizeProgram($programPenyaluran);
+
+        return view('admin.program-penyaluran.program-penyaluran-show', [
+            'program' => $programPenyaluran,
+            'kategoriDana' => $programPenyaluran->kategoriDana()->orderBy('nama')->get(),
+        ]);
     }
 
     public function edit(ProgramPenyaluran $programPenyaluran): View
@@ -135,7 +140,8 @@ class ProgramPenyaluranController extends Controller
 
     private function instansi(): Instansi
     {
-        $user = auth()->user();
+        $user = auth()->guard()->user();
+
 
         if ($user?->instansi) {
             return $user->instansi;
