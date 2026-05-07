@@ -25,12 +25,9 @@ class Instansi extends Model
         'longitude',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'masa_berlaku' => 'date',
-        ];
-    }
+    protected $casts = [
+        'masa_berlaku' => 'date',
+    ];
 
     public function users(): HasMany
     {

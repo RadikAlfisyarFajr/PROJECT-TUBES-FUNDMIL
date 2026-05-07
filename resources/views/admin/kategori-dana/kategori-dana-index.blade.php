@@ -620,6 +620,7 @@
                     <button class="icon-btn" type="button" aria-label="Bantuan">
                         <i class="bi bi-question-circle-fill"></i>
                     </button>
+
                     <div class="admin-name">
                         <strong>{{ $instansi->nama }}</strong>
                         <div class="admin-role">{{ $instansi->tipe ?: 'Admin Instansi' }}</div>
@@ -631,6 +632,12 @@
                             {{ $instansiInitials ?: 'A' }}
                         @endif
                     </div>
+
+                    @include('admin.partials.account-identity', [
+                        'nameClass' => 'admin-name',
+                        'roleClass' => 'admin-role',
+                        'avatarClass' => 'avatar',
+                    ])
                 </div>
             </header>
 

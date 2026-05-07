@@ -18,8 +18,10 @@ return new class extends Migration
             $table->string('nama');
             $table->string('nik', 16)->nullable();
             $table->text('alamat')->nullable();
-            $table->string('kategori_asnaf'); // fakir, miskin, amil, muallaf, riqab, gharimin, fisabilillah, ibnu sabil
-            $table->enum('status', ['pending', 'verified', 'rejected'])->default('pending');
+            $table->string('kategori_asnaf'); // fakir, miskin, amil, riqab, gharim, fisabilillah, ibnu_sabil
+            $table->string('kontak')->nullable();
+            $table->text('keterangan')->nullable();
+            $table->enum('status', ['aktif', 'tidak_aktif'])->default('aktif');
             $table->timestamp('tanggal_verifikasi')->nullable();
             $table->decimal('latitude', 10, 8)->nullable();
             $table->decimal('longitude', 11, 8)->nullable();

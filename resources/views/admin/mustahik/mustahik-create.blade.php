@@ -1,6 +1,7 @@
-@include('admin.partials.simple-page', [
-    'title' => 'Tambah Mustahik',
-    'description' => 'Form tambah mustahik memakai sidebar dan tema admin instansi yang sama.',
-    'active' => 'mustahik',
-    'backRoute' => 'mustahik.index',
+@include('admin.mustahik.partials.form', [
+'title' => 'Tambah Mustahik',
+'action' => route('mustahik.store'),
+'method' => 'POST',
+'mustahik' => $mustahik,
+'kategoriAsnaf' => $kategoriAsnaf,
 ])

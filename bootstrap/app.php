@@ -11,7 +11,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'admin.instansi' => \App\Http\Middleware\AdminInstansiOnly::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

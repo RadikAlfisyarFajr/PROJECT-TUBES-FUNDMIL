@@ -5,6 +5,7 @@ namespace App\Http\Controllers\ProfilInstansi;
 use App\Models\Instansi;
 use App\Models\ProfilInstansiNotification;
 use App\Models\RekeningInstansi;
+use App\Models\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -161,6 +162,7 @@ class ProfilInstansiController extends Controller
 
     private function resolveInstansi(?string $id = null): Instansi
     {
+        /** @var User|null $user */
         $user = Auth::user();
 
         if ($user?->isAdminInstansi()) {

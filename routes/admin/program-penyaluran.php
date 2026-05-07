@@ -3,5 +3,8 @@
 use App\Http\Controllers\ProgramPenyaluran\ProgramPenyaluranController;
 use Illuminate\Support\Facades\Route;
 
-Route::resource('program-penyaluran', ProgramPenyaluranController::class)
-    ->names('program-penyaluran');
+Route::middleware('admin.instansi')->group(function () {
+    Route::resource('program-penyaluran', ProgramPenyaluranController::class)
+        ->parameters(['program-penyaluran' => 'program_penyaluran'])
+        ->names('program-penyaluran');
+});

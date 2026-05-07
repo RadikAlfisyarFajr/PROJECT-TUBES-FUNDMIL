@@ -1,5 +1,8 @@
 @php
     $active = $active ?? '';
+    $sidebarUser = auth()->user();
+    $sidebarInstansi = $instansi ?? $sidebarUser?->instansi;
+    $sidebarBrandName = $sidebarInstansi?->nama ?: ($sidebarUser?->nama_instansi ?: 'FUNDMIL SOREANG');
     $items = $items ?? [
         ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'bi-house-door-fill', 'route' => 'dashboard.admin', 'pattern' => 'dashboard.admin'],
         ['key' => 'profil', 'label' => 'Profil Instansi', 'icon' => 'bi-bank2', 'route' => 'profil-instansi.index', 'pattern' => 'profil-instansi.*'],
@@ -20,7 +23,7 @@
             <i class="bi bi-shield-lock-fill"></i>
         </div>
         <div class="brand-copy">
-            <div class="brand-title">FUNDMIL SOREANG</div>
+            <div class="brand-title">{{ $sidebarBrandName }}</div>
             <div class="brand-subtitle">SISTEM AMANAH DIGITAL</div>
         </div>
     </div>
