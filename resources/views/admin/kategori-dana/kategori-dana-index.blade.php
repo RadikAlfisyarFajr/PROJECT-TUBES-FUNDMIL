@@ -1,11 +1,3 @@
-@php
-    $instansiInitials = collect(explode(' ', trim($instansi->nama ?? 'Admin')))
-        ->filter()
-        ->take(2)
-        ->map(fn ($word) => strtoupper(substr($word, 0, 1)))
-        ->implode('');
-@endphp
-
 <!DOCTYPE html>
 <html lang="id">
 
@@ -621,18 +613,6 @@
                         <i class="bi bi-question-circle-fill"></i>
                     </button>
 
-                    <div class="admin-name">
-                        <strong>{{ $instansi->nama }}</strong>
-                        <div class="admin-role">{{ $instansi->tipe ?: 'Admin Instansi' }}</div>
-                    </div>
-                    <div class="avatar">
-                        @if ($instansi->logo)
-                            <img src="{{ asset('storage/'.$instansi->logo) }}" alt="Logo {{ $instansi->nama }}">
-                        @else
-                            {{ $instansiInitials ?: 'A' }}
-                        @endif
-                    </div>
-
                     @include('admin.partials.account-identity', [
                         'nameClass' => 'admin-name',
                         'roleClass' => 'admin-role',
@@ -744,7 +724,7 @@
             notificationToggle.classList.remove('has-dot');
 
             if (isOpen) {
-                fetch('{{ route('kategori-dana.notifications.read') }}', {
+                fetch('{{ route("kategori-dana.notifications.read") }}', {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
