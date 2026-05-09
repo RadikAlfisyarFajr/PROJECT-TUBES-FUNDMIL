@@ -4,59 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title }} - Fundmil Soreang</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-[#f6f8f6] font-sans text-[#111813] antialiased">
-@php
-    $menuItems = [
-        ['Beranda', 'grid', route('dashboard.admin')],
-        ['Profil Instansi', 'bank', route('profil-instansi.index')],
-        ['Kategori Dana', 'shapes', route('kategori-dana.index')],
-        ['Pemasukan Zakat', 'cash', route('pemasukan.index')],
-        ['Data Mustahik', 'users', route('mustahik.index')],
-        ['Program Penyaluran', 'spark', route('program-penyaluran.index')],
-        ['Pengaturan Distribusi', 'sliders', route('pengaturan-distribusi.index')],
-        ['Laporan', 'report', route('laporan.index')],
-        ['Pengaturan', 'gear', '#'],
-    ];
-@endphp
+<body class="sidebar-expanded bg-[#f6f8f6] font-sans text-[#111813] antialiased">
 <div class="min-h-screen lg:flex">
-    <aside class="fixed inset-y-0 left-0 z-20 hidden w-[286px] bg-white lg:block">
-        <div class="px-8 pt-[38px]">
-            <h1 class="text-[20px] font-black leading-none tracking-wide text-[#0b751f]">FUNDMIL SOREANG</h1>
-            <p class="mt-[13px] text-[10px] font-black uppercase tracking-[0.34em] text-[#a3aaa5]">Sistem Amanah Digital</p>
-        </div>
-        <nav class="mt-[62px] space-y-[9px] px-4 text-[14px] font-semibold text-[#41546a]">
-            @foreach ($menuItems as [$label, $icon, $url])
-                <a href="{{ $url }}" class="flex h-[48px] items-center gap-[17px] rounded-[16px] px-[18px] {{ $label === 'Data Mustahik' ? 'bg-[#f4f8f6] font-black text-[#0b751f] shadow-[inset_4px_0_0_#0b751f]' : '' }}">
-                    <span class="flex h-5 w-5 items-center justify-center">
-                        @if ($icon === 'grid')
-                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M3 3h6v6H3V3Zm8 0h6v6h-6V3ZM3 11h6v6H3v-6Zm8 0h6v6h-6v-6Z"/></svg>
-                        @elseif ($icon === 'bank')
-                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2 2 6v2h16V6l-8-4ZM4 9h2v6H4V9Zm5 0h2v6H9V9Zm5 0h2v6h-2V9ZM3 16h14v2H3v-2Z"/></svg>
-                        @elseif ($icon === 'users')
-                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm6.5 1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM1.5 17c.5-3.3 2.4-5.5 5.5-5.5s5 2.2 5.5 5.5h-11Zm10.7 0a7.7 7.7 0 0 0-1.5-3.7 4.6 4.6 0 0 1 2.8-.8c2.6 0 4.2 1.8 4.6 4.5h-5.9Z"/></svg>
-                        @elseif ($icon === 'spark')
-                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="m10 2 1.4 4.2L16 8l-4.6 1.8L10 14 8.6 9.8 4 8l4.6-1.8L10 2Zm-5 9 1 2.5L8.5 15 6 16l-1 2.5L4 16l-2.5-1L4 13.5 5 11Zm11 1 1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2Z"/></svg>
-                        @elseif ($icon === 'sliders')
-                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3h2v14H4V3Zm5 0h2v14H9V3Zm5 0h2v14h-2V3ZM2 6h6v2H2V6Zm5 6h6v2H7v-2Zm5-7h6v2h-6V5Z"/></svg>
-                        @else
-                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4h12v12H4V4Zm3 3v2h6V7H7Zm0 4v2h4v-2H7Z"/></svg>
-                        @endif
-                    </span>
-                    {{ $label }}
-                </a>
-            @endforeach
-        </nav>
-        <div class="absolute bottom-[55px] left-4 right-4 border-t border-[#e9eeeb] pt-[30px]">
-            <a class="flex items-center gap-[17px] px-[18px] text-[14px] font-semibold text-[#41546a]" href="#">
-                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-[#41546a] text-[11px] font-black text-white">?</span>
-                Bantuan
-            </a>
-        </div>
-    </aside>
+    @include('admin.partials.sidebar', ['active' => 'mustahik'])
 
-    <main class="min-h-screen flex-1 lg:ml-[286px]">
+    <main class="min-h-screen flex-1">
         <header class="flex h-[66px] items-center justify-between bg-white px-6 lg:px-[56px]">
             <a href="{{ route('mustahik.index') }}" class="inline-flex items-center gap-3 text-[14px] font-semibold text-[#6c756f]">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5m6-7-7 7 7 7"/></svg>
