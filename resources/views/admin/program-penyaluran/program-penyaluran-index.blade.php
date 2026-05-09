@@ -211,7 +211,7 @@
                             <span>Target: <strong>{{ $program->target_mustahik }} {{ $program->target_mustahik > 1 ? 'Jiwa' : 'Bangunan' }}</strong></span>
                             <div class="flex items-center gap-3 font-black">
                                 @if (! $isSample)
-                                <a class="{{ $isSelesai ? 'text-[#9b9f9b]' : 'text-[#0b751f]' }}" href="{{ route('pengaturan-distribusi.index', ['program' => $program->id]) }}">{{ $isSelesai ? 'Arsip >' : 'Detail >' }}</a>
+                                <a class="{{ $isSelesai ? 'text-[#9b9f9b]' : 'text-[#0b751f]' }}" href="{{ route('pengaturan-distribusi.show', $program) }}">{{ $isSelesai ? 'Arsip >' : 'Pengaturan >' }}</a>
                                 <a class="text-[#0b751f]" href="{{ route('program-penyaluran.edit', $program) }}">Edit</a>
                                 <form action="{{ route('program-penyaluran.destroy', $program) }}" method="POST" onsubmit="return confirm('Hapus program ini?')">
                                     @csrf
@@ -219,7 +219,7 @@
                                     <button class="text-red-600">Hapus</button>
                                 </form>
                                 @else
-                                <span class="{{ $isSelesai ? 'text-[#9b9f9b]' : 'text-[#0b751f]' }}">{{ $isSelesai ? 'Arsip >' : 'Detail >' }}</span>
+                                <span class="{{ $isSelesai ? 'text-[#9b9f9b]' : 'text-[#0b751f]' }}">{{ $isSelesai ? 'Arsip >' : 'Pengaturan >' }}</span>
                                 @endif
                             </div>
                         </div>

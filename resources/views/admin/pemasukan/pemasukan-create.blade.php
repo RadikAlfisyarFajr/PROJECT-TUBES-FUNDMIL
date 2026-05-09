@@ -617,8 +617,7 @@
         data-fidyah-buka-puasa-per-hari="{{ $rates['fidyahBukaPuasaPerHari'] }}"
         data-fidyah-sahur-per-hari="{{ $rates['fidyahSahurPerHari'] }}"
         data-pertanian-per-kg="{{ $rates['pertanianPerKg'] }}"
-        data-peternakan-per-ekor="{{ $rates['peternakanPerEkor'] }}"
-    ></div>
+        data-peternakan-per-ekor="{{ $rates['peternakanPerEkor'] }}"></div>
     <script>
         const zakatRatesData = document.getElementById('zakatRatesData').dataset;
         const zakatRates = {
@@ -926,6 +925,17 @@
 
                 successFlash.textContent = `${payload.message} Nomor kuitansi ${payload.nomor_kuitansi}.`;
                 successFlash.style.display = 'block';
+
+                // popup auto-hide (biar user ga klik berkali-kali)
+                submitBtn.textContent = 'Menyimpan...';
+                let isToastVisible = true;
+                clearTimeout(window.__pemasukanToastTimer);
+                window.__pemasukanToastTimer = setTimeout(() => {
+                    if (!isToastVisible) return;
+                    successFlash.style.display = 'none';
+                    isToastVisible = false;
+                }, 2500);
+
                 resetForm(payload.next_nomor_kuitansi);
             } catch (error) {
                 errorBox.textContent = error.message;
