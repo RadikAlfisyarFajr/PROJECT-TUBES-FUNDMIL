@@ -8,7 +8,7 @@
     @include('admin.partials.tailwind-assets')
 </head>
 
-<body class="bg-[#f6f8f6] font-sans text-[#111813] antialiased">
+<body class="overflow-x-hidden bg-[#f6f8f6] font-sans text-[#111813] antialiased">
     @php
     $adminUser = auth()->user();
     $adminInstansi = $adminUser?->instansi;
@@ -36,9 +36,16 @@
     @endphp
     <div class="min-h-screen lg:flex">
         <aside class="fixed inset-y-0 left-0 z-20 hidden w-[286px] bg-white lg:block">
-            <div class="px-8 pt-[38px]">
-                <h1 class="text-[20px] font-black leading-none tracking-wide text-[#0b751f]">{{ $adminBrandName }}</h1>
-                <p class="mt-[13px] text-[10px] font-black uppercase tracking-[0.34em] text-[#a3aaa5]">Sistem Amanah Digital</p>
+            <div class="flex items-start gap-[12px] px-[18px] pt-[22px]">
+                <span class="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-[11px] bg-[#07651f] text-white">
+                    <svg class="h-[16px] w-[16px]" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                        <path d="M10 2 4 4.4v4.7c0 3.9 2.5 7.1 6 8.9 3.5-1.8 6-5 6-8.9V4.4L10 2Zm1.2 6.6a1.8 1.8 0 0 1-.7 3.3v2.3h-1v-2.3a1.8 1.8 0 1 1 1.7-3.3Z" />
+                    </svg>
+                </span>
+                <div class="min-w-0 pt-[1px]">
+                    <h1 class="whitespace-nowrap text-[24px] font-black leading-[25px] text-[#053f24]">{{ $adminBrandName }}</h1>
+                    <p class="mt-[12px] whitespace-nowrap text-[12px] font-black uppercase tracking-[0.24em] text-[#a3aaa5]">Sistem Amanah Digital</p>
+                </div>
             </div>
             <nav class="mt-[62px] space-y-[9px] px-4 text-[14px] font-semibold text-[#41546a]">
                 @foreach ($menuItems as [$label, $icon, $url])
@@ -82,14 +89,14 @@
             </div>
         </aside>
 
-        <main class="min-h-screen flex-1 lg:ml-[286px]">
-            <header class="flex h-[86px] items-center justify-between bg-white px-6 lg:px-[56px]">
-                <div>
-                    <div class="text-[11px] font-bold text-[#92a09a]">Dashboard <span class="mx-2">›</span> <span class="text-[#0b751f]">Database Mustahik</span></div>
+        <main class="min-h-screen w-full min-w-0 overflow-x-hidden lg:ml-[286px] lg:w-[calc(100%_-_286px)] lg:flex-none">
+            <header class="flex min-h-[86px] min-w-0 items-center justify-between gap-5 bg-white px-6 lg:px-[40px]">
+                <div class="min-w-0">
+                    <div class="truncate text-[11px] font-bold text-[#92a09a]">Dashboard <span class="mx-2">&gt;</span> <span class="text-[#0b751f]">Database Mustahik</span></div>
                     <h1 class="mt-2 text-[25px] font-black">Data Mustahik</h1>
                 </div>
-                <div class="hidden items-center gap-[24px] md:flex">
-                    <form action="{{ route('mustahik.index') }}" method="GET" class="flex h-[58px] w-[290px] items-center gap-3 rounded-full bg-[#eef2f0] px-5">
+                <div class="hidden min-w-0 shrink-0 items-center gap-[22px] md:flex">
+                    <form action="{{ route('mustahik.index') }}" method="GET" class="flex h-[54px] w-[290px] max-w-[32vw] items-center gap-3 rounded-full bg-[#eef2f0] px-5">
                         <svg class="h-5 w-5 text-[#71807a]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="m21 21-4.3-4.3M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" />
                         </svg>
@@ -108,13 +115,13 @@
                 </div>
             </header>
 
-            <section class="px-6 pb-16 pt-[60px] lg:px-[56px]">
-                <div class="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-                    <div>
-                        <h2 class="text-[36px] font-black leading-tight">Database Mustahik</h2>
-                        <p class="mt-[9px] text-[16px] text-[#47544d]">Kelola data warga penerima manfaat di wilayah Kelurahan Soreang.</p>
+            <section class="min-w-0 px-6 pb-16 pt-[52px] lg:px-[40px]">
+                <div class="flex min-w-0 flex-col gap-5 md:flex-row md:items-start md:justify-between">
+                    <div class="min-w-0">
+                        <h2 class="break-words text-[34px] font-black leading-tight">Database Mustahik</h2>
+                        <p class="mt-[9px] max-w-[620px] text-[16px] leading-7 text-[#47544d]">Kelola data warga penerima manfaat di wilayah Kelurahan Soreang.</p>
                     </div>
-                    <a href="{{ route('mustahik.create') }}" class="inline-flex h-[54px] min-w-[235px] items-center justify-center gap-3 rounded-[13px] bg-[#0b751f] px-5 text-[15px] font-black text-white shadow-[0_12px_20px_rgba(8,117,31,0.28)]">
+                    <a href="{{ route('mustahik.create') }}" class="inline-flex h-[54px] shrink-0 items-center justify-center gap-3 rounded-[13px] bg-[#0b751f] px-5 text-[15px] font-black text-white shadow-[0_12px_20px_rgba(8,117,31,0.28)]">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M11 5H9v4H5v2h4v4h2v-4h4V9h-4V5ZM4 4a3 3 0 1 1 6 0A3 3 0 0 1 4 4Zm-3 13c.5-3.4 2.6-5.6 6-5.6 1.1 0 2.1.2 2.9.7A5.8 5.8 0 0 0 7.8 17H1Z" />
                         </svg>
@@ -126,56 +133,56 @@
                 <div class="mt-6 rounded-[13px] border border-green-200 bg-green-50 px-5 py-3 text-sm font-black text-green-800">{{ session('success') }}</div>
                 @endif
 
-                <div class="mt-[42px] grid gap-[28px] xl:grid-cols-3">
-                    <section class="flex h-[212px] items-center gap-[25px] rounded-[14px] bg-white px-[36px] shadow-sm ring-1 ring-[#e6ece9]">
-                        <span class="grid h-[64px] w-[64px] place-items-center rounded-[15px] bg-[#eef5f0] text-[#0b751f]">
+                <div class="mt-[38px] grid min-w-0 gap-[24px] xl:grid-cols-3">
+                    <section class="flex min-h-[190px] min-w-0 items-center gap-[22px] rounded-[14px] bg-white px-[28px] shadow-sm ring-1 ring-[#e6ece9]">
+                        <span class="grid h-[58px] w-[58px] shrink-0 place-items-center rounded-[15px] bg-[#eef5f0] text-[#0b751f]">
                             <svg class="h-7 w-7" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M7 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm6.5 1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM1.5 17c.5-3.3 2.4-5.5 5.5-5.5s5 2.2 5.5 5.5h-11Zm10.7 0a7.7 7.7 0 0 0-1.5-3.7 4.6 4.6 0 0 1 2.8-.8c2.6 0 4.2 1.8 4.6 4.5h-5.9Z" />
                             </svg>
                         </span>
-                        <div>
+                        <div class="min-w-0">
                             <p class="text-[12px] font-black uppercase tracking-[.18em] text-[#526058]">Total Mustahik</p>
                             <p class="mt-2 text-[39px] font-black leading-none">{{ number_format($totalMustahik, 0, ',', '.') }}</p>
                         </div>
                     </section>
-                    <section class="flex h-[212px] items-center gap-[25px] rounded-[14px] bg-white px-[36px] shadow-sm ring-1 ring-[#e6ece9]">
-                        <span class="grid h-[64px] w-[64px] place-items-center rounded-[15px] bg-pink-50 text-pink-700">
+                    <section class="flex min-h-[190px] min-w-0 items-center gap-[22px] rounded-[14px] bg-white px-[28px] shadow-sm ring-1 ring-[#e6ece9]">
+                        <span class="grid h-[58px] w-[58px] shrink-0 place-items-center rounded-[15px] bg-pink-50 text-pink-700">
                             <svg class="h-7 w-7" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9 2h2v7h6v2h-6v7H9v-7H3V9h6V2Z" />
                             </svg>
                         </span>
-                        <div>
+                        <div class="min-w-0">
                             <p class="text-[12px] font-black uppercase tracking-[.18em] text-[#526058]">Kategori Terbanyak</p>
-                            <p class="mt-2 text-[42px] font-black leading-[42px]">{{ $kategoriTerbanyak }}</p>
+                            <p class="mt-2 break-words text-[clamp(30px,3vw,42px)] font-black leading-[1.02]">{{ $kategoriTerbanyak }}</p>
                         </div>
                     </section>
-                    <section class="flex h-[212px] items-center gap-[25px] rounded-[14px] bg-[#fffbe6] px-[36px] shadow-sm ring-1 ring-[#f1e8b7]">
-                        <span class="grid h-[64px] w-[64px] place-items-center rounded-[15px] bg-[#fff099] text-[#9a7a00]">
+                    <section class="flex min-h-[190px] min-w-0 items-center gap-[22px] rounded-[14px] bg-[#fffbe6] px-[28px] shadow-sm ring-1 ring-[#f1e8b7]">
+                        <span class="grid h-[58px] w-[58px] shrink-0 place-items-center rounded-[15px] bg-[#fff099] text-[#9a7a00]">
                             <svg class="h-7 w-7" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M5 2h10v3h2v13H3V5h2V2Zm2 3h6V4H7v1Zm3 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm.5 2v2.2l1.8 1.1-.8 1.3L9 14v-3h1.5Z" />
                             </svg>
                         </span>
-                        <div>
+                        <div class="min-w-0">
                             <p class="text-[12px] font-black uppercase tracking-[.18em] text-[#9a7a00]">Tidak Aktif</p>
                             <p class="mt-2 text-[38px] font-black leading-none">{{ number_format($tidakAktifMustahik, 0, ',', '.') }}</p>
                         </div>
                     </section>
                 </div>
 
-                <form action="{{ route('mustahik.index') }}" method="GET" class="mt-[44px] grid gap-4 rounded-[15px] bg-[#edf1ef] p-6 lg:grid-cols-[1fr_220px_220px_58px]">
-                    <label class="flex h-[48px] items-center gap-3 rounded-[10px] bg-white px-4 shadow-sm">
+                <form action="{{ route('mustahik.index') }}" method="GET" class="mt-[44px] grid min-w-0 gap-4 rounded-[15px] bg-[#edf1ef] p-6 lg:grid-cols-[minmax(0,1fr)_200px_200px_58px]">
+                    <label class="flex h-[48px] min-w-0 items-center gap-3 rounded-[10px] bg-white px-4 shadow-sm">
                         <svg class="h-5 w-5 text-[#536058]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="m21 21-4.3-4.3M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" />
                         </svg>
-                        <input name="search" value="{{ request('search') }}" class="w-full bg-transparent text-sm outline-none placeholder:text-[#738078]" placeholder="Cari berdasarkan Nama atau Alamat">
+                        <input name="search" value="{{ request('search') }}" class="min-w-0 w-full bg-transparent text-sm outline-none placeholder:text-[#738078]" placeholder="Cari berdasarkan Nama atau Alamat">
                     </label>
-                    <select name="kategori" class="h-[48px] rounded-[10px] bg-white px-4 text-sm font-bold outline-none shadow-sm">
+                    <select name="kategori" class="h-[48px] min-w-0 rounded-[10px] bg-white px-4 text-sm font-bold outline-none shadow-sm">
                         <option value="semua">Kategori Asnaf</option>
                         @foreach ($kategoriAsnaf as $value => $label)
                         <option value="{{ $value }}" @selected(request('kategori')===$value)>{{ $label }}</option>
                         @endforeach
                     </select>
-                    <select name="status" class="h-[48px] rounded-[10px] bg-white px-4 text-sm font-bold outline-none shadow-sm">
+                    <select name="status" class="h-[48px] min-w-0 rounded-[10px] bg-white px-4 text-sm font-bold outline-none shadow-sm">
                         <option value="semua">Semua Status</option>
                         <option value="aktif" @selected(request('status')==='aktif' )>Aktif</option>
                         <option value="tidak_aktif" @selected(request('status')==='tidak_aktif' )>Tidak Aktif</option>

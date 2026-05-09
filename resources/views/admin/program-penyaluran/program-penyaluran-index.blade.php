@@ -35,9 +35,16 @@
     @endphp
     <div class="min-h-screen lg:flex">
         <aside class="fixed inset-y-0 left-0 z-20 hidden w-[254px] bg-white lg:block">
-            <div class="px-8 pt-[38px]">
-                <h1 class="text-[20px] font-black leading-none tracking-wide text-[#0b751f]">{{ $adminBrandName }}</h1>
-                <p class="mt-[13px] text-[10px] font-black uppercase tracking-[0.34em] text-[#a3aaa5]">Sistem Amanah Digital</p>
+            <div class="flex items-center gap-[10px] px-8 pt-[34px]">
+                <span class="grid h-[28px] w-[28px] shrink-0 place-items-center rounded-[10px] bg-[#07651f] text-white">
+                    <svg class="h-[14px] w-[14px]" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                        <path d="M10 2 4 4.4v4.7c0 3.9 2.5 7.1 6 8.9 3.5-1.8 6-5 6-8.9V4.4L10 2Zm1.2 6.6a1.8 1.8 0 0 1-.7 3.3v2.3h-1v-2.3a1.8 1.8 0 1 1 1.7-3.3Z" />
+                    </svg>
+                </span>
+                <div class="min-w-0">
+                    <h1 class="whitespace-nowrap text-[20px] font-black leading-[22px] text-[#053f24]">{{ $adminBrandName }}</h1>
+                    <p class="mt-[6px] whitespace-nowrap text-[11px] font-black uppercase tracking-[0.28em] text-[#a3aaa5]">Sistem Amanah Digital</p>
+                </div>
             </div>
 
             <nav class="mt-[62px] space-y-[9px] px-4 text-[14px] font-semibold text-[#41546a]">
