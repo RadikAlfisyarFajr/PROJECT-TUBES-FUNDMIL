@@ -4,37 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title }} - Fundmil Soreang</title>
-    @include('admin.partials.tailwind-assets')
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-[#9b9f9b] font-sans text-[#122016] antialiased">
-@php
-    $adminUser = auth()->user();
-    $adminInstansi = $adminUser?->instansi;
-    $adminBrandName = $adminInstansi?->nama ?: ($adminUser?->nama_instansi ?: 'FUNDMIL SOREANG');
-@endphp
+<body class="sidebar-expanded min-h-screen bg-[#9b9f9b] font-sans text-[#122016] antialiased">
 <div class="fixed inset-0 -z-10 overflow-hidden bg-[#f6f8f6]">
     <div class="flex min-h-screen blur-[4px]">
-        <aside class="hidden w-[254px] shrink-0 bg-white lg:block">
-            <div class="flex items-center gap-[10px] px-8 pt-[34px]">
-                <span class="grid h-[28px] w-[28px] shrink-0 place-items-center rounded-[10px] bg-[#07651f] text-white">
-                    <svg class="h-[14px] w-[14px]" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                        <path d="M10 2 4 4.4v4.7c0 3.9 2.5 7.1 6 8.9 3.5-1.8 6-5 6-8.9V4.4L10 2Zm1.2 6.6a1.8 1.8 0 0 1-.7 3.3v2.3h-1v-2.3a1.8 1.8 0 1 1 1.7-3.3Z" />
-                    </svg>
-                </span>
-                <div class="min-w-0">
-                    <h1 class="whitespace-nowrap text-[20px] font-black leading-[22px] text-[#053f24]">{{ $adminBrandName }}</h1>
-                    <p class="mt-[6px] whitespace-nowrap text-[11px] font-black uppercase tracking-[0.28em] text-[#a3aaa5]">Sistem Amanah Digital</p>
-                </div>
-            </div>
-            <div class="mt-[70px] space-y-[26px] px-8 text-[14px] font-semibold text-[#41546a]">
-                <p>Beranda</p>
-                <p>Profil Instansi</p>
-                <p>Kategori Dana</p>
-                <p>Pemasukan Zakat</p>
-                <p>Data Mustahik</p>
-                <p class="rounded-[16px] bg-[#f4f8f6] px-4 py-3 font-black text-[#0b751f]">Program Penyaluran</p>
-            </div>
-        </aside>
+        @include('admin.partials.sidebar', ['active' => 'program'])
         <main class="flex-1">
             <div class="h-[64px] bg-white"></div>
             <div class="px-[34px] pt-[35px]">
