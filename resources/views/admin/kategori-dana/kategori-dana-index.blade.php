@@ -258,6 +258,64 @@
             background: #e23d4d;
         }
 
+        .notification-wrap {
+            position: relative;
+        }
+
+        .notification-menu {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            width: min(360px, calc(100vw - 32px));
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 18px 38px rgba(20, 47, 27, .13);
+            overflow: hidden;
+            display: none;
+            z-index: 20;
+        }
+
+        .notification-menu.is-open {
+            display: block;
+        }
+
+        .notification-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--line);
+            font-weight: 900;
+        }
+
+        .notification-item {
+            padding: 14px 16px;
+            border-bottom: 1px solid #edf1ee;
+            white-space: normal;
+        }
+
+        .notification-item:last-child {
+            border-bottom: 0;
+        }
+
+        .notification-title {
+            color: var(--ink);
+            font-size: .86rem;
+            font-weight: 850;
+            margin-bottom: 4px;
+        }
+
+        .notification-text {
+            color: #536058;
+            font-size: .78rem;
+            line-height: 1.45;
+            margin-bottom: 6px;
+        }
+
+        .notification-time {
+            color: #8a958f;
+            font-size: .72rem;
+            font-weight: 700;
+        }
+
         .admin-name {
             font-size: .72rem;
             line-height: 1.1;
@@ -279,6 +337,15 @@
             place-items: center;
             font-size: .72rem;
             font-weight: 800;
+            overflow: hidden;
+            flex: 0 0 auto;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
         .content-wrap {
@@ -325,6 +392,10 @@
             background: #fff;
             box-shadow: var(--shadow);
             position: relative;
+        }
+
+        .category-item.is-hidden {
+            display: none;
         }
 
         .category-icon {
@@ -458,6 +529,22 @@
             line-height: 1.7;
         }
 
+        .empty-search {
+            display: none;
+            margin-top: 24px;
+            padding: 24px;
+            border: 1px dashed #cfded4;
+            border-radius: 14px;
+            background: #f8fbf9;
+            color: #4d6254;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .empty-search.is-visible {
+            display: block;
+        }
+
         @media (max-width: 991px) {
             .admin-layout {
                 grid-template-columns: 1fr;
@@ -501,14 +588,31 @@
                 <div class="top-actions">
                     <div class="search-box">
                         <i class="bi bi-search"></i>
-                        <input type="search" placeholder="Cari kategori...">
+                        <input id="categorySearch" type="search" placeholder="Cari kategori...">
                     </div>
-                    <button class="icon-btn has-dot" type="button" aria-label="Notifikasi">
-                        <i class="bi bi-bell-fill"></i>
-                    </button>
+                    <div class="notification-wrap">
+                        <button id="notificationToggle" class="icon-btn {{ $unreadNotifications > 0 ? 'has-dot' : '' }}" type="button" aria-label="Notifikasi kategori dana" aria-expanded="false">
+                            <i class="bi bi-bell-fill"></i>
+                        </button>
+                        <div id="notificationMenu" class="notification-menu" aria-labelledby="notificationToggle">
+                            <div class="notification-header">Update Konfigurasi</div>
+                            @forelse ($notifications as $notification)
+                                <div class="notification-item">
+                                    <div class="notification-title">{{ $notification->title }}</div>
+                                    <div class="notification-text">{{ $notification->message }}</div>
+                                    <div class="notification-time">{{ $notification->created_at->diffForHumans() }}</div>
+                                </div>
+                            @empty
+                                <div class="notification-item text-center text-muted">
+                                    Belum ada update konfigurasi.
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
                     <button class="icon-btn" type="button" aria-label="Bantuan">
                         <i class="bi bi-question-circle-fill"></i>
                     </button>
+
                     @include('admin.partials.account-identity', [
                         'nameClass' => 'admin-name',
                         'roleClass' => 'admin-role',
@@ -518,87 +622,51 @@
             </header>
 
             <div class="content-wrap">
-                <div class="page-intro">
-                    <p class="page-desc">Aktifkan kategori utama sebagai payung besar pengelolaan dana di instansi Anda.</p>
-                    <button class="save-btn" type="button">
-                        <i class="bi bi-floppy-fill"></i>
-                        Simpan Konfigurasi
-                    </button>
-                </div>
+                @if (session('success'))
+                    <div class="alert alert-success border-0 shadow-sm mb-4">
+                        {{ session('success') }}
+                    </div>
+                @endif
 
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <section class="category-card">
-                            <label class="toggle-switch" aria-label="Aktifkan Zakat Fitrah">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <div class="category-icon green">
-                                <i class="bi bi-flower1"></i>
-                            </div>
-                            <h2 class="category-title">Zakat Fitrah</h2>
-                            <p class="category-desc">Fokus: Pengelolaan beras atau uang per jiwa untuk menyucikan diri di bulan Ramadhan.</p>
-                            <div class="tag-list">
-                                <span class="tag-pill">Ramadhan 2026</span>
-                                <span class="tag-pill">Wajib Per Jiwa</span>
-                            </div>
-                        </section>
+                <form method="POST" action="{{ route('kategori-dana.update', 0) }}">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="page-intro">
+                        <p class="page-desc">Aktifkan kategori utama sebagai payung besar pengelolaan dana di instansi Anda.</p>
+                        <button class="save-btn" type="submit">
+                            <i class="bi bi-floppy-fill"></i>
+                            Simpan Konfigurasi
+                        </button>
                     </div>
 
-                    <div class="col-md-6">
-                        <section class="category-card">
-                            <label class="toggle-switch" aria-label="Aktifkan Zakat Maal">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <div class="category-icon gray">
-                                <i class="bi bi-wallet2"></i>
+                    <div class="row g-4">
+                        @foreach ($categoryCards as $category)
+                            <div class="col-md-6 category-item" data-search="{{ strtolower($category['nama'] . ' ' . $category['description'] . ' ' . implode(' ', $category['tags']) . ' ' . $category['children']->pluck('nama')->implode(' ')) }}">
+                                <section class="category-card">
+                                    <label class="toggle-switch" aria-label="Aktifkan {{ $category['nama'] }}">
+                                        <input type="checkbox" name="categories[]" value="{{ $category['id'] }}" @checked($category['is_active'])>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <div class="category-icon {{ $category['color'] }}">
+                                        <i class="bi {{ $category['icon'] }}"></i>
+                                    </div>
+                                    <h2 class="category-title">{{ $category['nama'] }}</h2>
+                                    <p class="category-desc">{{ $category['description'] }}</p>
+                                    <div class="tag-list">
+                                        @foreach ($category['tags'] as $tag)
+                                            <span class="tag-pill">{{ $tag }}</span>
+                                        @endforeach
+                                    </div>
+                                </section>
                             </div>
-                            <h2 class="category-title">Zakat Maal</h2>
-                            <p class="category-desc">Fokus: Pengelolaan harta benda yang telah mencapai batas nishab dan masa haul.</p>
-                            <div class="tag-list">
-                                <span class="tag-pill">Sepanjang Tahun</span>
-                                <span class="tag-pill">Nilai, Profesi & Tabungan</span>
-                            </div>
-                        </section>
+                        @endforeach
                     </div>
 
-                    <div class="col-md-6">
-                        <section class="category-card">
-                            <label class="toggle-switch" aria-label="Aktifkan Infaq dan Sedekah">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <div class="category-icon pink">
-                                <i class="bi bi-heart-fill"></i>
-                            </div>
-                            <h2 class="category-title">Infaq &amp; Sedekah</h2>
-                            <p class="category-desc">Fokus: Pemberian sukarela untuk kemaslahatan umat tanpa batasan nishab tertentu.</p>
-                            <div class="tag-list">
-                                <span class="tag-pill">Sukarela</span>
-                                <span class="tag-pill">Terbuka Umum</span>
-                            </div>
-                        </section>
+                    <div id="emptySearch" class="empty-search">
+                        Kategori dana tidak ditemukan.
                     </div>
-
-                    <div class="col-md-6">
-                        <section class="category-card">
-                            <label class="toggle-switch" aria-label="Aktifkan Fidyah dan Kaffarah">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <div class="category-icon gray">
-                                <i class="bi bi-fork-knife"></i>
-                            </div>
-                            <h2 class="category-title">Fidyah / Kaffarah</h2>
-                            <p class="category-desc">Fokus: Pembayaran denda atau tebusan atas kewajiban ibadah yang tertinggal.</p>
-                            <div class="tag-list">
-                                <span class="tag-pill">Denda / Tebusan</span>
-                                <span class="tag-pill">Konversi Makanan</span>
-                            </div>
-                        </section>
-                    </div>
-                </div>
+                </form>
 
                 <section class="info-panel">
                     <div class="info-icon">
@@ -622,6 +690,59 @@
 
         sidebarToggle.addEventListener('click', () => {
             document.body.classList.toggle('sidebar-expanded');
+        });
+
+        const categorySearch = document.getElementById('categorySearch');
+        const categoryItems = document.querySelectorAll('.category-item');
+        const emptySearch = document.getElementById('emptySearch');
+
+        categorySearch?.addEventListener('input', () => {
+            const keyword = categorySearch.value.trim().toLowerCase();
+            let visibleCount = 0;
+
+            categoryItems.forEach((item) => {
+                const isMatch = item.dataset.search.includes(keyword);
+
+                item.classList.toggle('is-hidden', !isMatch);
+
+                if (isMatch) {
+                    visibleCount += 1;
+                }
+            });
+
+            emptySearch?.classList.toggle('is-visible', visibleCount === 0);
+        });
+
+        const notificationToggle = document.getElementById('notificationToggle');
+        const notificationMenu = document.getElementById('notificationMenu');
+
+        notificationToggle?.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const isOpen = notificationMenu?.classList.toggle('is-open');
+
+            notificationToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            notificationToggle.classList.remove('has-dot');
+
+            if (isOpen) {
+                fetch('{{ route("kategori-dana.notifications.read") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                }).catch(() => {});
+            }
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!notificationMenu?.classList.contains('is-open')) {
+                return;
+            }
+
+            if (!notificationMenu.contains(event.target)) {
+                notificationMenu.classList.remove('is-open');
+                notificationToggle?.setAttribute('aria-expanded', 'false');
+            }
         });
     </script>
 </body>
