@@ -243,7 +243,7 @@
                         <p class="laporan-card-desc">Daftar transaksi pemasukan dana zakat, infaq, dan sedekah beserta detail muzaki per periode.</p>
                         <div class="laporan-card-footer">
                             <span class="periode-tag">Fleksibel</span>
-                            <button class="lihat-btn" onclick="showComingSoon('Pemasukan')"><i class="bi bi-eye"></i> Lihat</button>
+                            <a href="{{ route('laporan.pemasukan') }}" class="lihat-btn"><i class="bi bi-eye"></i> Lihat</a>
                         </div>
                     </div>
                 </div>
@@ -311,6 +311,59 @@
     </div>
 </div>
 
+{{-- Modal Pemasukan (menampilkan data pemasukan dari TransaksiZakat) --}}
+<div class="modal-backdrop-custom" id="pemasukanModal">
+    <div class="modal-box" style="max-width:900px; width:95%; padding:18px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;">
+            <div>
+                <h3 style="margin:0; font-size:1.05rem; font-weight:900;">Laporan Pemasukan</h3>
+                <p style="margin:0; color:#465650; font-size:.86rem;">Menampilkan daftar transaksi pemasukan zakat, infaq, dan sedekah.</p>
+            </div>
+            <div style="text-align:right">
+                <div style="font-size:.9rem; color:#2f5a3f; font-weight:900">Total Pemasukan</div>
+                <div style="font-size:1.05rem; font-weight:900">Rp {{ number_format($totalPemasukan ?? 0, 0, ',', '.') }}</div>
+            </div>
+        </div>
+
+        <div style="max-height:60vh; overflow:auto;">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>No. Kuitansi</th>
+                        <th>Muzakki</th>
+                        <th>Kategori</th>
+                        <th>Jenis</th>
+                        <th class="text-end">Jumlah</th>
+                        <th>Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if(!empty($pemasukan) && $pemasukan->count())
+                        @foreach($pemasukan as $trx)
+                            <tr>
+                                <td>{{ \Illuminate\Support\Carbon::parse($trx->tanggal)->format('d M Y') }}</td>
+                                <td>{{ $trx->nomor_kuitansi ?? '-' }}</td>
+                                <td>{{ $trx->nama_muzakki ?? '-' }}</td>
+                                <td>{{ optional($trx->kategori)->nama ?? '-' }}</td>
+                                <td>{{ $trx->jenis ?? '-' }}</td>
+                                <td class="text-end">Rp {{ number_format($trx->jumlah ?? 0, 0, ',', '.') }}</td>
+                                <td>{{ $trx->keterangan ?? '' }}</td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr><td colspan="7" class="text-center">Belum ada data pemasukan.</td></tr>
+                    @endif
+                </tbody>
+            </table>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
+            <button class="modal-close-btn" onclick="closePemasukan()">Tutup</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const sidebarToggle = document.getElementById('sidebarToggle');
     if (sidebarToggle) sidebarToggle.addEventListener('click', () => document.body.classList.toggle('sidebar-expanded'));
@@ -324,6 +377,10 @@
     function closeModal() { document.getElementById('comingSoonModal').classList.remove('show'); }
 
     document.getElementById('comingSoonModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+    
+    function showPemasukan() { document.getElementById('pemasukanModal').classList.add('show'); }
+    function closePemasukan() { document.getElementById('pemasukanModal').classList.remove('show'); }
+    document.getElementById('pemasukanModal').addEventListener('click', function(e) { if (e.target === this) closePemasukan(); });
 </script>
 </body>
 </html>
