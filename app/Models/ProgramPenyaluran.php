@@ -59,6 +59,11 @@ class ProgramPenyaluran extends Model
         return $this->hasMany(ProgramPenyaluranDana::class);
     }
 
+    public function pengaturanDistribusi(): HasMany
+    {
+        return $this->hasMany(PengaturanDistribusi::class);
+    }
+
     public function kategoriDana(): BelongsToMany
     {
         return $this->belongsToMany(
