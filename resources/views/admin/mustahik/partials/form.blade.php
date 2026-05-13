@@ -35,7 +35,7 @@
                 <p class="mt-[9px] text-[17px] text-[#758078]">Input data lengkap warga penerima manfaat baru untuk proses verifikasi asnaf.</p>
             </div>
 
-            <form action="{{ $action }}" method="POST" class="mt-[38px] max-w-[1040px] rounded-[15px] bg-white px-[44px] py-[42px] shadow-sm ring-1 ring-[#e6ece9]">
+            <form action="{{ $action }}" method="POST" enctype="multipart/form-data" class="mt-[38px] max-w-[1040px] rounded-[15px] bg-white px-[44px] py-[42px] shadow-sm ring-1 ring-[#e6ece9]">
                 @csrf
                 @if ($method !== 'POST')
                     @method($method)
@@ -80,9 +80,16 @@
                         <div>
                             <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Jenis Kelamin</span>
                             <div class="mt-[10px] grid grid-cols-2 gap-4">
-                                <button type="button" class="h-[48px] rounded-[11px] border-2 border-[#0b751f] bg-white text-sm font-bold">Laki-laki</button>
-                                <button type="button" class="h-[48px] rounded-[11px] bg-[#e5eae7] text-sm font-bold">Perempuan</button>
+                                <label for="jenis_kelamin_laki_laki" class="gender-option grid h-[48px] cursor-pointer place-items-center rounded-[11px] border-2 border-transparent bg-[#e5eae7] text-sm font-bold transition" data-gender-option>
+                                    <input id="jenis_kelamin_laki_laki" type="radio" name="jenis_kelamin" value="laki_laki" class="sr-only" @checked(old('jenis_kelamin', $mustahik->jenis_kelamin ?? 'laki_laki') === 'laki_laki')>
+                                    <span>Laki-laki</span>
+                                </label>
+                                <label for="jenis_kelamin_perempuan" class="gender-option grid h-[48px] cursor-pointer place-items-center rounded-[11px] border-2 border-transparent bg-[#e5eae7] text-sm font-bold transition" data-gender-option>
+                                    <input id="jenis_kelamin_perempuan" type="radio" name="jenis_kelamin" value="perempuan" class="sr-only" @checked(old('jenis_kelamin', $mustahik->jenis_kelamin ?? '') === 'perempuan')>
+                                    <span>Perempuan</span>
+                                </label>
                             </div>
+                            @error('jenis_kelamin') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
                         </div>
                         <label>
                             <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Nomor Telepon</span>
@@ -163,17 +170,31 @@
                         Foto Dokumen
                     </h2>
                     <div class="mt-[24px] grid gap-[30px] md:grid-cols-2">
-                        <div class="grid h-[140px] place-items-center rounded-[12px] border-2 border-dashed border-[#c8d6ce] bg-[#fbfcfb] text-center text-[#6c756f]">
-                            <div>
-                                <svg class="mx-auto h-8 w-8" fill="currentColor" viewBox="0 0 20 20"><path d="M4 5h3l1-2h4l1 2h3v11H4V5Zm6 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></svg>
-                                <p class="mt-3 text-[11px] font-black uppercase tracking-[.18em]">Unggah Foto KTP</p>
-                            </div>
+                        <div>
+                            <label for="foto_ktp" class="relative grid min-h-[180px] cursor-pointer place-items-center overflow-hidden rounded-[12px] border-2 border-dashed border-[#c8d6ce] bg-[#fbfcfb] text-center text-[#6c756f] transition hover:border-[#0b751f] hover:bg-green-50/30">
+                                <input id="foto_ktp" name="foto_ktp" type="file" accept="image/jpeg,image/png,image/jpg,image/webp" class="sr-only" data-preview-target="preview-foto-ktp" data-file-name-target="file-name-foto-ktp">
+                                <img id="preview-foto-ktp" src="{{ $mustahik?->foto_ktp ? asset('storage/'.$mustahik->foto_ktp) : '' }}" alt="Preview foto KTP" class="{{ $mustahik?->foto_ktp ? '' : 'hidden' }} absolute inset-0 h-full w-full object-cover">
+                                <span class="absolute inset-0 {{ $mustahik?->foto_ktp ? 'bg-black/35' : 'bg-transparent' }}" data-preview-overlay="preview-foto-ktp"></span>
+                                <span class="relative z-10 grid place-items-center px-4">
+                                    <svg class="mx-auto h-8 w-8" fill="currentColor" viewBox="0 0 20 20"><path d="M4 5h3l1-2h4l1 2h3v11H4V5Zm6 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></svg>
+                                    <span class="mt-3 block text-[11px] font-black uppercase tracking-[.18em]">{{ $mustahik?->foto_ktp ? 'Ganti Foto KTP' : 'Unggah Foto KTP' }}</span>
+                                    <span id="file-name-foto-ktp" class="mt-2 block max-w-full truncate text-[11px] font-bold normal-case tracking-normal">{{ $mustahik?->foto_ktp ? basename($mustahik->foto_ktp) : 'JPG, PNG, atau WEBP maksimal 2 MB' }}</span>
+                                </span>
+                            </label>
+                            @error('foto_ktp') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
                         </div>
-                        <div class="grid h-[140px] place-items-center rounded-[12px] border-2 border-dashed border-[#c8d6ce] bg-[#fbfcfb] text-center text-[#6c756f]">
-                            <div>
-                                <svg class="mx-auto h-8 w-8" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3h12v14H4V3Zm3 4h6V5H7v2Zm0 4h6V9H7v2Zm0 4h4v-2H7v2Z"/></svg>
-                                <p class="mt-3 text-[11px] font-black uppercase tracking-[.18em]">Unggah Foto KK</p>
-                            </div>
+                        <div>
+                            <label for="foto_kk" class="relative grid min-h-[180px] cursor-pointer place-items-center overflow-hidden rounded-[12px] border-2 border-dashed border-[#c8d6ce] bg-[#fbfcfb] text-center text-[#6c756f] transition hover:border-[#0b751f] hover:bg-green-50/30">
+                                <input id="foto_kk" name="foto_kk" type="file" accept="image/jpeg,image/png,image/jpg,image/webp" class="sr-only" data-preview-target="preview-foto-kk" data-file-name-target="file-name-foto-kk">
+                                <img id="preview-foto-kk" src="{{ $mustahik?->foto_kk ? asset('storage/'.$mustahik->foto_kk) : '' }}" alt="Preview foto KK" class="{{ $mustahik?->foto_kk ? '' : 'hidden' }} absolute inset-0 h-full w-full object-cover">
+                                <span class="absolute inset-0 {{ $mustahik?->foto_kk ? 'bg-black/35' : 'bg-transparent' }}" data-preview-overlay="preview-foto-kk"></span>
+                                <span class="relative z-10 grid place-items-center px-4">
+                                    <svg class="mx-auto h-8 w-8" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3h12v14H4V3Zm3 4h6V5H7v2Zm0 4h6V9H7v2Zm0 4h4v-2H7v2Z"/></svg>
+                                    <span class="mt-3 block text-[11px] font-black uppercase tracking-[.18em]">{{ $mustahik?->foto_kk ? 'Ganti Foto KK' : 'Unggah Foto KK' }}</span>
+                                    <span id="file-name-foto-kk" class="mt-2 block max-w-full truncate text-[11px] font-bold normal-case tracking-normal">{{ $mustahik?->foto_kk ? basename($mustahik->foto_kk) : 'JPG, PNG, atau WEBP maksimal 2 MB' }}</span>
+                                </span>
+                            </label>
+                            @error('foto_kk') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
                         </div>
                     </div>
                 </section>
@@ -191,5 +212,58 @@
         </section>
     </main>
 </div>
+<script>
+    const refreshGenderOptions = () => {
+        document.querySelectorAll('[data-gender-option]').forEach((option) => {
+            const input = option.querySelector('input[type="radio"]');
+            const isChecked = input?.checked;
+
+            option.classList.toggle('border-[#0b751f]', isChecked);
+            option.classList.toggle('border-transparent', !isChecked);
+            option.classList.toggle('bg-white', isChecked);
+            option.classList.toggle('bg-[#e5eae7]', !isChecked);
+            option.classList.toggle('text-[#0b751f]', isChecked);
+        });
+    };
+
+    document.querySelectorAll('input[name="jenis_kelamin"]').forEach((input) => {
+        input.addEventListener('change', refreshGenderOptions);
+    });
+
+    document.querySelectorAll('[data-gender-option]').forEach((option) => {
+        option.addEventListener('click', () => {
+            const input = option.querySelector('input[type="radio"]');
+
+            if (input) {
+                input.checked = true;
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+    });
+
+    refreshGenderOptions();
+
+    document.querySelectorAll('input[type="file"][data-preview-target]').forEach((input) => {
+        input.addEventListener('change', () => {
+            const file = input.files?.[0];
+            const preview = document.getElementById(input.dataset.previewTarget);
+            const fileName = document.getElementById(input.dataset.fileNameTarget);
+            const overlay = document.querySelector(`[data-preview-overlay="${input.dataset.previewTarget}"]`);
+
+            if (!file || !preview) {
+                return;
+            }
+
+            preview.src = URL.createObjectURL(file);
+            preview.classList.remove('hidden');
+            overlay?.classList.remove('bg-transparent');
+            overlay?.classList.add('bg-black/35');
+
+            if (fileName) {
+                fileName.textContent = file.name;
+            }
+        });
+    });
+</script>
 </body>
 </html>
