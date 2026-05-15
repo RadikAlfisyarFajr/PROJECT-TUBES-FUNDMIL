@@ -17,11 +17,171 @@
     $ariaLabel = $ariaLabel ?? 'Navigasi Admin Instansi';
 @endphp
 
+@once
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            width: 88px;
+            padding: 20px 12px 24px;
+            background: #f0f3f1;
+            border-right: 1px solid #e9eeea;
+            display: flex;
+            flex: 0 0 88px;
+            flex-direction: column;
+            overflow-x: hidden;
+            transition: width .25s ease, flex-basis .25s ease, padding .25s ease;
+        }
+
+        body.sidebar-expanded .admin-sidebar {
+            width: 280px;
+            flex-basis: 280px;
+            padding: 34px 18px 28px;
+        }
+
+        .admin-sidebar .brand {
+            min-height: 52px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: padding .25s ease;
+        }
+
+        body.sidebar-expanded .admin-sidebar .brand {
+            justify-content: flex-start;
+            padding: 0 16px;
+        }
+
+        .admin-sidebar .brand-copy {
+            display: none;
+            min-width: 0;
+            white-space: nowrap;
+        }
+
+        body.sidebar-expanded .admin-sidebar .brand-copy {
+            display: block;
+        }
+
+        .admin-sidebar .brand-title {
+            margin: 0 0 6px;
+            color: #053f24;
+            font-size: 1.2rem;
+            font-weight: 900;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .admin-sidebar .brand-subtitle {
+            color: #a0a8a2;
+            font-size: .62rem;
+            font-weight: 800;
+            letter-spacing: .18em;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .admin-sidebar .sidebar-nav {
+            margin-top: 34px;
+            display: grid;
+            gap: 6px;
+            transition: margin-top .25s ease;
+        }
+
+        body.sidebar-expanded .admin-sidebar .sidebar-nav {
+            margin-top: 44px;
+        }
+
+        .admin-sidebar .sidebar-toggle,
+        .admin-sidebar .nav-item-link {
+            width: 58px;
+            height: 52px;
+            min-height: 52px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 0;
+            border-radius: 14px;
+            background: transparent;
+            color: #263b52;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 0;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: background .2s ease, color .2s ease, width .25s ease, padding .25s ease;
+        }
+
+        body.sidebar-expanded .admin-sidebar .sidebar-toggle,
+        body.sidebar-expanded .admin-sidebar .nav-item-link {
+            width: 100%;
+            padding: 0 16px;
+            justify-content: flex-start;
+        }
+
+        .admin-sidebar .sidebar-toggle:hover {
+            background: rgba(7, 101, 31, .08);
+            color: #07651f;
+        }
+
+        .admin-sidebar .nav-item-link:hover,
+        .admin-sidebar .nav-item-link.active {
+            background: #fff;
+            color: #07651f;
+        }
+
+        .admin-sidebar .nav-item-link.active {
+            box-shadow: inset 4px 0 0 #07651f;
+        }
+
+        .admin-sidebar .sidebar-toggle i,
+        .admin-sidebar .nav-item-link i {
+            width: 24px;
+            color: #053f24;
+            font-size: 1.25rem;
+            text-align: center;
+            flex: 0 0 auto;
+        }
+
+        .admin-sidebar .sidebar-toggle i {
+            font-size: 1.35rem;
+        }
+
+        .admin-sidebar .nav-item-link.active i {
+            color: #07651f;
+        }
+
+        .admin-sidebar .nav-item-link span,
+        .admin-sidebar .sidebar-toggle span {
+            display: none;
+        }
+
+        body.sidebar-expanded .admin-sidebar .nav-item-link span,
+        body.sidebar-expanded .admin-sidebar .sidebar-toggle span {
+            display: inline;
+        }
+
+        .admin-sidebar .sidebar-footer {
+            margin-top: auto;
+            padding-top: 14px;
+            border-top: 1px solid #e9eeea;
+            display: grid;
+            gap: 8px;
+        }
+
+        @media (max-width: 991px) {
+            .admin-sidebar {
+                display: none;
+            }
+        }
+    </style>
+@endonce
+
 <aside class="sidebar admin-sidebar">
     <div class="brand">
-        <div class="brand-icon">
-            <i class="bi bi-shield-lock-fill"></i>
-        </div>
         <div class="brand-copy">
             <div class="brand-title">{{ $sidebarBrandName }}</div>
             <div class="brand-subtitle">SISTEM AMANAH DIGITAL</div>
@@ -29,7 +189,7 @@
     </div>
 
     <nav class="sidebar-nav" aria-label="{{ $ariaLabel }}">
-        <button id="sidebarToggle" class="sidebar-toggle" type="button">
+        <button id="sidebarToggle" class="sidebar-toggle" type="button" onclick="event.stopImmediatePropagation(); document.body.classList.toggle('sidebar-expanded');">
             <i class="bi bi-list"></i>
             <span>Menu</span>
         </button>
