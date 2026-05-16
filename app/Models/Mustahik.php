@@ -7,21 +7,53 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Mustahik extends Model
 {
+    public const KATEGORI = [
+        'fakir' => 'Fakir',
+        'miskin' => 'Miskin',
+        'amil' => 'Amil',
+        'riqab' => 'Riqab',
+        'gharim' => 'Gharim',
+        'fisabilillah' => 'Fisabilillah',
+        'ibnu_sabil' => 'Ibnu Sabil',
+    ];
+
     protected $table = 'mustahik';
+
     protected $fillable = [
         'instansi_id',
         'nama',
         'nik',
+        'jenis_kelamin',
         'alamat',
         'kategori_asnaf',
+        'kontak',
+        'keterangan',
+        'foto_ktp',
+        'foto_kk',
         'status',
         'tanggal_verifikasi',
         'latitude',
         'longitude'
     ];
 
+    protected $casts = [
+        'tanggal_verifikasi' => 'datetime',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
+    ];
+
     public function instansi(): BelongsTo
     {
         return $this->belongsTo(Instansi::class);
+    }
+
+    public function getNamaLengkapAttribute(): string
+    {
+        return $this->nama;
+    }
+
+    public function getKategoriLabelAttribute(): string
+    {
+        return self::KATEGORI[$this->kategori_asnaf] ?? str($this->kategori_asnaf)->replace('_', ' ')->title();
     }
 }

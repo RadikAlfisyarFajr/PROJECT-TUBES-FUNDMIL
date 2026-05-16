@@ -20,9 +20,26 @@ class DatabaseSeeder extends Seeder
             'email' => 'superadmin@example.com',
         ], [
             'name' => 'Super Admin',
-            'password' => Hash::make('password'),
+            'nama_instansi' => 'Super Admin',
+            'username' => 'superadmin',
+            'password' => Hash::make('SuperAdmin123'),
             'role' => User::ROLE_SUPER_ADMIN,
+            'status' => 'active',
             'instansi_id' => null,
+        ]);
+
+        $this->call([
+            InstansiSeeder::class,
+            HargaBerasSeeder::class,
+            NishabSeeder::class,
+            ProfilInstansiSeeder::class,
+            KategoriDanaSeeder::class,
+            PemasukanSeeder::class,
+            MustahikSeeder::class,
+            ProgramPenyaluranSeeder::class,
+            PengaturanDistribusiSeeder::class,
+            PenyaluranSeeder::class,
+            LaporanSeeder::class,
         ]);
     }
 }

@@ -16,10 +16,14 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
+        'nama_instansi',
+        'desa',
         'email',
+        'username',
         'password',
         'instansi_id',
-        'role'
+        'role',
+        'status',
     ];
 
     protected $hidden = [
@@ -27,13 +31,10 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
 
     /**
      * Relasi ke Instansi
