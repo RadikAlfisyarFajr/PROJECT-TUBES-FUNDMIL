@@ -7,11 +7,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [AuthController::class, 'showLandingPage'])->name('public.home');
 Route::get('/auth', [AuthController::class, 'showAuthForm'])->name('auth');
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
-Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+require __DIR__ . '/auth.php';
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
@@ -24,7 +21,7 @@ Route::middleware('auth')->group(function () {
         return $user->role === 'super_admin'
             ? redirect()->route('dashboard.superadmin')
             : redirect()->route('dashboard.admin');
-    })->name('dashboard.home');
+    })->name('dashboard');
 
     Route::get('/dashboard/admin', function () {
         $user = Auth::user();
