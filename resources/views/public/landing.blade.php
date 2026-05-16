@@ -33,6 +33,13 @@
             font-weight: 800;
             text-decoration: none;
         }
+        .brand-logo {
+            display: block;
+            width: 160px;
+            height: 48px;
+            object-fit: contain;
+            object-position: left center;
+        }
         .nav-link {
             color: #263326;
             font-size: .92rem;
@@ -200,7 +207,9 @@
 <body>
     <nav class="site-nav sticky-top">
         <div class="container d-flex align-items-center justify-content-between py-3">
-            <a class="brand" href="{{ route('public.home') }}">FUNDMIL SOREANG</a>
+            <a class="brand d-inline-flex align-items-center" href="{{ route('public.home') }}" aria-label="FUNDMIL SOREANG">
+                <img class="brand-logo" src="{{ asset('build/assets/logo.png') }}" alt="FUNDMIL SOREANG">
+            </a>
             <div class="nav gap-4">
                 <a class="nav-link active px-0" href="#beranda">Beranda</a>
                 <a class="nav-link px-0" href="#statistik">Statistik</a>
