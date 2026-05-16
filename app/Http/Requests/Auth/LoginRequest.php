@@ -57,6 +57,26 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = Auth::user();
+
+        if ($user?->status === 'pending') {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'login' => 'Akun Anda menunggu persetujuan super admin.',
+            ]);
+        }
+
+        if ($user?->status === 'blocked') {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'login' => 'Akun Anda tidak aktif atau ditolak.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 
