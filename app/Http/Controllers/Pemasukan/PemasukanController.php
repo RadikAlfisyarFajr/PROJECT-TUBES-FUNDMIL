@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Pemasukan;
 use App\Http\Controllers\Controller;
 use App\Models\Instansi;
 use App\Models\KategoriDana;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -63,14 +64,15 @@ class PemasukanController extends Controller
             }])
             ->orderBy('nama')
             ->get()
-            ->filter(fn (KategoriDana $category) => $category->children->isNotEmpty());
+            ->filter(fn(KategoriDana $category) => $category->children->isNotEmpty());
     }
 
     private function resolveInstansi(): Instansi
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
-        if ($user?->isAdminInstansi()) {
+        if (($user?->role ?? null) === User::ROLE_ADMIN_INSTANSI) {
             if (! $user->instansi_id || ! Instansi::query()->whereKey($user->instansi_id)->exists()) {
                 $instansi = Instansi::query()->create([
                     'nama' => $user->nama_instansi ?: $user->name,
@@ -79,7 +81,7 @@ class PemasukanController extends Controller
                     'status' => 'aktif',
                 ]);
 
-                $user->forceFill(['instansi_id' => $instansi->id])->save();
+                $user->fill(['instansi_id' => $instansi->id])->save();
 
                 return $instansi;
             }

@@ -42,6 +42,30 @@
             border-color: #0f722b;
             box-shadow: 0 0 0 .18rem rgba(15, 114, 43, .12);
         }
+        .password-field {
+            position: relative;
+        }
+        .password-field .form-control {
+            padding-right: 52px;
+        }
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 14px;
+            width: 34px;
+            height: 34px;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: #5e6b61;
+            display: grid;
+            place-items: center;
+            transform: translateY(-50%);
+        }
+        .password-toggle:hover {
+            background: #eaf3eb;
+            color: #0f722b;
+        }
         .btn-success {
             background: #0f722b;
             border-color: #0f722b;
@@ -59,7 +83,7 @@
 <body>
     <main class="auth-shell">
         <section class="auth-card">
-            <a href="{{ route('public.home') }}" class="brand text-decoration-none d-inline-flex align-items-center gap-2 mb-4">
+            <a href="{{ url('/') }}" class="brand text-decoration-none d-inline-flex align-items-center gap-2 mb-4">
                 <i class="bi bi-shield-check"></i>
                 FUNDMIL SOREANG
             </a>
@@ -67,30 +91,44 @@
             <h1 class="h3 fw-bold mb-2">Login Admin</h1>
             <p class="text-muted mb-4">Masuk sebagai super admin atau admin instansi sesuai akun yang sudah terdaftar.</p>
 
-            @if(session('success'))
-                <div class="alert alert-success py-2">{{ session('success') }}</div>
+            @if (session('status'))
+                <div class="alert alert-success py-2">{{ session('status') }}</div>
             @endif
 
-            <form method="POST" action="{{ route('auth.login') }}">
+            <form method="POST" action="{{ route('login') }}">
                 @csrf
+
                 <div class="mb-3">
-                    <label class="form-label fw-semibold" for="username">Username</label>
-                    <input id="username" type="text" name="username" value="{{ old('username') }}" class="form-control @error('username') is-invalid @enderror" placeholder="Masukkan username">
-                    @error('username')
+                    <label class="form-label fw-semibold" for="email">Email</label>
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" class="form-control @error('email') is-invalid @enderror" placeholder="Masukkan email" required autofocus autocomplete="username">
+                    @error('email')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+
                 <div class="mb-3">
                     <label class="form-label fw-semibold" for="password">Password</label>
-                    <input id="password" type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Masukkan password">
+                    <div class="password-field">
+                        <input id="password" type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Masukkan password" required autocomplete="current-password">
+                        <button id="togglePassword" class="password-toggle" type="button" aria-label="Tampilkan password" aria-pressed="false">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
                     @error('password')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-                <div class="form-check mb-4">
-                    <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                    <label class="form-check-label" for="remember">Ingat saya</label>
+
+                <div class="d-flex justify-content-between align-items-center mb-4 gap-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="remember" id="remember">
+                        <label class="form-check-label" for="remember">Ingat saya</label>
+                    </div>
+                    @if (Route::has('password.request'))
+                        <a href="{{ route('password.request') }}" class="text-success fw-semibold text-decoration-none">Forgot Password?</a>
+                    @endif
                 </div>
+
                 <button type="submit" class="btn btn-success w-100">Masuk</button>
             </form>
 
@@ -100,5 +138,21 @@
             </div>
         </section>
     </main>
+
+    <script>
+        const passwordInput = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+        const toggleIcon = togglePassword?.querySelector('i');
+
+        togglePassword?.addEventListener('click', () => {
+            const isHidden = passwordInput.type === 'password';
+
+            passwordInput.type = isHidden ? 'text' : 'password';
+            togglePassword.setAttribute('aria-label', isHidden ? 'Sembunyikan password' : 'Tampilkan password');
+            togglePassword.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+            toggleIcon?.classList.toggle('bi-eye', !isHidden);
+            toggleIcon?.classList.toggle('bi-eye-slash', isHidden);
+        });
+    </script>
 </body>
 </html>
