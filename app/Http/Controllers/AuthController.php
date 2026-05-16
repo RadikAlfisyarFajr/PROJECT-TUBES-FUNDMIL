@@ -71,12 +71,12 @@ class AuthController extends Controller
             ]);
 
             $debugMessage = app()->environment('local')
-                ? ' Detail SMTP: '.$exception->getMessage()
+                ? ' Detail SMTP: ' . $exception->getMessage()
                 : '';
 
             return back()
                 ->withInput($request->only('email'))
-                ->withErrors(['email' => 'Email reset password gagal dikirim. Periksa konfigurasi SMTP.'.$debugMessage]);
+                ->withErrors(['email' => 'Email reset password gagal dikirim. Periksa konfigurasi SMTP.' . $debugMessage]);
         }
 
         if ($status !== Password::RESET_LINK_SENT) {
@@ -146,7 +146,7 @@ class AuthController extends Controller
             'desa' => ['required', 'string', 'max:100', Rule::in($this->desaOptions())],
             'email' => 'required|email|max:255|unique:users,email',
             'username' => 'required|string|max:50|unique:users,username',
-            'password' => 'required|string|min:8',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         User::create([
