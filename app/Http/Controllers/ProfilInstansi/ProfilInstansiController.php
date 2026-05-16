@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class ProfilInstansiController extends Controller
 {
@@ -57,11 +58,18 @@ class ProfilInstansiController extends Controller
     public function update(Request $request, string $id)
     {
         $instansi = $this->resolveInstansi($id);
+        /** @var User|null $user */
+        $user = Auth::user();
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
             'tipe' => ['nullable', 'string', 'max:100'],
             'kontak' => ['nullable', 'string', 'max:30'],
-            'email' => ['nullable', 'email', 'max:255'],
+            'email' => [
+                'nullable',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($user?->id),
+            ],
             'alamat' => ['nullable', 'string'],
             'nomor_sk' => ['nullable', 'string', 'max:255'],
             'masa_berlaku' => ['nullable', 'date'],
@@ -74,6 +82,7 @@ class ProfilInstansiController extends Controller
         $this->replaceUploadedFile($request, $validated, $instansi, 'tanda_tangan', 'profil-instansi/tanda-tangan');
 
         $instansi->update($validated);
+        $this->syncAuthenticatedUserEmail($instansi, $validated['email'] ?? null);
         $this->recordNotification(
             $instansi,
             'Profil instansi diperbarui',
@@ -196,6 +205,26 @@ class ProfilInstansiController extends Controller
             'nomor_rekening' => ['required', 'string', 'max:100'],
             'nama_pemilik' => ['required', 'string', 'max:255'],
         ]);
+    }
+
+    private function syncAuthenticatedUserEmail(Instansi $instansi, ?string $email): void
+    {
+        if (! $email) {
+            return;
+        }
+
+        /** @var User|null $user */
+        $user = Auth::user();
+
+        if (! $user?->isAdminInstansi() || $user->instansi_id !== $instansi->id) {
+            return;
+        }
+
+        if ($user->email === $email) {
+            return;
+        }
+
+        $user->forceFill(['email' => $email])->save();
     }
 
     private function authorizeRekening(RekeningInstansi $rekening): void

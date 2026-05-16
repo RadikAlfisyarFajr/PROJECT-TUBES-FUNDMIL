@@ -1,5 +1,6 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,12 +14,14 @@
             color: #101510;
             font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
+
         .auth-shell {
             min-height: 100vh;
             display: grid;
             place-items: center;
             padding: 32px 16px;
         }
+
         .auth-card {
             width: min(100%, 460px);
             background: #fff;
@@ -27,21 +30,25 @@
             box-shadow: 0 24px 60px rgba(18, 42, 24, .08);
             padding: 32px;
         }
+
         .brand {
             color: #096b26;
             font-weight: 800;
             letter-spacing: .02em;
         }
+
         .form-control {
             min-height: 52px;
             border-radius: 14px;
             border-color: #dde6dd;
             background: #f8faf8;
         }
+
         .form-control:focus {
             border-color: #0f722b;
             box-shadow: 0 0 0 .18rem rgba(15, 114, 43, .12);
         }
+
         .btn-success {
             background: #0f722b;
             border-color: #0f722b;
@@ -49,13 +56,23 @@
             min-height: 52px;
             font-weight: 700;
         }
+
         .btn-outline-success {
             border-color: #0f722b;
             color: #0f722b;
             border-radius: 14px;
         }
+
+        .invalid-feedback {
+            font-size: .9rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+        }
     </style>
 </head>
+
 <body>
     <main class="auth-shell">
         <section class="auth-card">
@@ -68,23 +85,33 @@
             <p class="text-muted mb-4">Masuk sebagai super admin atau admin instansi sesuai akun yang sudah terdaftar.</p>
 
             @if(session('success'))
-                <div class="alert alert-success py-2">{{ session('success') }}</div>
+            <div class="alert alert-success py-2">{{ session('success') }}</div>
             @endif
 
-            <form method="POST" action="{{ route('auth.login') }}">
+            @if ($errors->any())
+            <div class="alert alert-danger p-3 rounded-3 mb-4">
+                <ul class="mb-0 ps-3">
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
+            <form method="POST" action="{{ route('login') }}">
                 @csrf
                 <div class="mb-3">
-                    <label class="form-label fw-semibold" for="username">Username</label>
-                    <input id="username" type="text" name="username" value="{{ old('username') }}" class="form-control @error('username') is-invalid @enderror" placeholder="Masukkan username">
-                    @error('username')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                    <label class="form-label fw-semibold" for="login">Email atau Username</label>
+                    <input id="login" type="text" name="login" value="{{ old('login') }}" class="form-control @error('login') is-invalid @enderror" placeholder="Email atau Username" required autofocus>
+                    @error('login')
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-semibold" for="password">Password</label>
                     <input id="password" type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Masukkan password">
                     @error('password')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="form-check mb-4">
@@ -96,9 +123,11 @@
 
             <div class="border-top mt-4 pt-4 text-center">
                 <p class="text-muted mb-2">Belum punya akun instansi?</p>
-                <a href="{{ route('register') }}" class="btn btn-outline-success w-100">Daftar Instansi</a>
+                <a href="{{ route('register') }}" class="btn btn-outline-success w-100 mb-3">Daftar Instansi</a>
+                <a href="{{ route('password.request') }}" class="text-success fw-semibold">Forgot password?</a>
             </div>
         </section>
     </main>
 </body>
+
 </html>

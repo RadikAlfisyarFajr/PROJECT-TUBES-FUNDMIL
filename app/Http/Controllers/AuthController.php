@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Instansi;
 use App\Models\User;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
@@ -42,6 +46,92 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
+    public function showForgotPasswordForm()
+    {
+        return view('auth.forgot-password');
+    }
+
+    public function sendResetPasswordLink(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'email', 'exists:users,email'],
+        ], [
+            'email.exists' => 'Email tidak ditemukan pada sistem.',
+        ]);
+
+        try {
+            $status = Password::sendResetLink($validated);
+        } catch (\Throwable $exception) {
+            Log::error('Gagal mengirim email reset password.', [
+                'email' => $validated['email'],
+                'exception' => $exception::class,
+                'message' => $exception->getMessage(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+            ]);
+
+            $debugMessage = app()->environment('local')
+                ? ' Detail SMTP: ' . $exception->getMessage()
+                : '';
+
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => 'Email reset password gagal dikirim. Periksa konfigurasi SMTP.' . $debugMessage]);
+        }
+
+        if ($status !== Password::RESET_LINK_SENT) {
+            Log::warning('Password reset link tidak terkirim.', [
+                'email' => $validated['email'],
+                'status' => $status,
+            ]);
+
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => __($status)]);
+        }
+
+        return back()->with('success', 'Link reset password sudah dikirim ke email Anda.');
+    }
+
+    public function showResetPasswordForm(Request $request, string $token)
+    {
+        return view('auth.reset-password', [
+            'token' => $token,
+            'email' => $request->query('email'),
+        ]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'email', 'exists:users,email'],
+            'token' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'email.exists' => 'Email tidak ditemukan pada sistem.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+        ]);
+
+        $status = Password::reset($validated, function (User $user, string $password) {
+            $user->forceFill([
+                'password' => Hash::make($password),
+                'remember_token' => Str::random(60),
+            ])->save();
+
+            event(new PasswordReset($user));
+        });
+
+        if ($status !== Password::PASSWORD_RESET) {
+            return back()
+                ->withErrors(['email' => 'Link reset password tidak valid atau sudah kedaluwarsa.'])
+                ->withInput($request->only('email'));
+        }
+
+        return redirect()
+            ->route('login')
+            ->with('success', 'Password berhasil direset. Silakan login dengan password baru.');
+    }
+
     public function showRegisterForm()
     {
         return view('auth.register', [
@@ -56,7 +146,7 @@ class AuthController extends Controller
             'desa' => ['required', 'string', 'max:100', Rule::in($this->desaOptions())],
             'email' => 'required|email|max:255|unique:users,email',
             'username' => 'required|string|max:50|unique:users,username',
-            'password' => 'required|string|min:8',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         User::create([
