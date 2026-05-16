@@ -199,12 +199,6 @@ class AuthController extends Controller
 
     public function showSuperAdminDashboard()
     {
-        $user = Auth::user();
-
-        if (! $user instanceof User || $user->role !== 'super_admin') {
-            abort(403, 'Unauthorized');
-        }
-
         $pendingUsers = User::where('role', 'admin_instansi')
             ->where('status', 'pending')
             ->orderByDesc('created_at')
@@ -215,12 +209,6 @@ class AuthController extends Controller
 
     public function approveAdminInstansi(User $user)
     {
-        $authUser = Auth::user();
-
-        if (! $authUser instanceof User || $authUser->role !== 'super_admin') {
-            abort(403, 'Unauthorized');
-        }
-
         if ($user->role !== 'admin_instansi' || $user->status !== 'pending') {
             abort(404);
         }
@@ -246,12 +234,6 @@ class AuthController extends Controller
 
     public function rejectAdminInstansi(User $user)
     {
-        $authUser = Auth::user();
-
-        if (! $authUser instanceof User || $authUser->role !== 'super_admin') {
-            abort(403, 'Unauthorized');
-        }
-
         if ($user->role !== 'admin_instansi' || $user->status !== 'pending') {
             abort(404);
         }

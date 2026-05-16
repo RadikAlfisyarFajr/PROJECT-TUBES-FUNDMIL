@@ -1,114 +1,68 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password | FUNDMIL SOREANG</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        body {
-            min-height: 100vh;
-            background: #f2f5f1;
-            color: #101510;
-            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        }
-        .auth-shell {
-            min-height: 100vh;
-            display: grid;
-            place-items: center;
-            padding: 32px 16px;
-        }
-        .auth-card {
-            width: min(100%, 520px);
-            background: #fff;
-            border: 1px solid #e6ece5;
-            border-radius: 22px;
-            box-shadow: 0 24px 60px rgba(18, 42, 24, .08);
-            padding: 32px;
-        }
-        .brand {
-            color: #096b26;
-            font-weight: 800;
-            letter-spacing: .02em;
-        }
-        .form-control {
-            min-height: 52px;
-            border-radius: 14px;
-            border-color: #dde6dd;
-            background: #f8faf8;
-        }
-        .form-control:focus {
-            border-color: #0f722b;
-            box-shadow: 0 0 0 .18rem rgba(15, 114, 43, .12);
-        }
-        .btn-success {
-            background: #0f722b;
-            border-color: #0f722b;
-            border-radius: 14px;
-            min-height: 52px;
-            font-weight: 700;
-        }
-        .btn-outline-success {
-            border-color: #0f722b;
-            color: #0f722b;
-            border-radius: 14px;
-        }
-    </style>
-</head>
-<body>
-    <main class="auth-shell">
-        <section class="auth-card">
-            <a href="{{ route('public.home') }}" class="brand text-decoration-none d-inline-flex align-items-center gap-2 mb-4">
-                <i class="bi bi-shield-check"></i>
-                FUNDMIL SOREANG
-            </a>
+<x-guest-layout>
+    <div class="min-h-screen flex items-center justify-center bg-[#f5f9f3] px-4 py-8">
+        <div class="w-full max-w-lg">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold tracking-tight text-[#10391d]">reset password</h1>
+                <p class="mt-3 text-sm text-[#44523d]">masukkan password baru untuk akunmu agar dapat login kembali.</p>
+            </div>
 
-            <h1 class="h3 fw-bold mb-2">Set Password Baru</h1>
-            <p class="text-muted mb-4">Masukkan email akun dan password baru untuk menyelesaikan reset password.</p>
-
-            @if ($errors->any())
-                <div class="alert alert-danger py-2">
-                    <ul class="mb-0 ps-3">
+            <div class="bg-white shadow-[0_28px_60px_rgba(15,23,42,0.08)] rounded-[28px] border border-[#e6efeb] px-8 py-10">
+                @if ($errors->any())
+                <div class="rounded-2xl bg-[#fef3f2] border border-[#fbcaca] p-4 text-sm text-[#9b2c2c] mb-6">
+                    <ul class="space-y-2 list-disc list-inside">
                         @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
+                        <li>{{ $error }}</li>
                         @endforeach
                     </ul>
                 </div>
-            @endif
+                @endif
 
-            <form method="POST" action="{{ route('password.store') }}">
-                @csrf
-                <input type="hidden" name="token" value="{{ $request->route('token') }}">
+                <form method="post" action="{{ route('password.store') }}" class="space-y-6">
+                    @csrf
 
-                <div class="mb-3">
-                    <label class="form-label fw-semibold" for="email">Email</label>
-                    <input id="email" type="email" name="email" value="{{ old('email', $request->email) }}" class="form-control @error('email') is-invalid @enderror" placeholder="admin@instansi.id" required autofocus>
-                    @error('email')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+                    <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
-                <div class="mb-3">
-                    <label class="form-label fw-semibold" for="password">Password Baru</label>
-                    <input id="password" type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Minimal 8 karakter" required autocomplete="new-password">
-                    @error('password')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+                    <div>
+                        <label for="email" class="block text-sm font-semibold text-[#33412f]">email</label>
+                        <input
+                            id="email"
+                            type="email"
+                            name="email"
+                            value="{{ old('email', $request->email) }}"
+                            required
+                            autofocus
+                            autocomplete="username"
+                            class="mt-3 w-full rounded-[18px] border border-[#d8e0d4] bg-[#f7faf5] px-4 py-3 text-sm text-[#1f2b1e] outline-none transition focus:border-[#166534] focus:ring-2 focus:ring-[#d1fae5]" />
+                    </div>
 
-                <div class="mb-4">
-                    <label class="form-label fw-semibold" for="password_confirmation">Konfirmasi Password Baru</label>
-                    <input id="password_confirmation" type="password" name="password_confirmation" class="form-control" placeholder="Ulangi password baru" required autocomplete="new-password">
-                </div>
+                    <div>
+                        <label for="password" class="block text-sm font-semibold text-[#33412f]">password baru</label>
+                        <input
+                            id="password"
+                            type="password"
+                            name="password"
+                            required
+                            autocomplete="new-password"
+                            class="mt-3 w-full rounded-[18px] border border-[#d8e0d4] bg-[#f7faf5] px-4 py-3 text-sm text-[#1f2b1e] outline-none transition focus:border-[#166534] focus:ring-2 focus:ring-[#d1fae5]" />
+                    </div>
 
-                <button type="submit" class="btn btn-success w-100">Simpan Password Baru</button>
-            </form>
+                    <div>
+                        <label for="password_confirmation" class="block text-sm font-semibold text-[#33412f]">konfirmasi password baru</label>
+                        <input
+                            id="password_confirmation"
+                            type="password"
+                            name="password_confirmation"
+                            required
+                            autocomplete="new-password"
+                            class="mt-3 w-full rounded-[18px] border border-[#d8e0d4] bg-[#f7faf5] px-4 py-3 text-sm text-[#1f2b1e] outline-none transition focus:border-[#166534] focus:ring-2 focus:ring-[#d1fae5]" />
+                    </div>
 
-            <div class="border-top mt-4 pt-4 text-center">
-                <a href="{{ route('login') }}" class="btn btn-outline-success w-100">Kembali ke Login</a>
+                    <div class="flex items-center justify-between text-sm text-[#44523d]">
+                        <a href="{{ route('login') }}" class="font-semibold text-[#166534] hover:text-[#14532d]">kembali ke login</a>
+                        <button type="submit" class="rounded-[18px] bg-[#166534] px-5 py-3 text-sm font-semibold text-white shadow-xl shadow-[#14532d1a] transition hover:bg-[#14532d]">reset password</button>
+                    </div>
+                </form>
             </div>
-        </section>
-    </main>
-</body>
-</html>
+        </div>
+    </div>
+</x-guest-layout>
