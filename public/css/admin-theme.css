@@ -198,8 +198,40 @@ textarea,
     line-height: 1.65;
 }
 
+/* Ensure numeric values and display sizes use the admin font and consistent digits */
+.card-body strong,
+.table,
+.table th,
+.table td,
+.fs-1, .fs-2, .fs-3, .fs-4,
+.admin-page-title,
+.admin-empty-state h2 {
+    font-family: var(--admin-font-sans) !important;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Make sure distribution cards and totals use the exact same font/digits */
+.distribution-card-value,
+.distribution-total-value,
+.distribution-total-meta strong,
+.distribution-panel .plan-history-item strong,
+.distribution-panel .plan-history-item small,
+.distribution-card .maal-chip,
+.simulation-row strong,
+.distribution-badge,
+.distribution-card-note,
+.distribution-total-label {
+    font-family: var(--admin-font-sans) !important;
+    font-variant-numeric: tabular-nums;
+}
+
 .distribution-page {
     padding-bottom: 120px;
+}
+
+.distribution-overview {
+    display: grid;
+    gap: 18px;
 }
 
 .distribution-balance-grid {
@@ -243,7 +275,7 @@ textarea,
     color: #536058;
     font-size: .78rem;
     font-weight: 900;
-    text-transform: lowercase;
+    text-transform: none;
 }
 
 .distribution-card-icon {
@@ -261,7 +293,7 @@ textarea,
     margin: 0;
     color: var(--ink);
     font-size: clamp(1.25rem, 2vw, 1.85rem);
-    font-weight: 950;
+    font-weight: 900;
     line-height: 1.12;
 }
 
@@ -301,14 +333,14 @@ textarea,
     color: #536058;
     font-size: .82rem;
     font-weight: 900;
-    text-transform: lowercase;
+    text-transform: none;
 }
 
 .distribution-total-value {
     margin: 0;
     color: var(--green-dark);
     font-size: clamp(1.8rem, 4vw, 3rem);
-    font-weight: 950;
+    font-weight: 900;
     line-height: 1;
 }
 
@@ -329,7 +361,7 @@ textarea,
     display: block;
     margin-top: 5px;
     font-size: 1rem;
-    font-weight: 950;
+    font-weight: 900;
 }
 
 .distribution-workspace {
@@ -355,7 +387,7 @@ textarea,
 .distribution-panel-title {
     margin: 0;
     font-size: 1.08rem;
-    font-weight: 950;
+    font-weight: 900;
 }
 
 .distribution-panel-desc {
@@ -363,6 +395,50 @@ textarea,
     color: var(--muted);
     font-size: .88rem;
     line-height: 1.55;
+}
+
+.distribution-status-grid {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.distribution-status-card {
+    min-height: 90px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: var(--shadow);
+    padding: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+}
+
+.distribution-status-card strong {
+    display: block;
+    color: var(--ink);
+    font-weight: 900;
+}
+
+.distribution-status-card p {
+    margin: 5px 0 0;
+    color: var(--muted);
+    font-size: .82rem;
+    line-height: 1.45;
+}
+
+.distribution-step {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: var(--green-soft);
+    color: var(--green);
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    flex: 0 0 auto;
 }
 
 .distribution-badge {
@@ -423,7 +499,7 @@ textarea,
     color: #314138;
     font-size: .78rem;
     font-weight: 900;
-    text-transform: lowercase;
+    text-transform: none;
 }
 
 .distribution-input,
@@ -566,6 +642,46 @@ textarea,
     background: #f4f8f6;
 }
 
+.distribution-empty-guide {
+    margin-bottom: 16px;
+    border: 1px dashed #cddbd2;
+    border-radius: 16px;
+    background: #f8fbf9;
+    padding: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    color: #3a4a41;
+}
+
+.distribution-empty-guide i {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--green-soft);
+    color: var(--green);
+    display: grid;
+    place-items: center;
+    font-size: 1.05rem;
+    flex: 0 0 auto;
+}
+
+.distribution-empty-guide strong,
+.distribution-empty-guide span {
+    display: block;
+}
+
+.distribution-empty-guide strong {
+    font-weight: 900;
+}
+
+.distribution-empty-guide span {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: .83rem;
+    line-height: 1.45;
+}
+
 .manual-entry-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
     align-items: end;
@@ -629,7 +745,7 @@ textarea,
     display: flex;
     justify-content: space-between;
     gap: 16px;
-    font-weight: 950;
+    font-weight: 900;
 }
 
 .simulation-result.is-minus strong,
@@ -665,6 +781,26 @@ textarea,
     margin-top: 20px;
     display: grid;
     gap: 10px;
+}
+
+.plan-history-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.plan-history-head h3 {
+    margin: 0;
+    font-size: .92rem;
+    font-weight: 900;
+}
+
+.plan-history-head span {
+    color: var(--muted);
+    font-size: .78rem;
+    font-weight: 800;
+    white-space: nowrap;
 }
 
 .plan-history-item {
@@ -901,6 +1037,7 @@ body.sidebar-expanded .admin-sidebar .sidebar-toggle span {
     }
 
     .distribution-balance-grid,
+    .distribution-status-grid,
     .distribution-workspace {
         grid-template-columns: 1fr;
     }
