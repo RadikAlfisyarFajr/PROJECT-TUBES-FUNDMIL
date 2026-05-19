@@ -1,10 +1,10 @@
-{{-- Laporan Data Mustahik — UI seragam dengan pemasukan-index.blade.php --}}
+{{-- Laporan Penyaluran - UI seragam dengan laporan-mustahik-index.blade.php --}}
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Data Mustahik | Admin Instansi</title>
+    <title>Laporan Penyaluran | Admin Instansi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
     <link href="{{ asset('css/admin-theme.css') }}" rel="stylesheet">
@@ -183,38 +183,19 @@
         .table tbody tr:last-child td { border-bottom: 0; }
         .table tbody tr:hover td { background: var(--green-pale); }
 
-        /* ── Avatar inisial ── */
-        .mustahik-avatar {
-            width: 38px; height: 38px; border-radius: 50%;
-            background: var(--green-soft); color: var(--green-dark);
-            display: grid; place-items: center;
-            font-size: .8rem; font-weight: 900; flex: 0 0 auto;
-        }
-
-        /* ── Badge asnaf & status ── */
-        .badge-asnaf {
-            padding: 4px 10px; border-radius: 999px;
-            font-size: .62rem; font-weight: 900; text-transform: uppercase;
-        }
-        .badge-asnaf.fakir        { background: #fee2e2; color: #b91c1c; }
-        .badge-asnaf.miskin       { background: #ffedd5; color: #c2410c; }
-        .badge-asnaf.amil         { background: var(--green-soft); color: var(--green-dark); }
-        .badge-asnaf.riqab        { background: #dbeafe; color: #1e40af; }
-        .badge-asnaf.gharim       { background: #ede9fe; color: #6d28d9; }
-        .badge-asnaf.fisabilillah { background: #fce7f3; color: #9d174d; }
-        .badge-asnaf.ibnu_sabil   { background: #f3f4f6; color: #374151; }
-
+        /* ── Badge status ── */
         .badge-status {
             display: inline-flex; align-items: center; gap: 6px;
             font-size: .7rem; font-weight: 900; text-transform: uppercase;
+            padding: 4px 10px; border-radius: 999px;
         }
         .badge-status .dot {
             width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto;
         }
-        .badge-status.aktif    { color: var(--green); }
-        .badge-status.aktif .dot    { background: var(--green); }
-        .badge-status.nonaktif { color: #c0392b; }
-        .badge-status.nonaktif .dot { background: #c0392b; }
+        .badge-status.selesai { background: var(--green-soft); color: var(--green-dark); }
+        .badge-status.selesai .dot { background: var(--green-dark); }
+        .badge-status.proses { background: #fef3c7; color: #b45309; }
+        .badge-status.proses .dot { background: #b45309; }
 
         /* ── Tombol detail ── */
         .btn-detail {
@@ -234,23 +215,6 @@
             padding-top: 14px; margin-top: 4px; border-top: 1px solid var(--line);
         }
         .paging-row small { color: var(--muted); font-size: .78rem; }
-
-        /* ── Buttons ── */
-        .btn-export {
-            min-height: 34px; padding: 0 16px; border: 1px solid var(--line); border-radius: 10px;
-            background: #fff; color: var(--ink); font-size: .78rem; font-weight: 800;
-            display: inline-flex; align-items: center; gap: 6px;
-            cursor: pointer; transition: background .2s ease; text-decoration: none;
-        }
-        .btn-export:hover { background: var(--green-soft); color: var(--green-dark); }
-
-        .btn-print {
-            min-height: 34px; padding: 0 16px; border: 0; border-radius: 10px;
-            background: var(--green); color: #fff; font-size: .78rem; font-weight: 800;
-            display: inline-flex; align-items: center; gap: 6px;
-            cursor: pointer; transition: background .2s ease; text-decoration: none;
-        }
-        .btn-print:hover { background: var(--green-dark); color: #fff; }
 
         /* ══ MODAL ══ */
         .modal-overlay {
@@ -322,13 +286,6 @@
         }
         .detail-field-value { color: var(--ink); font-size: .9rem; font-weight: 700; }
 
-        /* ── Keterangan box ── */
-        .keterangan-box {
-            padding: 14px 16px; border-radius: 12px;
-            background: var(--surface); border: 1px solid var(--line);
-            font-size: .86rem; color: var(--ink); line-height: 1.6;
-        }
-
         /* Skeleton */
         .skeleton-line {
             height: 14px; border-radius: 6px;
@@ -337,9 +294,6 @@
             animation: shimmer 1.3s infinite; margin-bottom: 10px;
         }
         @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
-
-        /* ── NIK mask ── */
-        .nik-mono { font-family: monospace; font-size: .85rem; letter-spacing: .03em; }
 
         @media (max-width: 991px) {
             .admin-layout { grid-template-columns: 1fr; }
@@ -360,7 +314,7 @@
 
     <main class="main-content">
         <header class="topbar">
-            <h1 class="page-title">Laporan Data Mustahik</h1>
+            <h1 class="page-title">Laporan Penyaluran</h1>
             <div class="top-actions">
                 <div class="account-profile">
                     <div style="text-align: right;">
@@ -394,57 +348,47 @@
             {{-- PAGE INTRO --}}
             <div class="page-intro">
                 <div>
-                    <h2>Laporan Data Mustahik</h2>
-                    <p class="page-desc">Daftar lengkap penerima manfaat beserta status kelayakan dan riwayat penerimaan bantuan.</p>
+                    <h2>Laporan Penyaluran</h2>
+                    <p class="page-desc">Daftar lengkap penyaluran bantuan kepada mustahik dengan status dan detail penerimaan.</p>
                 </div>
             </div>
 
             {{-- SUMMARY CARDS --}}
             <div class="row g-3 mb-3">
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-4">
                     <div class="summary-card">
                         <div class="stat-icon" style="background:#e8f5e9; color:var(--green);">
-                            <i class="bi bi-people-fill"></i>
+                            <i class="bi bi-box-seam"></i>
                         </div>
-                        <small>Total Mustahik</small>
-                        <h4>{{ number_format($totalMustahik, 0, ',', '.') }}</h4>
-                        <span style="color:var(--muted); font-size:.76rem;">Terdata</span>
+                        <small>Total Penyaluran</small>
+                        <h4>{{ number_format($totalPenyaluran, 0, ',', '.') }}</h4>
+                        <span style="color:var(--muted); font-size:.76rem;">Catatan</span>
                     </div>
                 </div>
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-4">
                     <div class="summary-card">
                         <div class="stat-icon" style="background:#d4f1d4; color:#0b7a36;">
                             <i class="bi bi-check-circle-fill"></i>
                         </div>
-                        <small>Aktif</small>
-                        <h4>{{ number_format($aktifMustahik, 0, ',', '.') }}</h4>
-                        <span style="color:var(--muted); font-size:.76rem;">Siap disalurkan</span>
+                        <small>Selesai</small>
+                        <h4>{{ number_format($berhasilPenyaluran, 0, ',', '.') }}</h4>
+                        <span style="color:var(--muted); font-size:.76rem;">Terverifikasi</span>
                     </div>
                 </div>
-                <div class="col-6 col-md-3">
-                    <div class="summary-card">
-                        <div class="stat-icon" style="background:#fdecea; color:#c0392b;">
-                            <i class="bi bi-x-circle-fill"></i>
-                        </div>
-                        <small>Tidak Aktif</small>
-                        <h4>{{ number_format($tidakAktifMustahik, 0, ',', '.') }}</h4>
-                        <span style="color:var(--muted); font-size:.76rem;">Perlu pembaruan</span>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-4">
                     <div class="summary-card green-card">
                         <div class="stat-icon" style="background:rgba(255,255,255,.2); color:#fff;">
-                            <i class="bi bi-bar-chart-fill"></i>
+                            <i class="bi bi-hourglass-split"></i>
                         </div>
-                        <small>Kategori Terbanyak</small>
-                        <h4 style="font-size:1rem; margin-top:8px;">{{ $kategoriTerbanyak }}</h4>
-                        <span style="font-size:.76rem; opacity:.85;">Asnaf dominan</span>
+                        <small>Dalam Proses</small>
+                        <h4>{{ number_format($prosesPenyaluran, 0, ',', '.') }}</h4>
+                        <span style="font-size:.76rem; opacity:.85;">Sedang berlangsung</span>
                     </div>
                 </div>
             </div>
 
             {{-- FILTER --}}
-            <form action="{{ route('laporan.mustahik') }}" method="GET" class="filter-card">
+            <form action="{{ route('laporan.penyaluran') }}" method="GET" class="filter-card">
                 <div class="input-group input-group-sm" style="width:220px;">
                     <span class="input-group-text bg-white border-end-0">
                         <i class="bi bi-search" style="color:var(--muted);"></i>
@@ -453,30 +397,23 @@
                         type="text" name="search"
                         value="{{ request('search') }}"
                         class="form-control border-start-0"
-                        placeholder="Cari nama atau alamat…"
+                        placeholder="Cari program…"
                         style="font-size:.82rem;"
                     >
                 </div>
 
-                <select name="kategori" class="form-select form-select-sm w-auto" style="font-size:.82rem;">
-                    <option value="semua">Semua Kategori</option>
-                    @foreach($kategoriAsnaf as $value => $label)
-                        <option value="{{ $value }}" @selected(request('kategori') === $value)>{{ $label }}</option>
-                    @endforeach
-                </select>
-
                 <select name="status" class="form-select form-select-sm w-auto" style="font-size:.82rem;">
                     <option value="semua">Semua Status</option>
-                    <option value="aktif"       @selected(request('status') === 'aktif')>Aktif</option>
-                    <option value="tidak_aktif" @selected(request('status') === 'tidak_aktif')>Tidak Aktif</option>
+                    <option value="selesai" @selected(request('status') === 'selesai')>Selesai</option>
+                    <option value="proses" @selected(request('status') === 'proses')>Dalam Proses</option>
                 </select>
 
                 <button type="submit" class="btn-print ms-auto" style="border-radius:10px;">
                     Terapkan Filter
                 </button>
 
-                @if(request()->hasAny(['search','kategori','status']))
-                    <a href="{{ route('laporan.mustahik') }}" class="btn-export" style="border-radius:10px;">
+                @if(request()->hasAny(['search','status']))
+                    <a href="{{ route('laporan.penyaluran') }}" class="btn-export" style="border-radius:10px;">
                         <i class="bi bi-x"></i> Reset
                     </a>
                 @endif
@@ -485,72 +422,50 @@
             {{-- TABLE --}}
             <div class="table-card">
                 <div class="table-card-header">
-                    <h5>Daftar Mustahik <span style="color:var(--muted); font-weight:400; font-size:.85rem;">({{ number_format($mustahik->total(), 0, ',', '.') }} data)</span></h5>
-                    <span class="audit-badge">Point in Time</span>
+                    <h5>Daftar Penyaluran <span style="color:var(--muted); font-weight:400; font-size:.85rem;">({{ number_format($penyaluran->total(), 0, ',', '.') }} data)</span></h5>
+                    <span class="audit-badge">Realtime Data</span>
                 </div>
 
                 <div style="overflow-x:auto;">
                     <table class="table mb-0">
                         <thead>
                             <tr>
-                                <th>Nama</th>
-                                <th>NIK</th>
-                                <th>Kategori Asnaf</th>
-                                <th>Alamat</th>
+                                <th>Program Penyaluran</th>
+                                <th>Tanggal</th>
+                                <th>Penerima</th>
+                                <th>Total Penyaluran</th>
                                 <th>Status</th>
                                 <th style="width:80px; text-align:center;">Detail</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($mustahik as $row)
-                                @php
-                                    $initials = collect(explode(' ', $row->nama))
-                                        ->filter()->take(2)
-                                        ->map(fn($p) => strtoupper(substr($p, 0, 1)))
-                                        ->join('');
-                                    $asnafClass = str_replace(' ', '_', strtolower($row->kategori_asnaf));
-                                @endphp
+                            @forelse($penyaluran as $row)
                                 <tr>
                                     <td>
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div class="mustahik-avatar">{{ $initials ?: 'M' }}</div>
-                                            <div>
-                                                <div style="font-weight:800; font-size:.9rem;">{{ $row->nama }}</div>
-                                                <div style="color:var(--muted); font-size:.75rem;">{{ $row->kontak ?: 'Kontak belum diisi' }}</div>
-                                            </div>
-                                        </div>
+                                        <strong style="font-size:.9rem;">{{ $row->programPenyaluran?->nama_program ?? '—' }}</strong><br>
+                                        <span style="color:var(--muted); font-size:.75rem;">{{ $row->penyaluranDetail->count() }} penerima</span>
                                     </td>
                                     <td>
-                                        @if($row->nik)
-                                            <span class="nik-mono">
-                                                {{ substr($row->nik, 0, 6) }}******{{ substr($row->nik, -4) }}
-                                            </span>
-                                        @else
-                                            <span style="color:var(--muted);">—</span>
-                                        @endif
+                                        {{ $row->tanggal_penyaluran?->isoFormat('D MMM YYYY') ?? '—' }}
                                     </td>
                                     <td>
-                                        <span class="badge-asnaf {{ $asnafClass }}">
-                                            {{ $row->kategori_label ?? ($kategoriAsnaf[$row->kategori_asnaf] ?? $row->kategori_asnaf) }}
-                                        </span>
-                                    </td>
-                                    <td style="font-size:.84rem; max-width:200px;">
-                                        <span style="display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
-                                            {{ $row->alamat }}
-                                        </span>
+                                        {{ $row->penyaluranDetail->count() }} orang
                                     </td>
                                     <td>
-                                        <span class="badge-status {{ $row->status === 'aktif' ? 'aktif' : 'nonaktif' }}">
+                                        Rp {{ number_format($row->penyaluranDetail->sum('jumlah_diterima'), 0, ',', '.') }}
+                                    </td>
+                                    <td>
+                                        <span class="badge-status {{ $row->status }}">
                                             <span class="dot"></span>
-                                            {{ $row->status === 'aktif' ? 'Aktif' : 'Tidak Aktif' }}
+                                            {{ ucfirst($row->status) }}
                                         </span>
                                     </td>
                                     <td style="text-align:center;">
                                         <button
                                             class="btn-detail"
                                             type="button"
-                                            onclick="openDetail({{ $row->id }})"
-                                            aria-label="Lihat detail mustahik"
+                                            data-detail-id="{{ $row->id }}"
+                                            aria-label="Lihat detail penyaluran"
                                         >
                                             <i class="bi bi-eye"></i> Detail
                                         </button>
@@ -559,7 +474,7 @@
                             @empty
                                 <tr>
                                     <td colspan="6" class="text-center py-4" style="color:var(--muted);">
-                                        Tidak ada data mustahik
+                                        Tidak ada data penyaluran
                                     </td>
                                 </tr>
                             @endforelse
@@ -569,10 +484,10 @@
 
                 <div class="paging-row">
                     <small>
-                        {{ $mustahik->firstItem() ?? 0 }} – {{ $mustahik->lastItem() ?? 0 }}
-                        dari {{ number_format($mustahik->total(), 0, ',', '.') }} mustahik
+                        {{ $penyaluran->firstItem() ?? 0 }} – {{ $penyaluran->lastItem() ?? 0 }}
+                        dari {{ number_format($penyaluran->total(), 0, ',', '.') }} penyaluran
                     </small>
-                    {{ $mustahik->links() }}
+                    {{ $penyaluran->links() }}
                 </div>
             </div>
 
@@ -582,7 +497,7 @@
 
 
 {{-- ═══════════════════════════════════════════
-     MODAL DETAIL MUSTAHIK
+     MODAL DETAIL PENYALURAN
 ═══════════════════════════════════════════ --}}
 <div class="modal-overlay" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-box">
@@ -591,10 +506,10 @@
         <div class="modal-head">
             <div class="modal-head-left">
                 <div class="modal-icon-wrap">
-                    <i class="bi bi-person-vcard"></i>
+                    <i class="bi bi-box-seam"></i>
                 </div>
                 <div>
-                    <h2 class="modal-title" id="modalTitle">Detail Mustahik</h2>
+                    <h2 class="modal-title" id="modalTitle">Detail Penyaluran</h2>
                     <p class="modal-subtitle" id="modalSubtitle">Memuat data…</p>
                 </div>
             </div>
@@ -624,9 +539,6 @@
             <button class="btn-export" onclick="closeDetail()">
                 <i class="bi bi-x"></i> Tutup
             </button>
-            <a id="modalEditBtn" href="#" class="btn-print">
-                <i class="bi bi-pencil"></i> Edit Data
-            </a>
         </div>
 
     </div>
@@ -634,16 +546,14 @@
 
 
 <script>
-    document.getElementById('sidebarToggle')?.addEventListener('click', () =>
-        document.body.classList.toggle('sidebar-expanded')
-    );
-
     document.getElementById('detailModal').addEventListener('click', function (e) {
         if (e.target === this) closeDetail();
     });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+    document.querySelectorAll('[data-detail-id]').forEach((button) => {
+        button.addEventListener('click', () => openDetail(button.dataset.detailId));
+    });
 
-    /* ════════════ openDetail ════════════ */
     function openDetail(id) {
         const modal   = document.getElementById('detailModal');
         const skel    = document.getElementById('modalSkeleton');
@@ -654,12 +564,11 @@
         content.style.display = 'none';
         errBox.style.display  = 'none';
         document.getElementById('modalSubtitle').textContent = 'Memuat data…';
-        document.getElementById('modalEditBtn').href         = '#';
 
         modal.classList.add('show');
         document.body.style.overflow = 'hidden';
 
-        fetch(`{{ url('laporan/mustahik') }}/${id}/detail`, {
+        fetch(`{{ url('laporan/penyaluran') }}/${id}/detail`, {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
@@ -679,95 +588,82 @@
         document.body.style.overflow = '';
     }
 
-    /* ── Helpers ── */
     const safe = s => String(s || '—').replace(/[&<>"']/g, c =>
         ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])
     );
 
-    const asnafBadge = (key, label) => {
-        const colorMap = {
-            fakir:        'background:#fee2e2; color:#b91c1c;',
-            miskin:       'background:#ffedd5; color:#c2410c;',
-            amil:         'background:#dff3e4; color:#06451f;',
-            riqab:        'background:#dbeafe; color:#1e40af;',
-            gharim:       'background:#ede9fe; color:#6d28d9;',
-            fisabilillah: 'background:#fce7f3; color:#9d174d;',
-            ibnu_sabil:   'background:#f3f4f6; color:#374151;',
-        };
-        const style = colorMap[key] || 'background:#f0f0f0; color:#555;';
-        return `<span style="padding:4px 10px; border-radius:999px; ${style} font-size:.65rem; font-weight:900; text-transform:uppercase;">${safe(label)}</span>`;
-    };
-
     const statusBadge = s => {
-        const aktif = s === 'aktif';
-        const style = aktif
-            ? 'color:#06451f;'
-            : 'color:#c0392b;';
-        const dot = aktif ? '#06451f' : '#c0392b';
-        return `<span style="display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:900; text-transform:uppercase; ${style}">
-                    <span style="width:7px; height:7px; border-radius:50%; background:${dot}; display:inline-block;"></span>
-                    ${aktif ? 'Aktif' : 'Tidak Aktif'}
+        const colorMap = {
+            'selesai': { bg: '#dff3e4', color: '#06451f' },
+            'proses': { bg: '#fef3c7', color: '#b45309' },
+        };
+        const style = colorMap[s] || { bg: '#f0f0f0', color: '#555' };
+        return `<span style="display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:900; text-transform:uppercase; color:${style.color}">
+                    <span style="width:7px; height:7px; border-radius:50%; background:${style.color}; display:inline-block;"></span>
+                    ${safe(s === 'selesai' ? 'Selesai' : 'Dalam Proses')}
                 </span>`;
     };
 
-    /* ════════════ renderDetail ════════════ */
     function renderDetail(d) {
-        document.getElementById('modalSubtitle').textContent = d.nama ?? '';
-        document.getElementById('modalEditBtn').href         = `{{ url('mustahik') }}/${d.id}/edit`;
+        document.getElementById('modalSubtitle').textContent = d.program_nama ?? '—';
+
+        let detailItemsHtml = '';
+        if (d.detail_items && d.detail_items.length > 0) {
+            detailItemsHtml = `
+                <p class="detail-section-label">
+                    <i class="bi bi-list-check" style="color:var(--green);"></i>
+                    Detail Penerima (${d.detail_items.length} orang)
+                </p>
+                <div style="margin-bottom:18px; max-height:200px; overflow-y:auto; border: 1px solid var(--line); border-radius:10px; padding:10px;">
+                    ${d.detail_items.map((item, idx) => `
+                        <div style="padding:8px 0; border-bottom: 1px solid var(--line); font-size:.82rem;">
+                            <strong>${safe(item.nama_penerima)}</strong><br>
+                            <span style="color:var(--muted); font-size:.75rem;">${safe(item.jenis_penerima)}</span>
+                            <div style="margin-top:4px; color:var(--green); font-weight:700;">Rp ${Number(item.jumlah_diterima).toLocaleString('id-ID')}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
 
         document.getElementById('modalContent').innerHTML = `
-
-            <!-- Identitas -->
             <p class="detail-section-label">
-                <i class="bi bi-person-fill" style="color:var(--green);"></i>
-                Identitas
+                <i class="bi bi-info-circle" style="color:var(--green);"></i>
+                Informasi Penyaluran
             </p>
             <div class="detail-grid">
                 <div class="detail-field">
-                    <span class="detail-field-label">Nama Lengkap</span>
-                    <span class="detail-field-value">${safe(d.nama)}</span>
+                    <span class="detail-field-label">Program</span>
+                    <span class="detail-field-value">${safe(d.program_nama)}</span>
                 </div>
                 <div class="detail-field">
-                    <span class="detail-field-label">NIK</span>
-                    <span class="detail-field-value" style="font-family:monospace;">${safe(d.nik_display)}</span>
+                    <span class="detail-field-label">Tanggal Penyaluran</span>
+                    <span class="detail-field-value">${safe(d.tanggal_penyaluran)}</span>
                 </div>
                 <div class="detail-field">
-                    <span class="detail-field-label">Kontak / WhatsApp</span>
-                    <span class="detail-field-value">${safe(d.kontak)}</span>
+                    <span class="detail-field-label">Total Penerima</span>
+                    <span class="detail-field-value">${d.total_penerima} orang</span>
                 </div>
                 <div class="detail-field">
-                    <span class="detail-field-label">Tanggal Verifikasi</span>
-                    <span class="detail-field-value">${safe(d.tanggal_verifikasi)}</span>
-                </div>
-            </div>
-
-            <!-- Kelayakan -->
-            <p class="detail-section-label">
-                <i class="bi bi-shield-check" style="color:var(--green);"></i>
-                Kelayakan
-            </p>
-            <div class="detail-grid" style="margin-bottom:18px;">
-                <div class="detail-field">
-                    <span class="detail-field-label">Kategori Asnaf</span>
-                    <span class="detail-field-value">${asnafBadge(d.kategori_asnaf, d.kategori_label)}</span>
+                    <span class="detail-field-label">Total Jumlah</span>
+                    <span class="detail-field-value">Rp ${Number(d.total_jumlah).toLocaleString('id-ID')}</span>
                 </div>
                 <div class="detail-field">
                     <span class="detail-field-label">Status</span>
                     <span class="detail-field-value">${statusBadge(d.status)}</span>
                 </div>
-                <div class="detail-field" style="grid-column:1/-1;">
-                    <span class="detail-field-label">Alamat Lengkap</span>
-                    <span class="detail-field-value">${safe(d.alamat)}</span>
-                </div>
             </div>
 
-            <!-- Keterangan -->
+            ${detailItemsHtml}
+
             ${d.keterangan ? `
             <p class="detail-section-label">
                 <i class="bi bi-chat-left-text" style="color:var(--green);"></i>
                 Keterangan
             </p>
-            <div class="keterangan-box">${safe(d.keterangan)}</div>
+            <div style="padding:12px 16px; border-radius:10px; background:var(--surface); border:1px solid var(--line); font-size:.86rem; color:var(--ink); line-height:1.6;">
+                ${safe(d.keterangan)}
+            </div>
             ` : ''}
         `;
     }

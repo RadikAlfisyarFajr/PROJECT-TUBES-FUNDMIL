@@ -513,7 +513,7 @@
                                         <button
                                             class="btn-detail"
                                             type="button"
-                                            onclick="openDetail({{ $trx->id }})"
+                                            data-detail-id="{{ $trx->id }}"
                                             aria-label="Lihat detail transaksi"
                                         >
                                             <i class="bi bi-eye"></i> Detail
@@ -614,6 +614,9 @@
         if (e.target === this) closeDetail();
     });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDetail(); });
+    document.querySelectorAll('[data-detail-id]').forEach((button) => {
+        button.addEventListener('click', () => openDetail(button.dataset.detailId));
+    });
 
     /* ════════════════════════════════
        openDetail — fetch & render

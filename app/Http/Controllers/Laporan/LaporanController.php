@@ -37,7 +37,7 @@ class LaporanController extends Controller
         $pemasukan      = $query->paginate(25)->withQueryString();
         $totalPemasukan = TransaksiZakat::sum('jumlah');
 
-        return view('admin.laporan.pemasukan-index', compact('pemasukan', 'totalPemasukan'));
+        return view('admin.laporan.laporan-pemasukan-index', compact('pemasukan', 'totalPemasukan'));
     }
 
     /**Mengembalikan seluruh data satu transaksi beserta item-itemnya
@@ -109,7 +109,7 @@ class LaporanController extends Controller
 
         $mustahik = $query->paginate(10)->withQueryString();
 
-        return view('admin.laporan.mustahik-index', [
+        return view('admin.laporan.laporan-mustahik-index', [
             'mustahik' => $mustahik,
             'totalMustahik' => Mustahik::where('instansi_id', $instansiId)->count(),
             'aktifMustahik' => Mustahik::where('instansi_id', $instansiId)->where('status', 'aktif')->count(),
@@ -181,7 +181,7 @@ class LaporanController extends Controller
 
         $penyaluran = $query->paginate(10)->withQueryString();
 
-        return view('admin.laporan.penyaluran-index', [
+        return view('admin.laporan.laporan-penyaluran-index', [
             'penyaluran' => $penyaluran,
             'totalPenyaluran' => Penyaluran::where('instansi_id', $instansiId)->count(),
             'berhasilPenyaluran' => Penyaluran::where('instansi_id', $instansiId)->where('status', 'selesai')->count(),
@@ -267,7 +267,7 @@ class LaporanController extends Controller
 
         $saldoBersih = $totalPemasukan - $totalPenyaluran;
 
-        return view('admin.laporan.keuangan-index', [
+        return view('admin.laporan.laporan-keuangan-index', [
             'pemasukan' => $pemasukan,
             'penyaluran' => $penyaluran,
             'totalPemasukan' => $totalPemasukan,
