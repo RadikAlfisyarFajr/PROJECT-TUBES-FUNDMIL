@@ -902,7 +902,7 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
                     <head>
                         <title>Struk ${data.nomor_kuitansi}</title>
                         <style>
-                            body{font-family:Arial,sans-serif;padding:24px;color:#111}
+                            body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:24px;color:#111}
                             h1{font-size:18px;margin:0 0 4px}
                             table{width:100%;border-collapse:collapse;margin-top:18px}
                             td,th{border-bottom:1px solid #ddd;padding:8px;text-align:left}

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Reset Password FUNDMIL Soreang</title>
 </head>
-<body style="margin:0;background:#f2f5f1;font-family:Arial,sans-serif;color:#17211b;">
+<body style="margin:0;background:#f2f5f1;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#17211b;">
     <div style="max-width:560px;margin:0 auto;padding:32px 18px;">
         <div style="background:#ffffff;border:1px solid #e2ebe4;border-radius:16px;padding:28px;">
             <h1 style="margin:0 0 12px;font-size:22px;color:#096b26;">Reset Password</h1>

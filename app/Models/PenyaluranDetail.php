@@ -20,6 +20,14 @@ class PenyaluranDetail extends Model
         'keterangan'
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'jumlah_diterima' => 'decimal:2',
+            'tanggal_diterima' => 'datetime',
+        ];
+    }
+
     public function penyaluran(): BelongsTo
     {
         return $this->belongsTo(Penyaluran::class);
