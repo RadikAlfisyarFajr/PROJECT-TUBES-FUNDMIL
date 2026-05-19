@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Laporan;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\TransaksiZakat;
+use App\Models\Mustahik;
+use App\Models\Penyaluran;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class LaporanController extends Controller
 {
@@ -77,6 +80,204 @@ class LaporanController extends Controller
         'total_beras_kg'   => 0,
     ]);
 }
+
+    /**
+     * Laporan Data Mustahik
+     */
+    public function mustahik(Request $request)
+    {
+        $user = Auth::user();
+        $instansiId = $user->instansi_id ?? 1;
+        
+        $query = Mustahik::where('instansi_id', $instansiId)->latest();
+
+        if ($request->filled('search')) {
+            $search = $request->string('search');
+            $query->where(function ($builder) use ($search) {
+                $builder->where('nama', 'like', "%{$search}%")
+                    ->orWhere('alamat', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status') && $request->status !== 'semua') {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('kategori') && $request->kategori !== 'semua') {
+            $query->where('kategori_asnaf', $request->kategori);
+        }
+
+        $mustahik = $query->paginate(10)->withQueryString();
+
+        return view('admin.laporan.mustahik-index', [
+            'mustahik' => $mustahik,
+            'totalMustahik' => Mustahik::where('instansi_id', $instansiId)->count(),
+            'aktifMustahik' => Mustahik::where('instansi_id', $instansiId)->where('status', 'aktif')->count(),
+            'tidakAktifMustahik' => Mustahik::where('instansi_id', $instansiId)->where('status', 'tidak_aktif')->count(),
+            'kategoriTerbanyak' => $this->kategoriTerbanyak($instansiId),
+            'kategoriAsnaf' => Mustahik::KATEGORI,
+        ]);
+    }
+
+    /**
+     * Detail Mustahik untuk modal (AJAX)
+     */
+    public function mustahikDetail(int $id)
+    {
+        $user = Auth::user();
+        $instansiId = $user->instansi_id ?? 1;
+        
+        $mustahik = Mustahik::findOrFail($id);
+        
+        abort_if($mustahik->instansi_id !== $instansiId, 403);
+
+        return response()->json([
+            'id'                   => $mustahik->id,
+            'nama'                 => $mustahik->nama,
+            'nik_display'          => $mustahik->nik ? substr($mustahik->nik, 0, 6) . '******' . substr($mustahik->nik, -4) : '—',
+            'kontak'               => $mustahik->kontak ?? '—',
+            'tanggal_verifikasi'   => $mustahik->tanggal_verifikasi ? Carbon::parse($mustahik->tanggal_verifikasi)->isoFormat('D MMMM YYYY') : '—',
+            'kategori_asnaf'       => str_replace(' ', '_', strtolower($mustahik->kategori_asnaf)),
+            'kategori_label'       => Mustahik::KATEGORI[$mustahik->kategori_asnaf] ?? $mustahik->kategori_asnaf,
+            'status'               => $mustahik->status,
+            'alamat'               => $mustahik->alamat ?? '—',
+            'keterangan'           => $mustahik->keterangan ?? '',
+        ]);
+    }
+
+    private function kategoriTerbanyak($instansiId): string
+    {
+        $top = Mustahik::where('instansi_id', $instansiId)
+            ->selectRaw('kategori_asnaf, count(*) as total')
+            ->groupBy('kategori_asnaf')
+            ->orderByDesc('total')
+            ->first();
+
+        return $top ? (Mustahik::KATEGORI[$top->kategori_asnaf] ?? 'Fakir Miskin') : 'Fakir Miskin';
+    }
+
+    /**
+     * Laporan Penyaluran
+     */
+    public function penyaluran(Request $request)
+    {
+        $user = Auth::user();
+        $instansiId = $user->instansi_id ?? 1;
+        
+        $query = Penyaluran::where('instansi_id', $instansiId)
+            ->with(['programPenyaluran', 'penyaluranDetail'])
+            ->latest();
+
+        if ($request->filled('search')) {
+            $search = $request->string('search');
+            $query->whereHas('programPenyaluran', function ($q) use ($search) {
+                $q->where('nama_program', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status') && $request->status !== 'semua') {
+            $query->where('status', $request->status);
+        }
+
+        $penyaluran = $query->paginate(10)->withQueryString();
+
+        return view('admin.laporan.penyaluran-index', [
+            'penyaluran' => $penyaluran,
+            'totalPenyaluran' => Penyaluran::where('instansi_id', $instansiId)->count(),
+            'berhasilPenyaluran' => Penyaluran::where('instansi_id', $instansiId)->where('status', 'selesai')->count(),
+            'prosesPenyaluran' => Penyaluran::where('instansi_id', $instansiId)->where('status', 'proses')->count(),
+        ]);
+    }
+
+    /**
+     * Detail Penyaluran untuk modal (AJAX)
+     */
+    public function penyaluranDetail(int $id)
+    {
+        $user = Auth::user();
+        $instansiId = $user->instansi_id ?? 1;
+        
+        $penyaluran = Penyaluran::with(['programPenyaluran', 'penyaluranDetail.mustahik'])->findOrFail($id);
+        
+        abort_if($penyaluran->instansi_id !== $instansiId, 403);
+
+        $detail_items = $penyaluran->penyaluranDetail->map(function ($item) {
+            return [
+                'nama_penerima' => $item->nama_penerima,
+                'jenis_penerima' => $item->jenis_penerima,
+                'jumlah_diterima' => $item->jumlah_diterima,
+                'status_penerimaan' => $item->status_penerimaan,
+                'tanggal_diterima' => $item->tanggal_diterima ? Carbon::parse($item->tanggal_diterima)->isoFormat('D MMMM YYYY') : '—',
+                'keterangan' => $item->keterangan,
+            ];
+        });
+
+        return response()->json([
+            'id'                   => $penyaluran->id,
+            'program_nama'         => $penyaluran->programPenyaluran?->nama_program ?? '—',
+            'tanggal_penyaluran'   => Carbon::parse($penyaluran->tanggal_penyaluran)->isoFormat('D MMMM YYYY'),
+            'status'               => $penyaluran->status,
+            'keterangan'           => $penyaluran->keterangan ?? '',
+            'detail_items'         => $detail_items,
+            'total_penerima'       => $penyaluran->penyaluranDetail->count(),
+            'total_jumlah'         => $penyaluran->penyaluranDetail->sum('jumlah_diterima'),
+        ]);
+    }
+
+    /**
+     * Laporan Keuangan
+     */
+    public function keuangan(Request $request)
+    {
+        $user = Auth::user();
+        $instansiId = $user->instansi_id ?? 1;
+
+        $pemasukanQuery = TransaksiZakat::where('instansi_id', $instansiId)
+            ->with('kategori')
+            ->orderByDesc('tanggal');
+
+        if ($request->filled('search')) {
+            $search = $request->string('search');
+
+            $pemasukanQuery->where(function ($builder) use ($search) {
+                $builder->where('nama_muzakki', 'like', "%{$search}%")
+                    ->orWhere('nomor_kuitansi', 'like', "%{$search}%");
+            });
+        }
+
+        $pemasukan = $pemasukanQuery->limit(12)->get();
+        $totalPemasukan = TransaksiZakat::where('instansi_id', $instansiId)->sum('jumlah');
+
+        $penyaluranQuery = Penyaluran::where('instansi_id', $instansiId)
+            ->with(['programPenyaluran', 'penyaluranDetail'])
+            ->orderByDesc('tanggal_penyaluran');
+
+        if ($request->filled('search')) {
+            $search = $request->string('search');
+            $penyaluranQuery->whereHas('programPenyaluran', function ($builder) use ($search) {
+                $builder->where('nama_program', 'like', "%{$search}%");
+            });
+        }
+
+        $penyaluran = $penyaluranQuery->limit(12)->get();
+        $totalPenyaluran = Penyaluran::where('instansi_id', $instansiId)
+            ->with('penyaluranDetail')
+            ->get()
+            ->sum(fn (Penyaluran $item) => (float) $item->penyaluranDetail->sum('jumlah_diterima'));
+
+        $saldoBersih = $totalPemasukan - $totalPenyaluran;
+
+        return view('admin.laporan.keuangan-index', [
+            'pemasukan' => $pemasukan,
+            'penyaluran' => $penyaluran,
+            'totalPemasukan' => $totalPemasukan,
+            'totalPenyaluran' => $totalPenyaluran,
+            'saldoBersih' => $saldoBersih,
+            'totalTransaksiPemasukan' => TransaksiZakat::where('instansi_id', $instansiId)->count(),
+            'totalTransaksiPenyaluran' => Penyaluran::where('instansi_id', $instansiId)->count(),
+            'totalMustahik' => Mustahik::where('instansi_id', $instansiId)->count(),
+        ]);
+    }
 
     public function create()
     {

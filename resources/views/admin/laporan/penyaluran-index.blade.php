@@ -1,0 +1,669 @@
+{{-- Laporan Penyaluran — UI seragam dengan mustahik-index.blade.php --}}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Penyaluran | Admin Instansi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{{ asset('css/admin-theme.css') }}" rel="stylesheet">
+    <style>
+        :root {
+            --green: #087026;
+            --green-dark: #06451f;
+            --green-soft: #dff3e4;
+            --green-pale: #eef9f1;
+            --ink: #17211b;
+            --muted: #748077;
+            --surface: #f5f8f5;
+            --line: #e2ebe4;
+            --shadow: 0 16px 34px rgba(18, 55, 28, .07);
+        }
+
+        * { letter-spacing: 0; box-sizing: border-box; }
+
+        body {
+            margin: 0; min-height: 100vh; overflow-x: hidden;
+            background: var(--surface); color: var(--ink);
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .admin-layout {
+            min-height: 100vh; display: grid;
+            grid-template-columns: 88px minmax(0, 1fr);
+            transition: grid-template-columns .25s ease;
+        }
+        body.sidebar-expanded .admin-layout { grid-template-columns: 280px minmax(0, 1fr); }
+
+        .main-content { min-width: 0; padding: 18px 24px 38px; background: var(--surface); }
+
+        .topbar {
+            min-height: 56px; margin: -18px -24px 34px; padding: 16px 24px;
+            background: #fff; border-bottom: 1px solid rgba(226,235,228,.8);
+            display: flex; align-items: center; justify-content: space-between; gap: 24px;
+        }
+        .page-title { margin: 0; font-size: 1.12rem; font-weight: 900; }
+        .top-actions { display: flex; align-items: center; gap: 14px; }
+        .content-wrap { max-width: 1180px; margin: 0 auto; }
+
+        /* ── Account Profile Dropdown ── */
+        .account-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .account-dropdown {
+            position: relative;
+        }
+
+        .account-dropdown summary {
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .account-dropdown summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .admin-avatar {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: var(--green); color: #fff;
+            display: grid; place-items: center;
+            font-weight: 900; font-size: .95rem;
+            cursor: pointer;
+        }
+
+        .account-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 190px;
+            padding: 8px;
+            border: 1px solid #e2ebe4;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 18px 38px rgba(20, 47, 27, .13);
+            z-index: 30;
+        }
+
+        .account-dropdown-item {
+            width: 100%;
+            min-height: 40px;
+            padding: 0 10px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: #26352b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: .84rem;
+            font-weight: 800;
+            text-decoration: none;
+            text-align: left;
+        }
+
+        .account-dropdown-item:hover {
+            background: #eaf3eb;
+            color: #0f722b;
+        }
+
+        .account-dropdown-item.logout {
+            color: #b42318;
+        }
+
+        .account-dropdown-item.logout:hover {
+            background: #fff0ee;
+            color: #9f1f14;
+        }
+
+        /* ── Page intro ── */
+        .page-intro { margin-bottom: 24px; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+        .page-intro h2 { margin: 0 0 4px; font-size: 1.35rem; font-weight: 900; color: var(--ink); }
+        .page-desc { margin: 0; color: var(--muted); font-size: .92rem; line-height: 1.65; }
+
+        /* ── Summary cards ── */
+        .summary-card {
+            padding: 22px 24px;
+            border: 1px solid var(--line); border-radius: 18px;
+            background: #fff; box-shadow: var(--shadow); min-height: 110px;
+        }
+        .summary-card small { color: var(--muted); font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+        .summary-card h4 { margin: 6px 0 0; font-size: 1.25rem; font-weight: 900; color: var(--ink); }
+        .summary-card.green-card { background: var(--green); border-color: transparent; }
+        .summary-card.green-card small,
+        .summary-card.green-card h4,
+        .summary-card.green-card span { color: #fff; }
+
+        .stat-icon {
+            width: 42px; height: 42px; border-radius: 12px;
+            display: grid; place-items: center; font-size: 1.1rem;
+            margin-bottom: 14px; flex: 0 0 auto;
+        }
+
+        /* ── Filter card ── */
+        .filter-card {
+            padding: 16px 20px;
+            border: 1px solid var(--line); border-radius: 18px;
+            background: #fff; box-shadow: var(--shadow);
+            display: flex; gap: 10px; align-items: center;
+            margin-bottom: 18px; flex-wrap: wrap;
+        }
+
+        /* ── Table card ── */
+        .table-card {
+            padding: 24px;
+            border: 1px solid var(--line); border-radius: 18px;
+            background: #fff; box-shadow: var(--shadow);
+        }
+        .table-card-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .table-card-header h5 { margin: 0; font-size: 1rem; font-weight: 900; color: var(--ink); }
+
+        .audit-badge {
+            padding: 5px 12px; border-radius: 999px;
+            background: var(--green-soft); color: var(--green-dark);
+            font-size: .62rem; font-weight: 900; text-transform: uppercase; letter-spacing: .06em;
+        }
+
+        .table thead th {
+            background: var(--surface); color: var(--muted);
+            font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
+            border-bottom: 1px solid var(--line); padding: 10px 14px;
+        }
+        .table tbody td {
+            padding: 12px 14px; border-bottom: 1px solid var(--line);
+            font-size: .87rem; color: var(--ink); vertical-align: middle;
+        }
+        .table tbody tr:last-child td { border-bottom: 0; }
+        .table tbody tr:hover td { background: var(--green-pale); }
+
+        /* ── Badge status ── */
+        .badge-status {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: .7rem; font-weight: 900; text-transform: uppercase;
+            padding: 4px 10px; border-radius: 999px;
+        }
+        .badge-status .dot {
+            width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto;
+        }
+        .badge-status.selesai { background: var(--green-soft); color: var(--green-dark); }
+        .badge-status.selesai .dot { background: var(--green-dark); }
+        .badge-status.proses { background: #fef3c7; color: #b45309; }
+        .badge-status.proses .dot { background: #b45309; }
+
+        /* ── Tombol detail ── */
+        .btn-detail {
+            min-height: 30px; padding: 0 12px;
+            border: 1px solid var(--line); border-radius: 8px;
+            background: #fff; color: var(--green-dark);
+            font-size: .72rem; font-weight: 800;
+            display: inline-flex; align-items: center; gap: 5px;
+            cursor: pointer; transition: background .18s ease, border-color .18s ease;
+            white-space: nowrap;
+        }
+        .btn-detail:hover { background: var(--green-soft); border-color: #a3d4b0; }
+
+        /* ── Pagination ── */
+        .paging-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding-top: 14px; margin-top: 4px; border-top: 1px solid var(--line);
+        }
+        .paging-row small { color: var(--muted); font-size: .78rem; }
+
+        /* ══ MODAL ══ */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 1050;
+            background: rgba(10, 30, 15, .45);
+            align-items: center; justify-content: center; padding: 24px;
+        }
+        .modal-overlay.show { display: flex; }
+
+        .modal-box {
+            background: #fff; border-radius: 22px;
+            width: 100%; max-width: 620px; max-height: 88vh;
+            display: flex; flex-direction: column;
+            box-shadow: 0 28px 60px rgba(8, 40, 18, .22);
+            animation: modalIn .2s ease; overflow: hidden;
+        }
+        @keyframes modalIn {
+            from { transform: translateY(18px) scale(.97); opacity: 0; }
+            to   { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .modal-head {
+            padding: 22px 26px 18px; border-bottom: 1px solid var(--line);
+            display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+            flex: 0 0 auto;
+        }
+        .modal-head-left { display: flex; align-items: center; gap: 14px; }
+        .modal-icon-wrap {
+            width: 44px; height: 44px; border-radius: 14px;
+            background: var(--green-soft); color: var(--green);
+            display: grid; place-items: center; font-size: 1.2rem; flex: 0 0 auto;
+        }
+        .modal-title   { margin: 0 0 3px; font-size: 1rem; font-weight: 900; color: var(--ink); }
+        .modal-subtitle { margin: 0; color: var(--muted); font-size: .78rem; }
+
+        .modal-close {
+            width: 34px; height: 34px; border: 0; border-radius: 50%;
+            background: var(--surface); color: var(--muted);
+            display: grid; place-items: center; cursor: pointer; flex: 0 0 auto;
+            transition: background .15s;
+        }
+        .modal-close:hover { background: #fde8e8; color: #c0392b; }
+
+        .modal-body { padding: 22px 26px; overflow-y: auto; flex: 1 1 auto; }
+        .modal-foot {
+            padding: 16px 26px; border-top: 1px solid var(--line);
+            display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+            flex: 0 0 auto;
+        }
+
+        /* ── Section label ── */
+        .detail-section-label {
+            margin: 0 0 12px; color: var(--muted);
+            font-size: .65rem; font-weight: 900;
+            text-transform: uppercase; letter-spacing: .1em;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .detail-section-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+        /* ── Detail grid ── */
+        .detail-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 14px 20px; margin-bottom: 22px;
+        }
+        .detail-field { display: flex; flex-direction: column; gap: 3px; }
+        .detail-field-label {
+            color: var(--muted); font-size: .68rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: .04em;
+        }
+        .detail-field-value { color: var(--ink); font-size: .9rem; font-weight: 700; }
+
+        /* Skeleton */
+        .skeleton-line {
+            height: 14px; border-radius: 6px;
+            background: linear-gradient(90deg, #eef3ee 25%, #dce8dc 50%, #eef3ee 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.3s infinite; margin-bottom: 10px;
+        }
+        @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+        @media (max-width: 991px) {
+            .admin-layout { grid-template-columns: 1fr; }
+            .main-content { padding: 18px 16px 34px; }
+            .topbar { margin: -18px -16px 28px; padding: 16px; flex-direction: column; align-items: flex-start; }
+            .top-actions { width: 100%; }
+            .page-intro { flex-direction: column; }
+            .detail-grid { grid-template-columns: 1fr; }
+            .modal-overlay { padding: 12px; }
+        }
+    </style>
+</head>
+
+<body class="sidebar-expanded">
+<div class="admin-layout">
+
+    @include('admin.partials.sidebar', ['active' => 'laporan'])
+
+    <main class="main-content">
+        <header class="topbar">
+            <h1 class="page-title">Laporan Penyaluran</h1>
+            <div class="top-actions">
+                <div class="account-profile">
+                    <div style="text-align: right;">
+                        <strong style="display: block; font-size: .9rem; color: var(--ink);">{{ auth()->user()?->name ?? 'Admin' }}</strong>
+                        <div style="font-size: .75rem; color: var(--muted);">Admin Instansi</div>
+                    </div>
+                    <details class="account-dropdown">
+                        <summary class="admin-avatar" aria-label="Buka menu profil">
+                            {{ strtoupper(substr(auth()->user()?->name ?? 'A', 0, 1)) }}{{ strtoupper(substr(explode(' ', auth()->user()?->name ?? 'A')[1] ?? '', 0, 1)) }}
+                        </summary>
+                        <div class="account-dropdown-menu">
+                            <a class="account-dropdown-item" href="{{ route('profil-instansi.index') }}">
+                                <i class="bi bi-person-circle"></i>
+                                <span>Lihat Profile</span>
+                            </a>
+                            <form action="{{ route('logout') }}" method="POST" style="display: contents;">
+                                @csrf
+                                <button class="account-dropdown-item logout" type="submit">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span>Logout Akun</span>
+                                </button>
+                            </form>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-wrap">
+
+            {{-- PAGE INTRO --}}
+            <div class="page-intro">
+                <div>
+                    <h2>Laporan Penyaluran</h2>
+                    <p class="page-desc">Daftar lengkap penyaluran bantuan kepada mustahik dengan status dan detail penerimaan.</p>
+                </div>
+            </div>
+
+            {{-- SUMMARY CARDS --}}
+            <div class="row g-3 mb-3">
+                <div class="col-6 col-md-4">
+                    <div class="summary-card">
+                        <div class="stat-icon" style="background:#e8f5e9; color:var(--green);">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                        <small>Total Penyaluran</small>
+                        <h4>{{ number_format($totalPenyaluran, 0, ',', '.') }}</h4>
+                        <span style="color:var(--muted); font-size:.76rem;">Catatan</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div class="summary-card">
+                        <div class="stat-icon" style="background:#d4f1d4; color:#0b7a36;">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <small>Selesai</small>
+                        <h4>{{ number_format($berhasilPenyaluran, 0, ',', '.') }}</h4>
+                        <span style="color:var(--muted); font-size:.76rem;">Terverifikasi</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div class="summary-card green-card">
+                        <div class="stat-icon" style="background:rgba(255,255,255,.2); color:#fff;">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+                        <small>Dalam Proses</small>
+                        <h4>{{ number_format($prosesPenyaluran, 0, ',', '.') }}</h4>
+                        <span style="font-size:.76rem; opacity:.85;">Sedang berlangsung</span>
+                    </div>
+                </div>
+            </div>
+
+            {{-- FILTER --}}
+            <form action="{{ route('laporan.penyaluran') }}" method="GET" class="filter-card">
+                <div class="input-group input-group-sm" style="width:220px;">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-search" style="color:var(--muted);"></i>
+                    </span>
+                    <input
+                        type="text" name="search"
+                        value="{{ request('search') }}"
+                        class="form-control border-start-0"
+                        placeholder="Cari program…"
+                        style="font-size:.82rem;"
+                    >
+                </div>
+
+                <select name="status" class="form-select form-select-sm w-auto" style="font-size:.82rem;">
+                    <option value="semua">Semua Status</option>
+                    <option value="selesai" @selected(request('status') === 'selesai')>Selesai</option>
+                    <option value="proses" @selected(request('status') === 'proses')>Dalam Proses</option>
+                </select>
+
+                <button type="submit" class="btn-print ms-auto" style="border-radius:10px;">
+                    Terapkan Filter
+                </button>
+
+                @if(request()->hasAny(['search','status']))
+                    <a href="{{ route('laporan.penyaluran') }}" class="btn-export" style="border-radius:10px;">
+                        <i class="bi bi-x"></i> Reset
+                    </a>
+                @endif
+            </form>
+
+            {{-- TABLE --}}
+            <div class="table-card">
+                <div class="table-card-header">
+                    <h5>Daftar Penyaluran <span style="color:var(--muted); font-weight:400; font-size:.85rem;">({{ number_format($penyaluran->total(), 0, ',', '.') }} data)</span></h5>
+                    <span class="audit-badge">Realtime Data</span>
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Program Penyaluran</th>
+                                <th>Tanggal</th>
+                                <th>Penerima</th>
+                                <th>Total Penyaluran</th>
+                                <th>Status</th>
+                                <th style="width:80px; text-align:center;">Detail</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($penyaluran as $row)
+                                <tr>
+                                    <td>
+                                        <strong style="font-size:.9rem;">{{ $row->programPenyaluran?->nama_program ?? '—' }}</strong><br>
+                                        <span style="color:var(--muted); font-size:.75rem;">{{ $row->penyaluranDetail->count() }} penerima</span>
+                                    </td>
+                                    <td>
+                                        {{ $row->tanggal_penyaluran?->isoFormat('D MMM YYYY') ?? '—' }}
+                                    </td>
+                                    <td>
+                                        {{ $row->penyaluranDetail->count() }} orang
+                                    </td>
+                                    <td>
+                                        Rp {{ number_format($row->penyaluranDetail->sum('jumlah_diterima'), 0, ',', '.') }}
+                                    </td>
+                                    <td>
+                                        <span class="badge-status {{ $row->status }}">
+                                            <span class="dot"></span>
+                                            {{ ucfirst($row->status) }}
+                                        </span>
+                                    </td>
+                                    <td style="text-align:center;">
+                                        <button
+                                            class="btn-detail"
+                                            type="button"
+                                            onclick="openDetail({{ $row->id }})"
+                                            aria-label="Lihat detail penyaluran"
+                                        >
+                                            <i class="bi bi-eye"></i> Detail
+                                        </button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center py-4" style="color:var(--muted);">
+                                        Tidak ada data penyaluran
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="paging-row">
+                    <small>
+                        {{ $penyaluran->firstItem() ?? 0 }} – {{ $penyaluran->lastItem() ?? 0 }}
+                        dari {{ number_format($penyaluran->total(), 0, ',', '.') }} penyaluran
+                    </small>
+                    {{ $penyaluran->links() }}
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+
+{{-- ═══════════════════════════════════════════
+     MODAL DETAIL PENYALURAN
+═══════════════════════════════════════════ --}}
+<div class="modal-overlay" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-box">
+
+        {{-- Header --}}
+        <div class="modal-head">
+            <div class="modal-head-left">
+                <div class="modal-icon-wrap">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div>
+                    <h2 class="modal-title" id="modalTitle">Detail Penyaluran</h2>
+                    <p class="modal-subtitle" id="modalSubtitle">Memuat data…</p>
+                </div>
+            </div>
+            <button class="modal-close" onclick="closeDetail()" aria-label="Tutup">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        {{-- Body --}}
+        <div class="modal-body" id="modalBody">
+            <div id="modalSkeleton">
+                <div class="skeleton-line" style="width:40%; margin-bottom:18px;"></div>
+                <div class="skeleton-line" style="width:100%;"></div>
+                <div class="skeleton-line" style="width:80%;"></div>
+                <div class="skeleton-line" style="width:90%; margin-bottom:18px;"></div>
+                <div class="skeleton-line" style="width:60%;"></div>
+                <div class="skeleton-line" style="width:100%;"></div>
+            </div>
+            <div id="modalContent" style="display:none;"></div>
+            <div id="modalError" style="display:none; color:#c0392b; font-size:.88rem; font-weight:700; padding:12px 0;">
+                <i class="bi bi-exclamation-circle"></i> Gagal memuat data. Silakan coba lagi.
+            </div>
+        </div>
+
+        {{-- Footer --}}
+        <div class="modal-foot">
+            <button class="btn-export" onclick="closeDetail()">
+                <i class="bi bi-x"></i> Tutup
+            </button>
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+    document.getElementById('detailModal').addEventListener('click', function (e) {
+        if (e.target === this) closeDetail();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+    function openDetail(id) {
+        const modal   = document.getElementById('detailModal');
+        const skel    = document.getElementById('modalSkeleton');
+        const content = document.getElementById('modalContent');
+        const errBox  = document.getElementById('modalError');
+
+        skel.style.display    = 'block';
+        content.style.display = 'none';
+        errBox.style.display  = 'none';
+        document.getElementById('modalSubtitle').textContent = 'Memuat data…';
+
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+
+        fetch(`{{ url('laporan/penyaluran') }}/${id}/detail`, {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(data => {
+            renderDetail(data);
+            skel.style.display    = 'none';
+            content.style.display = 'block';
+        })
+        .catch(() => {
+            skel.style.display   = 'none';
+            errBox.style.display = 'block';
+        });
+    }
+
+    function closeDetail() {
+        document.getElementById('detailModal').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+    const safe = s => String(s || '—').replace(/[&<>"']/g, c =>
+        ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])
+    );
+
+    const statusBadge = s => {
+        const colorMap = {
+            'selesai': { bg: '#dff3e4', color: '#06451f' },
+            'proses': { bg: '#fef3c7', color: '#b45309' },
+        };
+        const style = colorMap[s] || { bg: '#f0f0f0', color: '#555' };
+        return `<span style="display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:900; text-transform:uppercase; color:${style.color}">
+                    <span style="width:7px; height:7px; border-radius:50%; background:${style.color}; display:inline-block;"></span>
+                    ${safe(s === 'selesai' ? 'Selesai' : 'Dalam Proses')}
+                </span>`;
+    };
+
+    function renderDetail(d) {
+        document.getElementById('modalSubtitle').textContent = d.program_nama ?? '—';
+
+        let detailItemsHtml = '';
+        if (d.detail_items && d.detail_items.length > 0) {
+            detailItemsHtml = `
+                <p class="detail-section-label">
+                    <i class="bi bi-list-check" style="color:var(--green);"></i>
+                    Detail Penerima (${d.detail_items.length} orang)
+                </p>
+                <div style="margin-bottom:18px; max-height:200px; overflow-y:auto; border: 1px solid var(--line); border-radius:10px; padding:10px;">
+                    ${d.detail_items.map((item, idx) => `
+                        <div style="padding:8px 0; border-bottom: 1px solid var(--line); font-size:.82rem;">
+                            <strong>${safe(item.nama_penerima)}</strong><br>
+                            <span style="color:var(--muted); font-size:.75rem;">${safe(item.jenis_penerima)}</span>
+                            <div style="margin-top:4px; color:var(--green); font-weight:700;">Rp ${Number(item.jumlah_diterima).toLocaleString('id-ID')}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        document.getElementById('modalContent').innerHTML = `
+            <p class="detail-section-label">
+                <i class="bi bi-info-circle" style="color:var(--green);"></i>
+                Informasi Penyaluran
+            </p>
+            <div class="detail-grid">
+                <div class="detail-field">
+                    <span class="detail-field-label">Program</span>
+                    <span class="detail-field-value">${safe(d.program_nama)}</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-field-label">Tanggal Penyaluran</span>
+                    <span class="detail-field-value">${safe(d.tanggal_penyaluran)}</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-field-label">Total Penerima</span>
+                    <span class="detail-field-value">${d.total_penerima} orang</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-field-label">Total Jumlah</span>
+                    <span class="detail-field-value">Rp ${Number(d.total_jumlah).toLocaleString('id-ID')}</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-field-label">Status</span>
+                    <span class="detail-field-value">${statusBadge(d.status)}</span>
+                </div>
+            </div>
+
+            ${detailItemsHtml}
+
+            ${d.keterangan ? `
+            <p class="detail-section-label">
+                <i class="bi bi-chat-left-text" style="color:var(--green);"></i>
+                Keterangan
+            </p>
+            <div style="padding:12px 16px; border-radius:10px; background:var(--surface); border:1px solid var(--line); font-size:.86rem; color:var(--ink); line-height:1.6;">
+                ${safe(d.keterangan)}
+            </div>
+            ` : ''}
+        `;
+    }
+</script>
+</body>
+</html>
