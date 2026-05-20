@@ -146,11 +146,48 @@
 
         /* ── Filter card ── */
         .filter-card {
-            padding: 16px 20px;
-            border: 1px solid var(--line); border-radius: 18px;
-            background: #fff; box-shadow: var(--shadow);
+            padding: 0;
+            border: 0;
+            background: transparent;
+            box-shadow: none;
             display: flex; gap: 10px; align-items: center;
             margin-bottom: 18px; flex-wrap: wrap;
+        }
+
+        .filter-search,
+        .filter-select {
+            min-height: 40px;
+            border: 0;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 8px 18px rgba(18, 55, 28, .06);
+        }
+
+        .filter-search {
+            width: 260px;
+            padding: 0 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-search input,
+        .filter-select {
+            outline: 0;
+            color: var(--ink);
+            font-size: .82rem;
+            font-weight: 700;
+        }
+
+        .filter-search input {
+            width: 100%;
+            border: 0;
+            background: transparent;
+        }
+
+        .filter-search:focus-within,
+        .filter-select:focus {
+            box-shadow: 0 0 0 3px #cfe8d5, 0 8px 18px rgba(18, 55, 28, .06);
         }
 
         /* ── Table card ── */
@@ -389,20 +426,16 @@
 
             {{-- FILTER --}}
             <form action="{{ route('laporan.penyaluran') }}" method="GET" class="filter-card">
-                <div class="input-group input-group-sm" style="width:220px;">
-                    <span class="input-group-text bg-white border-end-0">
-                        <i class="bi bi-search" style="color:var(--muted);"></i>
-                    </span>
+                <label class="filter-search">
+                    <i class="bi bi-search" style="color:var(--muted);"></i>
                     <input
                         type="text" name="search"
                         value="{{ request('search') }}"
-                        class="form-control border-start-0"
                         placeholder="Cari program…"
-                        style="font-size:.82rem;"
                     >
-                </div>
+                </label>
 
-                <select name="status" class="form-select form-select-sm w-auto" style="font-size:.82rem;">
+                <select name="status" class="filter-select px-3">
                     <option value="semua">Semua Status</option>
                     <option value="selesai" @selected(request('status') === 'selesai')>Selesai</option>
                     <option value="proses" @selected(request('status') === 'proses')>Dalam Proses</option>
