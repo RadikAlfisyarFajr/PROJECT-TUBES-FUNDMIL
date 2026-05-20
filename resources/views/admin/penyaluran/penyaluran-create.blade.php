@@ -5,6 +5,8 @@ $adminBrandName = $adminInstansi?->nama ?: ($adminUser?->nama_instansi ?: 'FUNDM
 $recipients = collect($selectedPlan?->penerima ?? []);
 $sources = collect($selectedPlan?->sumber_dana ?? []);
 $selectedProgram = $selectedPlan?->programPenyaluran;
+$targetAsnaf = collect($selectedProgram?->target_asnaf ?? []);
+$recipientNominal = (float) ($defaultRecipientNominal ?? 0);
 @endphp
 
 <!DOCTYPE html>
@@ -23,30 +25,30 @@ $selectedProgram = $selectedPlan?->programPenyaluran;
     <div class="admin-layout">
         @include('admin.partials.sidebar', ['active' => 'penyaluran'])
 
-        <main class="main-content">
-            <header class="topbar">
+        <main class="admin-page-content">
+            <header class="admin-page-topbar">
                 <div>
-                    <h1 class="page-title">Eksekusi Penyaluran</h1>
-                    <p class="page-desc">Realisasikan rencana distribusi yang sudah siap menjadi catatan penyaluran resmi.</p>
+                    <h1 class="admin-page-title">Eksekusi Penyaluran</h1>
+                    <p class="admin-page-desc">Realisasikan rencana distribusi yang sudah siap menjadi catatan penyaluran resmi.</p>
                 </div>
-                <div class="top-actions">
-                    <a href="{{ route('pengaturan-distribusi.index') }}" class="btn btn-outline-success">
+                <div class="admin-top-actions">
+                    <a href="{{ route('pengaturan-distribusi.index') }}" class="admin-secondary-btn">
                         <i class="bi bi-sliders"></i>
                         Atur Distribusi
                     </a>
-                    <a href="{{ route('penyaluran.index') }}" class="btn btn-outline-secondary">
+                    <a href="{{ route('penyaluran.index') }}" class="admin-secondary-btn">
                         <i class="bi bi-clock-history"></i>
                         Riwayat
                     </a>
                     @include('admin.partials.account-identity', [
                     'nameClass' => 'admin-name',
                     'roleClass' => 'admin-role',
-                    'avatarClass' => 'avatar',
+                    'avatarClass' => 'admin-avatar',
                     ])
                 </div>
             </header>
 
-            <div class="content-wrap">
+            <div class="admin-content-wrap">
                 @if(session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>
                 @endif
@@ -84,6 +86,15 @@ $selectedProgram = $selectedPlan?->programPenyaluran;
                                 <div class="text-muted">Program Terpilih</div>
                                 <strong class="fs-5 d-block mt-1">{{ $selectedProgram?->nama_program ?? 'Belum ada rencana siap' }}</strong>
                                 <p class="text-muted mb-0 mt-3">{{ $selectedPlan?->kode_rencana ?? 'Buat rencana di menu pengaturan distribusi terlebih dahulu.' }}</p>
+                                @if($targetAsnaf->isNotEmpty())
+                                <div class="d-flex flex-wrap gap-2 mt-3">
+                                    @foreach($targetAsnaf as $asnaf)
+                                    <span class="badge bg-light border text-dark">
+                                        {{ \App\Models\Mustahik::KATEGORI[$asnaf] ?? str($asnaf)->replace('_', ' ')->title() }}
+                                    </span>
+                                    @endforeach
+                                </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -130,7 +141,7 @@ $selectedProgram = $selectedPlan?->programPenyaluran;
                                                 </td>
                                                 <td>{{ str($recipient['jenis'] ?? $selectedPlan?->tipe_penerima)->replace('_', ' ')->title() }}</td>
                                                 <td class="text-muted">{{ $recipient['tujuan_penggunaan'] ?? $selectedPlan?->catatan ?? '-' }}</td>
-                                                <td class="text-end">Rp {{ number_format((float) ($recipient['nominal_alokasi'] ?? $selectedPlan?->nominal_per_penerima ?? 0), 0, ',', '.') }}</td>
+                                                <td class="text-end">Rp {{ number_format((float) (($recipient['nominal_alokasi'] ?? 0) > 0 ? $recipient['nominal_alokasi'] : $recipientNominal), 0, ',', '.') }}</td>
                                             </tr>
                                             @empty
                                             <tr>
@@ -196,6 +207,10 @@ $selectedProgram = $selectedPlan?->programPenyaluran;
                                         <div class="d-flex justify-content-between mb-2">
                                             <span class="text-muted">Saldo Saat Rencana Dibuat</span>
                                             <strong>Rp {{ number_format((float) ($selectedPlan?->saldo_awal ?? 0), 0, ',', '.') }}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="text-muted">Penerima Rencana</span>
+                                            <strong>{{ (int) ($selectedPlan?->jumlah_penerima ?? 0) }} orang/mitra</strong>
                                         </div>
                                         <div class="d-flex justify-content-between mb-2">
                                             <span class="text-muted">Total Distribusi</span>

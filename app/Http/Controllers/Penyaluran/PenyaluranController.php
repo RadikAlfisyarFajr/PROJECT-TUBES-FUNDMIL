@@ -47,6 +47,7 @@ class PenyaluranController extends Controller
         return view('admin.penyaluran.penyaluran-create', [
             'readyPlans' => $readyPlans,
             'selectedPlan' => $selectedPlan,
+            'defaultRecipientNominal' => $selectedPlan ? $this->recipientNominal($selectedPlan) : 0,
             'totalReadyPlans' => $readyPlans->count(),
             'totalReadyRecipients' => $readyPlans->sum('jumlah_penerima'),
             'totalReadyAllocation' => $readyPlans->sum('total_alokasi'),
@@ -99,6 +100,7 @@ class PenyaluranController extends Controller
             $penyaluran = Penyaluran::create([
                 'instansi_id' => $instansi->id,
                 'program_id' => $plan->program_penyaluran_id,
+                'pengaturan_distribusi_id' => $plan->id,
                 'tanggal_penyaluran' => $validated['tanggal_penyaluran'],
                 'status' => 'selesai',
                 'keterangan' => $keterangan ?: null,
@@ -109,7 +111,9 @@ class PenyaluranController extends Controller
                 'jenis_penerima' => $recipient['jenis'] ?? $plan->tipe_penerima,
                 'mustahik_id' => $recipient['mustahik_id'] ?? null,
                 'nama_penerima' => $recipient['nama'] ?? null,
-                'jumlah_diterima' => (float) ($recipient['nominal_alokasi'] ?? $plan->nominal_per_penerima),
+                'jumlah_diterima' => (float) (($recipient['nominal_alokasi'] ?? 0) > 0
+                    ? $recipient['nominal_alokasi']
+                    : $this->recipientNominal($plan)),
                 'status_penerimaan' => 'diterima',
                 'tanggal_diterima' => now(),
                 'keterangan' => $recipient['tujuan_penggunaan'] ?? $plan->catatan,
@@ -131,7 +135,7 @@ class PenyaluranController extends Controller
     {
         $this->authorizePenyaluran($penyaluran);
 
-        $penyaluran->load(['programPenyaluran', 'penyaluranDetail.mustahik']);
+        $penyaluran->load(['programPenyaluran', 'pengaturanDistribusi.programPenyaluran', 'penyaluranDetail.mustahik']);
 
         return view('admin.penyaluran.penyaluran-show', compact('penyaluran'));
     }
@@ -177,5 +181,22 @@ class PenyaluranController extends Controller
                 'status' => 'aktif',
             ]
         );
+    }
+
+    private function recipientNominal(PengaturanDistribusi $plan): float
+    {
+        $explicitNominal = (float) ($plan->nominal_per_penerima ?? 0);
+
+        if ($explicitNominal > 0) {
+            return $explicitNominal;
+        }
+
+        $recipientCount = (int) ($plan->jumlah_penerima ?? 0);
+
+        if ($recipientCount <= 0) {
+            return 0;
+        }
+
+        return (float) floor(((float) ($plan->total_alokasi ?? 0)) / $recipientCount);
     }
 }

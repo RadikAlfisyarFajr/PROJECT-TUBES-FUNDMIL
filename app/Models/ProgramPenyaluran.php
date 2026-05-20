@@ -21,6 +21,7 @@ class ProgramPenyaluran extends Model
         'target_dana',
         'total_dana',
         'target_mustahik',
+        'target_asnaf',
         'status',
         'approval_status',
         'approved_by',
@@ -35,6 +36,7 @@ class ProgramPenyaluran extends Model
             'tanggal_selesai' => 'date',
             'target_dana' => 'decimal:2',
             'total_dana' => 'decimal:2',
+            'target_asnaf' => 'array',
             'approved_at' => 'datetime',
         ];
     }

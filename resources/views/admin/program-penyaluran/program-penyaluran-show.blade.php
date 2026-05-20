@@ -45,15 +45,15 @@ Pastikan controller mengirim:
             </div>
         </div>
 
-        <div class="mt-[32px]">
-            <h3 class="text-[18px] font-black">Kategori Dana</h3>
+        <div class="mt-[28px]">
+            <h3 class="text-[18px] font-black">Target Asnaf</h3>
             <div class="mt-[12px] flex flex-wrap gap-3">
-                @forelse($kategoriDana as $dana)
-                <span class="rounded-full bg-[#edf1ee] px-[12px] py-[6px] text-[11px] font-black uppercase text-[#7d8880]">
-                    {{ $dana->nama }}
-                </span>
+                @forelse(collect($program->target_asnaf ?? [])->filter() as $asnaf)
+                    <span class="rounded-full bg-[#edf1ee] px-[12px] py-[6px] text-[11px] font-black uppercase text-[#7d8880]">
+                        {{ \App\Models\Mustahik::KATEGORI[$asnaf] ?? str($asnaf)->replace('_', ' ')->title() }}
+                    </span>
                 @empty
-                <span class="text-[#6c756f]">Belum ada kategori dana.</span>
+                    <span class="text-[#6c756f]">Belum ada target asnaf.</span>
                 @endforelse
             </div>
         </div>

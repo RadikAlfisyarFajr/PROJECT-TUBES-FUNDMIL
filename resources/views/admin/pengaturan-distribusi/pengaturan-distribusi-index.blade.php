@@ -2,22 +2,23 @@
 $selectedProgramId = (int) old('program_id', optional($selectedProgram)->id ?? optional($programs->first())->id);
 $selectedProgram = $selectedProgram ?: $programs->firstWhere('id', $selectedProgramId) ?: $programs->first();
 $selectedProgramId = optional($selectedProgram)->id;
+$selectedRecipientType = old('tipe_penerima', 'database_mustahik');
 $selectedSources = old('sumber_dana', ['zakat_maal']);
 $oldMustahikIds = collect(old('mustahik_ids', []))->map(fn ($id) => (int) $id)->all();
 $oldManualRecipients = old('manual_recipients', '[]');
 $initialManualRecipients = json_decode($oldManualRecipients, true) ?: [];
-$initialSelectedMustahik = $mustahikOptions
-    ->whereIn('id', $oldMustahikIds)
-    ->values()
-    ->map(fn ($item) => [
-        'id' => $item->id,
-        'nama' => $item->nama,
-        'kategori' => $item->kategori_label,
-        'alamat' => $item->alamat,
-    ]);
+$initialSelectedMustahik = count($oldMustahikIds) > 0
+    ? $mustahikOptions->whereIn('id', $oldMustahikIds)->values()
+    : ($selectedRecipientType === 'database_mustahik' ? $mustahikOptions->values() : collect());
+$initialMustahikPayload = $initialSelectedMustahik->map(fn ($item) => [
+    'id' => $item->id,
+    'nama' => $item->nama,
+    'kategori' => $item->kategori_label,
+    'alamat' => $item->alamat,
+]);
 $readyPlans = $plans->where('status', 'siap');
 $completedPlans = $plans->where('status', 'selesai');
-$initialSelectedMustahikJson = $initialSelectedMustahik->toJson();
+$initialSelectedMustahikJson = $initialMustahikPayload->toJson();
 $initialManualRecipientsJson = json_encode($initialManualRecipients);
 @endphp
 
@@ -240,8 +241,9 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
                                 </div>
 
                                 <div class="distribution-field">
-                                    <label for="nominal_per_penerima">Nominal per penerima</label>
+                                    <label for="nominal_per_penerima">Nominal</label>
                                     <input id="nominal_per_penerima" name="nominal_per_penerima" class="distribution-input" type="number" min="0" step="1000" value="{{ old('nominal_per_penerima', 0) }}" placeholder="0">
+                                    <small class="text-muted d-block mt-2">Mode Data Mustahik akan membagi nominal ini otomatis sesuai jumlah mustahik terpilih.</small>
                                 </div>
 
                                 <div class="distribution-field">
@@ -273,6 +275,7 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
                                     <label for="mustahik_search">Cari mustahik aktif</label>
                                     <div class="recipient-search-box">
                                         <input id="mustahik_search" class="distribution-input" type="search" placeholder="Nama, NIK, alamat, atau asnaf">
+                                        <small class="text-muted d-block mt-2">Saat mode Data Mustahik aktif, semua mustahik yang cocok akan otomatis masuk ke rencana.</small>
                                         <div id="search-result-list" class="search-result-list">
                                             @forelse($mustahikOptions as $mustahik)
                                             <button class="search-result-item" type="button" data-id="{{ $mustahik->id }}" data-nama="{{ $mustahik->nama }}" data-kategori="{{ $mustahik->kategori_label }}" data-alamat="{{ $mustahik->alamat }}">
@@ -283,7 +286,7 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
                                                 <i class="bi bi-plus-circle"></i>
                                             </button>
                                             @empty
-                                            <div class="p-3 text-muted">Belum ada mustahik aktif.</div>
+                                            <div class="p-3 text-muted">Belum ada mustahik aktif sesuai target asnaf.</div>
                                             @endforelse
                                         </div>
                                     </div>
@@ -424,7 +427,13 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
         };
 
         const activeType = () => document.querySelector('input[name="tipe_penerima"]:checked')?.value || 'database_mustahik';
-        const currentNominal = () => Number(nominalInput.value || 0);
+        const currentNominal = () => {
+            if (activeType() === 'database_mustahik') {
+                return autoNominalPerRecipient();
+            }
+
+            return Number(nominalInput.value || 0);
+        };
         const currentBalance = () => sourceInputs
             .filter((input) => input.checked)
             .reduce((total, input) => {
@@ -438,7 +447,28 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
             return option ? option.textContent.trim() : '-';
         };
 
+        const autoNominalPerRecipient = () => {
+            const recipients = activeRecipients().length;
+            const balance = currentBalance();
+
+            if (activeType() !== 'database_mustahik' || recipients === 0) {
+                return Number(nominalInput.value || 0);
+            }
+
+            return Math.floor(balance / recipients);
+        };
+
         const rowPurpose = (item) => item.tujuan || tujuanPenggunaan.value || 'bantuan sesuai program';
+
+        const syncMustahikSelection = (items, replace = false) => {
+            if (replace) {
+                selectedMustahik.clear();
+            }
+
+            items.forEach((item) => {
+                selectedMustahik.set(String(item.id), item);
+            });
+        };
 
         const activeRecipients = () => {
             if (activeType() === 'manual_mitra') {
@@ -468,17 +498,25 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
         const updateSimulation = () => {
             const recipients = activeRecipients().length;
             const balance = currentBalance();
-            const total = currentNominal() * recipients;
+            const nominal = activeType() === 'database_mustahik' ? autoNominalPerRecipient() : currentNominal();
+            const total = nominal * recipients;
             const left = balance - total;
             const hasMinus = left < 0;
-            const hasValidPlan = recipients > 0 && currentNominal() > 0 && sourceInputs.some((input) => input.checked) && programSelect?.value;
+            const hasValidPlan = recipients > 0 && nominal > 0 && sourceInputs.some((input) => input.checked) && programSelect?.value;
+
+            if (activeType() === 'database_mustahik') {
+                nominalInput.value = String(nominal);
+                nominalInput.readOnly = true;
+            } else {
+                nominalInput.readOnly = false;
+            }
 
             simStart.textContent = formatRupiah(balance);
             simTotal.textContent = formatRupiah(total);
             simLeft.textContent = formatRupiah(left);
             simResultRow.classList.toggle('is-minus', hasMinus);
             simWarning.classList.toggle('is-visible', hasMinus);
-            savePlanButton.disabled = hasMinus || !hasValidPlan;
+            savePlanButton.disabled = hasMinus || !hasValidPlan || (activeType() === 'database_mustahik' && nominal < 1);
         };
 
         const renderQueue = () => {
@@ -521,9 +559,12 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
             updateSimulation();
         };
 
-        const renderSearchResults = (items) => {
+        const renderSearchResults = (items, autoSelect = false) => {
             if (!items.length) {
                 searchResultList.innerHTML = '<div class="p-3 text-muted">Data mustahik tidak ditemukan.</div>';
+                if (autoSelect) {
+                    renderQueue();
+                }
                 return;
             }
 
@@ -536,18 +577,23 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
                     <i class="bi bi-plus-circle"></i>
                 </button>
             `).join('');
+
+            if (autoSelect) {
+                syncMustahikSelection(items, true);
+                renderQueue();
+            }
         };
 
-        const searchMustahik = () => {
+        const searchMustahik = ({ autoSelect = false } = {}) => {
             const q = searchInput.value.trim();
 
-            fetch(`${searchUrl}?q=${encodeURIComponent(q)}`, {
+            fetch(`${searchUrl}?q=${encodeURIComponent(q)}&program_id=${encodeURIComponent(programSelect?.value || '')}`, {
                 headers: {
                     accept: 'application/json',
                 },
             })
                 .then((response) => response.json())
-                .then((payload) => renderSearchResults(payload.data || []))
+                .then((payload) => renderSearchResults(payload.data || [], autoSelect || (activeType() === 'database_mustahik' && q === '')))
                 .catch(() => renderSearchResults([]));
         };
 
@@ -605,12 +651,26 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
             const isManual = activeType() === 'manual_mitra';
             databasePanel.classList.toggle('d-none', isManual);
             manualPanel.classList.toggle('d-none', !isManual);
+            if (!isManual) {
+                searchInput.value = '';
+                searchMustahik({ autoSelect: true });
+            }
             renderQueue();
         }));
 
         [nominalInput, programSelect, tujuanPenggunaan, ...sourceInputs].forEach((element) => {
             element?.addEventListener('input', renderQueue);
-            element?.addEventListener('change', renderQueue);
+            element?.addEventListener('change', () => {
+                renderQueue();
+                if (element === programSelect) {
+                    if (activeType() === 'database_mustahik') {
+                        searchInput.value = '';
+                        searchMustahik({ autoSelect: true });
+                    } else {
+                        searchMustahik();
+                    }
+                }
+            });
         });
 
         searchInput.addEventListener('input', () => {
@@ -622,6 +682,9 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
             const isManual = activeType() === 'manual_mitra';
             databasePanel.classList.toggle('d-none', isManual);
             manualPanel.classList.toggle('d-none', !isManual);
+            if (!isManual) {
+                searchMustahik({ autoSelect: true });
+            }
             renderQueue();
         });
     </script>

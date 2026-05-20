@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Mustahik;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -18,10 +19,10 @@ class ProgramPenyaluranRequest extends FormRequest
             'nama_program' => ['required', 'string', 'max:255'],
             'tanggal_mulai' => ['required', 'date'],
             'tanggal_selesai' => ['required', 'date', 'after_or_equal:tanggal_mulai'],
-            'kategori_dana_ids' => ['required', 'array', 'min:1'],
-            'kategori_dana_ids.*' => [
-                'integer',
-                Rule::exists('kategori_dana', 'id')->where('instansi_id', $this->user()?->instansi_id),
+            'target_asnaf' => ['required', 'array', 'min:1'],
+            'target_asnaf.*' => [
+                'string',
+                Rule::in(array_keys(Mustahik::KATEGORI)),
             ],
             'deskripsi' => ['nullable', 'string'],
             'total_dana' => ['nullable', 'numeric', 'min:0'],
@@ -36,7 +37,7 @@ class ProgramPenyaluranRequest extends FormRequest
             'nama_program' => 'nama program',
             'tanggal_mulai' => 'tanggal mulai',
             'tanggal_selesai' => 'tanggal selesai',
-            'kategori_dana_ids' => 'jenis dana',
+            'target_asnaf' => 'target asnaf',
             'total_dana' => 'total dana',
             'target_mustahik' => 'jumlah mustahik',
         ];

@@ -322,6 +322,13 @@
         }
         .detail-field-value { color: var(--ink); font-size: .9rem; font-weight: 700; }
 
+        .alamat-clamp {
+            display: block;
+            line-height: 1.6;
+            max-height: 3.2em;
+            overflow: hidden;
+        }
+
         /* ── Keterangan box ── */
         .keterangan-box {
             padding: 14px 16px; border-radius: 12px;
@@ -535,7 +542,7 @@
                                         </span>
                                     </td>
                                     <td style="font-size:.84rem; max-width:200px;">
-                                        <span style="display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+                                        <span class="alamat-clamp">
                                             {{ $row->alamat }}
                                         </span>
                                     </td>
