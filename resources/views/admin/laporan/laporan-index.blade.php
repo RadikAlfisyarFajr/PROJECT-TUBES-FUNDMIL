@@ -255,7 +255,7 @@
                         <p class="laporan-card-desc">Daftar distribusi dana kepada mustahik dan program sosial kemanusiaan per periode.</p>
                         <div class="laporan-card-footer">
                             <span class="periode-tag">Fleksibel</span>
-                            <button class="lihat-btn" onclick="showComingSoon('Penyaluran')"><i class="bi bi-eye"></i> Lihat</button>
+                            <a href="{{ route('laporan.penyaluran') }}" class="lihat-btn"><i class="bi bi-eye"></i> Lihat</a>
                         </div>
                     </div>
                 </div>
@@ -267,7 +267,7 @@
                         <p class="laporan-card-desc">Daftar lengkap penerima manfaat beserta status kelayakan dan riwayat penerimaan bantuan.</p>
                         <div class="laporan-card-footer">
                             <span class="periode-tag">Point in Time</span>
-                            <button class="lihat-btn" onclick="showComingSoon('Data Mustahik')"><i class="bi bi-eye"></i> Lihat</button>
+                            <a href="{{ route('laporan.mustahik') }}" class="lihat-btn"><i class="bi bi-eye"></i> Lihat</a>
                         </div>
                     </div>
                 </div>
@@ -279,7 +279,7 @@
                         <p class="laporan-card-desc">Ringkasan neraca periode: saldo awal, total pemasukan, total pengeluaran, dan saldo akhir instansi.</p>
                         <div class="laporan-card-footer">
                             <span class="periode-tag">Bulanan</span>
-                            <button class="lihat-btn" onclick="showComingSoon('Keuangan')"><i class="bi bi-eye"></i> Lihat</button>
+                            <a href="{{ route('laporan.keuangan') }}" class="lihat-btn"><i class="bi bi-eye"></i> Lihat</a>
                         </div>
                     </div>
                 </div>

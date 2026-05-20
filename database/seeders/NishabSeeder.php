@@ -11,6 +11,6 @@ class NishabSeeder extends Seeder
      */
     public function run(): void
     {
-        // TODO: Tambahkan data dummy nishab zakat saat dibutuhkan.
+        // Belum ada data awal nishab zakat.
     }
 }

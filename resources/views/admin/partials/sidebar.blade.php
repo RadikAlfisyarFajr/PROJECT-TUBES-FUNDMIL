@@ -44,5 +44,12 @@
             <i class="bi bi-question-circle-fill"></i>
             <span>Bantuan</span>
         </a>
+        <form method="POST" action="{{ route('logout') }}" class="m-0">
+            @csrf
+            <button type="submit" class="nav-item-link">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Logout</span>
+            </button>
+        </form>
     </div>
 </aside>

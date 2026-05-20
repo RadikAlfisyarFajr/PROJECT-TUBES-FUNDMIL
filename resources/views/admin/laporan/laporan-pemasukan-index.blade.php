@@ -46,7 +46,78 @@
         .page-title { margin: 0; font-size: 1.12rem; font-weight: 900; }
         .top-actions { display: flex; align-items: center; gap: 14px; }
         .content-wrap { max-width: 1180px; margin: 0 auto; }
+        /* ── Account Profile Dropdown ── */
+        .account-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
 
+        .account-dropdown {
+            position: relative;
+        }
+
+        .account-dropdown summary {
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .account-dropdown summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .admin-avatar {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: #087026; color: #fff;
+            display: grid; place-items: center;
+            font-weight: 900; font-size: .95rem;
+            cursor: pointer;
+        }
+
+        .account-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 190px;
+            padding: 8px;
+            border: 1px solid #e2ebe4;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 18px 38px rgba(20, 47, 27, .13);
+            z-index: 30;
+        }
+
+        .account-dropdown-item {
+            width: 100%;
+            min-height: 40px;
+            padding: 0 10px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: #26352b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: .84rem;
+            font-weight: 800;
+            text-decoration: none;
+            text-align: left;
+        }
+
+        .account-dropdown-item:hover {
+            background: #eaf3eb;
+            color: #0f722b;
+        }
+
+        .account-dropdown-item.logout {
+            color: #b42318;
+        }
+
+        .account-dropdown-item.logout:hover {
+            background: #fff0ee;
+            color: #9f1f14;
+        }
         .page-intro {
             margin-bottom: 24px;
             display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;
@@ -299,6 +370,30 @@
         <header class="topbar">
             <h1 class="page-title">Laporan Pemasukan</h1>
             <div class="top-actions">
+                <div class="account-profile">
+                    <div style="text-align: right;">
+                        <strong style="display: block; font-size: .9rem; color: #17211b;">{{ auth()->user()?->name ?? 'Admin' }}</strong>
+                        <div style="font-size: .75rem; color: #748077;">Admin Instansi</div>
+                    </div>
+                    <details class="account-dropdown">
+                        <summary class="admin-avatar" aria-label="Buka menu profil">
+                            {{ strtoupper(substr(auth()->user()?->name ?? 'A', 0, 1)) }}{{ strtoupper(substr(explode(' ', auth()->user()?->name ?? 'A')[1] ?? '', 0, 1)) }}
+                        </summary>
+                        <div class="account-dropdown-menu">
+                            <a class="account-dropdown-item" href="{{ route('profil-instansi.index') }}">
+                                <i class="bi bi-person-circle"></i>
+                                <span>Lihat Profile</span>
+                            </a>
+                            <form action="{{ route('logout') }}" method="POST" style="display: contents;">
+                                @csrf
+                                <button class="account-dropdown-item logout" type="submit">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span>Logout Akun</span>
+                                </button>
+                            </form>
+                        </div>
+                    </details>
+                </div>
             </div>
         </header>
 
@@ -418,7 +513,7 @@
                                         <button
                                             class="btn-detail"
                                             type="button"
-                                            onclick="openDetail({{ $trx->id }})"
+                                            data-detail-id="{{ $trx->id }}"
                                             aria-label="Lihat detail transaksi"
                                         >
                                             <i class="bi bi-eye"></i> Detail
@@ -519,6 +614,9 @@
         if (e.target === this) closeDetail();
     });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDetail(); });
+    document.querySelectorAll('[data-detail-id]').forEach((button) => {
+        button.addEventListener('click', () => openDetail(button.dataset.detailId));
+    });
 
     /* ════════════════════════════════
        openDetail — fetch & render
