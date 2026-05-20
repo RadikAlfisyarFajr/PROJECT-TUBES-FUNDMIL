@@ -6,9 +6,10 @@
     <title>{{ $title }} - Fundmil Soreang</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link href="{{ asset('css/admin-theme.css') }}" rel="stylesheet">
 </head>
 <body class="sidebar-expanded bg-[#f6f8f6] font-sans text-[#111813] antialiased">
-<div class="min-h-screen lg:flex">
+<div class="admin-layout">
     @include('admin.partials.sidebar', ['active' => 'mustahik'])
 
     <main class="min-h-screen flex-1">
