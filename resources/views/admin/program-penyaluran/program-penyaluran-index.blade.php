@@ -11,13 +11,6 @@
 
 <body class="sidebar-expanded bg-[#f6f8f6] font-sans text-[#111813] antialiased">
     @php
-    $samplePrograms = collect([
-    (object) ['id' => 1, 'nama_program' => 'Beasiswa Anak Yatim RW 05', 'tanggal_mulai' => now(), 'tanggal_selesai' => now()->addMonths(3), 'total_dana' => 125000000, 'target_mustahik' => 50, 'status' => 'aktif', 'progress' => 75, 'tags' => ['Fakir Miskin'], 'icon' => 'school'],
-    (object) ['id' => 2, 'nama_program' => 'Bantuan Kesehatan Lansia', 'tanggal_mulai' => now(), 'tanggal_selesai' => now()->addMonths(2), 'total_dana' => 90000000, 'target_mustahik' => 120, 'status' => 'aktif', 'progress' => 40, 'tags' => ['Miskin', 'Asnaf'], 'icon' => 'medical'],
-    (object) ['id' => 3, 'nama_program' => 'Modal Usaha Mikro Soreang', 'tanggal_mulai' => now()->subMonths(2), 'tanggal_selesai' => now()->subWeek(), 'total_dana' => 65000000, 'target_mustahik' => 30, 'status' => 'selesai', 'progress' => 100, 'tags' => ['Muallaf'], 'icon' => 'shop'],
-    (object) ['id' => 4, 'nama_program' => 'Renovasi Musholla At-Taqwa', 'tanggal_mulai' => now(), 'tanggal_selesai' => now()->addMonths(4), 'total_dana' => 45000000, 'target_mustahik' => 1, 'status' => 'aktif', 'progress' => 15, 'tags' => ['Fisabilillah'], 'icon' => 'mosque'],
-    ]);
-    $rows = $programs->count() ? $programs : $samplePrograms;
     $selectedKategori = request('kategori', 'semua');
     @endphp
     <div class="min-h-screen lg:flex">
@@ -75,7 +68,7 @@
                             </span>
                             <p class="text-[9px] font-black uppercase tracking-[0.28em] text-[#7f8a83]">Dana Terkumpul</p>
                         </div>
-                        <p class="mt-[40px] text-[36px] font-black leading-none">Rp {{ number_format($totalDana ?: 850000000, 0, ',', '.') }}</p>
+                        <p class="mt-[40px] text-[36px] font-black leading-none">Rp {{ number_format($totalDana, 0, ',', '.') }}</p>
                         <p class="mt-[8px] text-[15px] text-[#303b34]">Total Dana Tersedia</p>
                     </div>
                     <div class="h-[205px] rounded-[13px] bg-white px-[32px] py-[31px] shadow-sm ring-1 ring-[#e7eeea]">
@@ -87,7 +80,7 @@
                             </span>
                             <p class="text-[9px] font-black uppercase tracking-[0.28em] text-[#7f8a83]">Alokasi Aktif</p>
                         </div>
-                        <p class="mt-[40px] text-[36px] font-black leading-none">Rp {{ number_format($alokasiAktif ?: 425000000, 0, ',', '.') }}</p>
+                        <p class="mt-[40px] text-[36px] font-black leading-none">Rp {{ number_format($alokasiAktif, 0, ',', '.') }}</p>
                         <p class="mt-[8px] text-[15px] text-[#303b34]">Total Dialokasikan</p>
                     </div>
                 </div>
@@ -102,12 +95,11 @@
                 </form>
 
                 <div class="mt-[34px] grid gap-[23px] md:grid-cols-2 xl:grid-cols-3">
-                    @foreach ($rows as $program)
+                    @forelse ($programs as $program)
                     @php
                     $progress = $program->progress ?? ($program->status === 'selesai' ? 100 : 0);
                     $tags = $program->tags ?? $program->kategoriDana->pluck('nama')->filter()->take(2)->all();
                     $isSelesai = $program->status === 'selesai';
-                    $isSample = ! $programs->count();
                     @endphp
                     <article class="min-h-[266px] rounded-[13px] bg-white px-[24px] py-[24px] shadow-sm ring-1 ring-[#e3ebe6]">
                         <div class="flex items-start justify-between">
@@ -150,7 +142,6 @@
                         <div class="mt-[17px] flex items-center justify-between text-[12px]">
                             <span>Target: <strong>{{ $program->target_mustahik }} {{ $program->target_mustahik > 1 ? 'Jiwa' : 'Bangunan' }}</strong></span>
                             <div class="flex items-center gap-3 font-black">
-                                @if (! $isSample)
                                 <a class="{{ $isSelesai ? 'text-[#9b9f9b]' : 'text-[#0b751f]' }}" href="{{ route('pengaturan-distribusi.show', $program) }}">{{ $isSelesai ? 'Arsip >' : 'Pengaturan >' }}</a>
                                 <a class="text-[#0b751f]" href="{{ route('program-penyaluran.edit', $program) }}">Edit</a>
                                 <form action="{{ route('program-penyaluran.destroy', $program) }}" method="POST" onsubmit="return confirm('Hapus program ini?')">
@@ -158,13 +149,16 @@
                                     @method('DELETE')
                                     <button class="text-red-600">Hapus</button>
                                 </form>
-                                @else
-                                <span class="{{ $isSelesai ? 'text-[#9b9f9b]' : 'text-[#0b751f]' }}">{{ $isSelesai ? 'Arsip >' : 'Detail >' }}</span>
-                                @endif
                             </div>
                         </div>
                     </article>
-                    @endforeach
+                    @empty
+                    <div class="min-h-[266px] rounded-[13px] border border-dashed border-[#d9e2dd] bg-white px-[24px] py-[24px] text-center shadow-sm md:col-span-2 xl:col-span-3">
+                        <div class="mx-auto flex h-[48px] w-[48px] items-center justify-center rounded-full bg-[#e8f4ec] text-[24px] font-black text-[#0b751f]">+</div>
+                        <h3 class="mt-[24px] text-[18px] font-black text-[#17231b]">Belum ada program penyaluran</h3>
+                        <p class="mx-auto mt-[8px] max-w-[360px] text-[13px] leading-[20px] text-[#4a574f]">Data akan muncul di sini setelah program penyaluran dibuat.</p>
+                    </div>
+                    @endforelse
 
                     <a href="{{ route('program-penyaluran.create') }}" class="flex min-h-[266px] flex-col items-center justify-center rounded-[13px] border-2 border-dashed border-[#d9e2dd] bg-white text-center">
                         <span class="flex h-[48px] w-[48px] items-center justify-center rounded-full bg-[#80df7b] text-[24px] font-black text-[#0b751f]">+</span>
