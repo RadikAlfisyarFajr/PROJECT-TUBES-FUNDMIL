@@ -364,6 +364,17 @@ textarea,
     font-weight: 900;
 }
 
+/* Ensure summary/metric numbers use admin font + tabular figures */
+.summary-card h4,
+.metric-value,
+.metric-card .metric-value,
+.summary-card .metric-value {
+    font-family: var(--admin-font-sans) !important;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+    font-weight: 900;
+}
+
 .distribution-workspace {
     margin-top: 24px;
     display: grid;

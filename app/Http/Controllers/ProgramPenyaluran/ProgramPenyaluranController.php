@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramPenyaluranRequest;
 use App\Models\Instansi;
 use App\Models\KategoriDana;
+use App\Models\PengaturanDistribusi;
 use App\Models\ProgramPenyaluran;
+use App\Models\TransaksiZakat;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -50,11 +52,13 @@ class ProgramPenyaluranController extends Controller
 
     public function create(): View
     {
+        $instansi = $this->instansi();
+
         return view('admin.program-penyaluran.program-penyaluran-create', [
             'program' => new ProgramPenyaluran(['status' => 'aktif']),
             'kategoriDana' => $this->kategoriDanaOptions(),
             'selectedKategori' => [],
-            'saldoTersedia' => 850000000,
+            'saldoTersedia' => $this->saldoTersedia($instansi),
         ]);
     }
 
@@ -95,12 +99,13 @@ class ProgramPenyaluranController extends Controller
     public function edit(ProgramPenyaluran $programPenyaluran): View
     {
         $this->authorizeProgram($programPenyaluran);
+        $instansi = $this->instansi();
 
         return view('admin.program-penyaluran.program-penyaluran-edit', [
             'program' => $programPenyaluran,
             'kategoriDana' => $this->kategoriDanaOptions(),
             'selectedKategori' => $programPenyaluran->kategoriDana()->pluck('kategori_dana.id')->all(),
-            'saldoTersedia' => 850000000,
+            'saldoTersedia' => $this->saldoTersedia($instansi),
         ]);
     }
 
@@ -172,6 +177,20 @@ class ProgramPenyaluranController extends Controller
             ->where('is_active', true)
             ->orderBy('nama')
             ->get();
+    }
+
+    private function saldoTersedia(Instansi $instansi): float
+    {
+        $kasTotal = (float) TransaksiZakat::query()
+            ->where('instansi_id', $instansi->id)
+            ->sum('jumlah');
+
+        $bookedTotal = (float) PengaturanDistribusi::query()
+            ->where('instansi_id', $instansi->id)
+            ->where('status', 'siap')
+            ->sum('total_alokasi');
+
+        return max(0, $kasTotal - $bookedTotal);
     }
 
     private function authorizeProgram(ProgramPenyaluran $program): void

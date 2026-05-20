@@ -399,6 +399,17 @@
             font-weight: 800;
         }
 
+        .empty-state {
+            margin: 24px 0 0;
+            padding: 28px;
+            border: 1px dashed #d4ddd8;
+            border-radius: 16px;
+            background: #f8faf9;
+            color: #64706a;
+            text-align: center;
+            font-weight: 750;
+        }
+
         @media (max-width: 991px) {
             .dashboard-content {
                 padding: 24px 18px 36px;
@@ -442,6 +453,19 @@
             ->map(fn ($word) => mb_strtoupper(mb_substr($word, 0, 1)))
             ->implode('');
         $initials = $initials ?: 'A';
+        $stats = array_merge([
+            'hargaBeras' => 0,
+            'nishabMaal' => 0,
+            'totalPengumpulan' => 0,
+            'totalTersalurkan' => 0,
+            'saldoSiapDisalurkan' => 0,
+            'totalMuzakki' => 0,
+            'mustahikTersalurkan' => 0,
+            'totalMustahik' => 0,
+        ], $dashboardStats ?? []);
+        $recentTransactions = collect($recentTransactions ?? []);
+        $topWilayah = collect($topWilayah ?? []);
+        $rupiah = fn ($value) => 'Rp '.number_format((float) $value, 0, ',', '.');
     @endphp
 
     <div class="admin-layout">
@@ -492,7 +516,7 @@
                         <section class="metric-card">
                             <div class="metric-icon"><i class="bi bi-basket2-fill"></i></div>
                             <div class="metric-label">Harga Beras Harian</div>
-                            <h2 class="metric-value">Rp 15.200/kg</h2>
+                            <h2 class="metric-value">{{ $rupiah($stats['hargaBeras']) }}/kg</h2>
                             <p class="metric-note">Acuan zakat fitrah hari ini</p>
                         </section>
                     </div>
@@ -500,7 +524,7 @@
                         <section class="metric-card">
                             <div class="metric-icon"><i class="bi bi-gem"></i></div>
                             <div class="metric-label">Nishab Maal</div>
-                            <h2 class="metric-value">Rp 102.000.000</h2>
+                            <h2 class="metric-value">{{ $rupiah($stats['nishabMaal']) }}</h2>
                             <p class="metric-note">Batas nishab tahun berjalan</p>
                         </section>
                     </div>
@@ -508,16 +532,16 @@
                         <section class="metric-card">
                             <div class="metric-icon"><i class="bi bi-cash-stack"></i></div>
                             <div class="metric-label">Total Pengumpulan</div>
-                            <h2 class="metric-value">Rp 428.5M</h2>
-                            <p class="metric-note">1.240 muzakki aktif</p>
+                            <h2 class="metric-value">{{ $rupiah($stats['totalPengumpulan']) }}</h2>
+                            <p class="metric-note">{{ number_format($stats['totalMuzakki'], 0, ',', '.') }} muzaki tercatat</p>
                         </section>
                     </div>
                     <div class="col-md-6 col-xl-3">
                         <section class="metric-card">
                             <div class="metric-icon"><i class="bi bi-send-check-fill"></i></div>
                             <div class="metric-label">Tersalurkan</div>
-                            <h2 class="metric-value">Rp 312.8M</h2>
-                            <p class="metric-note">856 mustahik terbantu</p>
+                            <h2 class="metric-value">{{ $rupiah($stats['totalTersalurkan']) }}</h2>
+                            <p class="metric-note">{{ number_format($stats['mustahikTersalurkan'], 0, ',', '.') }} penerima terbantu</p>
                         </section>
                     </div>
                 </div>
@@ -527,8 +551,8 @@
                         <section class="panel-card">
                             <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
                                 <div>
-                                    <h2 class="section-heading">Peta Sebaran Lokal</h2>
-                                    <p class="section-subtitle">Titik muzakki dan mustahik di wilayah operasional.</p>
+                                    <h2 class="section-heading">Sebaran Wilayah</h2>
+                                    <p class="section-subtitle">Pengumpulan berdasarkan desa dari transaksi tersimpan.</p>
                                 </div>
                                 <div class="legend">
                                     <span class="legend-item"><span class="legend-dot" style="background:#2d88f0"></span>Muzakki</span>
@@ -536,13 +560,19 @@
                                 </div>
                             </div>
                             <div class="map-shell">
-                                <span class="map-line" style="top: 37%; left: 23%; width: 34%; transform: rotate(12deg);"></span>
-                                <span class="map-line" style="top: 62%; left: 31%; width: 48%; transform: rotate(-10deg);"></span>
-                                <span class="map-dot muzakki" style="top: 34%; left: 22%;"></span>
-                                <span class="map-dot mustahik" style="top: 70%; left: 30%;"></span>
-                                <span class="map-dot muzakki" style="top: 45%; left: 58%;"></span>
-                                <span class="map-dot mustahik" style="top: 26%; left: 72%;"></span>
-                                <span class="map-dot muzakki" style="top: 62%; left: 80%;"></span>
+                                <div class="ranking-list p-4">
+                                    @forelse ($topWilayah as $wilayah)
+                                    <div class="ranking-item">
+                                        <div>
+                                            <div class="item-title">{{ $wilayah->desa }}</div>
+                                            <div class="item-meta">{{ number_format($wilayah->total_transaksi, 0, ',', '.') }} transaksi</div>
+                                        </div>
+                                        <div class="amount">{{ $rupiah($wilayah->total) }}</div>
+                                    </div>
+                                    @empty
+                                    <div class="empty-state">Belum ada data transaksi per wilayah.</div>
+                                    @endforelse
+                                </div>
                             </div>
                         </section>
                     </div>
@@ -551,32 +581,22 @@
                             <div class="d-flex justify-content-between align-items-start gap-3">
                                 <div>
                                     <h2 class="section-heading">Insight Wilayah</h2>
-                                    <p class="section-subtitle">Peringkat pengumpulan pekan ini.</p>
+                                    <p class="section-subtitle">Peringkat pengumpulan dari data transaksi.</p>
                                 </div>
-                                <span class="badge-soft">Stabil</span>
+                                <span class="badge-soft">{{ $topWilayah->count() }} wilayah</span>
                             </div>
                             <div class="ranking-list">
+                                @forelse ($topWilayah as $wilayah)
                                 <div class="ranking-item">
                                     <div>
-                                        <div class="item-title">RW 04 Soreang Indah</div>
-                                        <div class="item-meta">Peringkat 1</div>
+                                        <div class="item-title">{{ $wilayah->desa }}</div>
+                                        <div class="item-meta">Peringkat {{ $loop->iteration }}</div>
                                     </div>
-                                    <div class="amount">Rp 45.2jt</div>
+                                    <div class="amount">{{ $rupiah($wilayah->total) }}</div>
                                 </div>
-                                <div class="ranking-item">
-                                    <div>
-                                        <div class="item-title">RW 07 Cingcin</div>
-                                        <div class="item-meta">Peringkat 2</div>
-                                    </div>
-                                    <div class="amount">Rp 38.9jt</div>
-                                </div>
-                                <div class="ranking-item">
-                                    <div>
-                                        <div class="item-title">RW 02 Soreang Kota</div>
-                                        <div class="item-meta">Peringkat 3</div>
-                                    </div>
-                                    <div class="amount">Rp 32.1jt</div>
-                                </div>
+                                @empty
+                                <div class="empty-state">Belum ada insight wilayah.</div>
+                                @endforelse
                             </div>
                         </section>
                     </div>
@@ -602,27 +622,19 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td><strong>Achmad R.</strong></td>
-                                    <td><span class="badge-soft">Zakat Maal</span></td>
-                                    <td>Rp 2.500.000</td>
-                                    <td>Hari ini, 14:20</td>
-                                    <td class="text-end"><button class="receipt-btn" type="button">Cetak Struk</button></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Siti Hajar</strong></td>
-                                    <td><span class="badge-soft">Infak/Sedekah</span></td>
-                                    <td>Rp 500.000</td>
-                                    <td>Hari ini, 12:45</td>
-                                    <td class="text-end"><button class="receipt-btn" type="button">Cetak Struk</button></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Bambang M.</strong></td>
-                                    <td><span class="badge-soft">Zakat Fitrah</span></td>
-                                    <td>Rp 450.000</td>
-                                    <td>Kemarin, 21:10</td>
-                                    <td class="text-end"><button class="receipt-btn" type="button">Cetak Struk</button></td>
-                                </tr>
+                                @forelse ($recentTransactions as $transaction)
+                                    <tr>
+                                        <td><strong>{{ $transaction->nama_muzakki }}</strong></td>
+                                        <td><span class="badge-soft">{{ $transaction->kategori?->nama ?? str($transaction->jenis)->replace('_', ' ')->title() }}</span></td>
+                                        <td>{{ $rupiah($transaction->jumlah) }}</td>
+                                        <td>{{ $transaction->tanggal ? \Illuminate\Support\Carbon::parse($transaction->tanggal)->format('d/m/Y') : '-' }}</td>
+                                        <td class="text-end"><a class="receipt-btn text-decoration-none" href="{{ route('pemasukan.show', $transaction->id) }}">Detail</a></td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-4">Belum ada transaksi pemasukan.</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -636,7 +648,7 @@
                             <div class="d-flex align-items-end justify-content-between gap-3">
                                 <div>
                                     <div class="metric-label">Sisa Saldo</div>
-                                    <h3 class="metric-value">Rp 115.7M</h3>
+                                    <h3 class="metric-value">{{ $rupiah($stats['saldoSiapDisalurkan']) }}</h3>
                                 </div>
                                 <span class="badge-soft">Siap Salur</span>
                             </div>
@@ -652,14 +664,14 @@
                                         <div class="item-title">Muzakki Aktif</div>
                                         <div class="item-meta">Terdata sepanjang periode berjalan</div>
                                     </div>
-                                    <div class="amount">1.240</div>
+                                    <div class="amount">{{ number_format($stats['totalMuzakki'], 0, ',', '.') }}</div>
                                 </div>
                                 <div class="activity-item">
                                     <div>
                                         <div class="item-title">Mustahik Tersalurkan</div>
                                         <div class="item-meta">Menerima bantuan dari program aktif</div>
                                     </div>
-                                    <div class="amount">856</div>
+                                    <div class="amount">{{ number_format($stats['mustahikTersalurkan'], 0, ',', '.') }}</div>
                                 </div>
                             </div>
                         </section>

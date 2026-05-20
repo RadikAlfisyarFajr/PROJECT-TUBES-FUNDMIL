@@ -11,6 +11,6 @@ class HargaBerasSeeder extends Seeder
      */
     public function run(): void
     {
-        // TODO: Tambahkan data dummy harga beras saat dibutuhkan.
+        // Belum ada data awal harga beras.
     }
 }

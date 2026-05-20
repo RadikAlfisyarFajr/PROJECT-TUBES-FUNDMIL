@@ -11,6 +11,6 @@ class PemasukanSeeder extends Seeder
      */
     public function run(): void
     {
-        // TODO: Tambahkan data dummy pemasukan zakat saat tabel/model sudah tersedia.
+        // Belum ada data awal pemasukan zakat.
     }
 }

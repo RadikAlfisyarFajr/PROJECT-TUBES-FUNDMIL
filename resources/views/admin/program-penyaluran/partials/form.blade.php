@@ -122,7 +122,7 @@
                 <svg class="h-5 w-5 text-[#0b751f]" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2 2 7h16l-8-5ZM4 8h2v6H4V8Zm5 0h2v6H9V8Zm5 0h2v6h-2V8ZM3 15h14v2H3v-2Z"/></svg>
                 <div>
                     <p>Saldo Tersedia</p>
-                    <p class="mt-[2px] text-[#0b751f]">Rp {{ number_format($saldoTersedia ?? 850000000, 0, ',', '.') }}</p>
+                    <p class="mt-[2px] text-[#0b751f]">Rp {{ number_format($saldoTersedia ?? 0, 0, ',', '.') }}</p>
                 </div>
             </div>
             <div class="flex items-center justify-end gap-[13px]">
