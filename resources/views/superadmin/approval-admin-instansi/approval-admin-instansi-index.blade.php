@@ -1,0 +1,487 @@
+@php
+    $pendingUsers = $pendingUsers ?? collect();
+@endphp
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approval Admin Instansi | Super Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --green: #0b7131;
+            --green-dark: #053f24;
+            --green-soft: #e8f5ec;
+            --surface: #f7f9f7;
+            --panel: #ffffff;
+            --line: #e7eee8;
+            --ink: #111711;
+            --muted: #66746b;
+            --nav: #263b52;
+            --danger: #b42335;
+            --shadow: 0 16px 34px rgba(20, 47, 27, .06);
+        }
+
+        * {
+            letter-spacing: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: var(--surface);
+            color: var(--ink);
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .sidebar {
+            background: #f0f3f1;
+            border-right: 1px solid var(--line);
+            padding: 42px 20px 30px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .brand {
+            padding: 0 20px;
+        }
+
+        .brand-title {
+            color: var(--green-dark);
+            font-size: 1.45rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .brand-subtitle {
+            color: #9fa8a2;
+            font-size: .78rem;
+            font-weight: 800;
+            letter-spacing: .34em;
+        }
+
+        .sidebar-nav {
+            margin-top: 76px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .nav-item-link,
+        .logout-button {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            min-height: 58px;
+            padding: 0 20px;
+            border-radius: 20px;
+            color: var(--nav);
+            font-weight: 650;
+            text-decoration: none;
+            border: 0;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item-link:hover,
+        .nav-item-link.active,
+        .logout-button:hover {
+            background: #fff;
+            color: var(--green);
+        }
+
+        .nav-item-link.active {
+            box-shadow: inset 4px 0 0 var(--green);
+        }
+
+        .nav-item-link i,
+        .logout-button i {
+            width: 24px;
+            color: #3f5164;
+            font-size: 1.25rem;
+            text-align: center;
+        }
+
+        .nav-item-link.active i,
+        .logout-button:hover i {
+            color: var(--green);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1px solid var(--line);
+            padding-top: 28px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .main-content {
+            padding: 34px 42px 52px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 28px;
+            margin-bottom: 38px;
+        }
+
+        .page-title {
+            font-size: clamp(2.1rem, 4vw, 2.7rem);
+            font-weight: 950;
+            line-height: 1.05;
+            margin: 0 0 8px;
+        }
+
+        .page-description {
+            color: #263026;
+            font-size: 1.08rem;
+            margin: 0;
+        }
+
+        .summary-card {
+            background: var(--green);
+            color: #fff;
+            border-radius: 18px;
+            min-width: 260px;
+            padding: 20px 24px;
+            box-shadow: 0 18px 35px rgba(11, 113, 49, .2);
+        }
+
+        .summary-card .number {
+            font-size: 2.3rem;
+            line-height: 1;
+            font-weight: 950;
+        }
+
+        .toolbar {
+            background: rgba(255,255,255,.68);
+            border: 1px solid #edf1ed;
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 32px;
+        }
+
+        .search-wrap {
+            position: relative;
+        }
+
+        .search-wrap i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #233025;
+            font-size: 1.35rem;
+        }
+
+        .form-control,
+        .form-select {
+            min-height: 58px;
+            border-radius: 14px;
+            border: 1px solid #e1e8e1;
+            box-shadow: none;
+            font-size: 1rem;
+        }
+
+        .search-input {
+            padding-left: 58px;
+        }
+
+        .table-card,
+        .empty-card {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .approval-table {
+            margin: 0;
+        }
+
+        .approval-table thead th {
+            background: #eef1ef;
+            border: 0;
+            color: #202a20;
+            font-size: .78rem;
+            font-weight: 950;
+            letter-spacing: .16em;
+            padding: 24px 28px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .approval-table tbody td {
+            border-color: #edf1ee;
+            padding: 28px;
+            vertical-align: middle;
+        }
+
+        .instansi-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 12px;
+            background: var(--green-soft);
+            color: var(--green);
+            display: grid;
+            place-items: center;
+            font-size: 1.45rem;
+            flex: 0 0 auto;
+        }
+
+        .instansi-name {
+            font-size: 1.06rem;
+            font-weight: 900;
+            margin-bottom: 2px;
+        }
+
+        .muted-small {
+            color: var(--muted);
+            font-size: .9rem;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            border-radius: 999px;
+            background: #fff4d8;
+            color: #946200;
+            font-size: .78rem;
+            font-weight: 900;
+            padding: 7px 12px;
+            text-transform: uppercase;
+        }
+
+        .action-stack {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-approve,
+        .btn-reject {
+            border-radius: 999px;
+            font-weight: 850;
+            padding: 10px 16px;
+        }
+
+        .btn-approve {
+            background: var(--green);
+            border-color: var(--green);
+            color: #fff;
+        }
+
+        .btn-reject {
+            border-color: #f0b6be;
+            color: var(--danger);
+            background: #fff;
+        }
+
+        .empty-card {
+            padding: 60px 28px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 74px;
+            height: 74px;
+            border-radius: 24px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 20px;
+            background: var(--green-soft);
+            color: var(--green);
+            font-size: 2rem;
+        }
+
+        @media (max-width: 991px) {
+            .sidebar {
+                min-height: auto;
+                padding: 28px 18px;
+            }
+
+            .sidebar-nav {
+                margin-top: 28px;
+            }
+
+            .sidebar-footer {
+                margin-top: 28px;
+            }
+
+            .main-content {
+                padding: 28px 18px 42px;
+            }
+
+            .page-header {
+                flex-direction: column;
+            }
+
+            .summary-card {
+                width: 100%;
+            }
+
+            .approval-table thead {
+                display: none;
+            }
+
+            .approval-table,
+            .approval-table tbody,
+            .approval-table tr,
+            .approval-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .approval-table tbody tr {
+                border-bottom: 1px solid #edf1ee;
+            }
+
+            .approval-table tbody td {
+                padding: 18px 20px;
+            }
+
+            .action-stack {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+    <link href="{{ asset('css/admin-theme.css') }}" rel="stylesheet">
+</head>
+<body class="sidebar-expanded">
+    <div class="admin-layout">
+        @include('superadmin.partials.sidebar', ['active' => 'approval-admin'])
+
+        <main class="admin-page-content">
+            <header class="admin-page-topbar">
+                <div>
+                    <h1 class="admin-page-title">Approval Admin Instansi</h1>
+                    <p class="admin-page-desc">Monitoring dan aktivasi akun admin instansi yang menunggu persetujuan.</p>
+                </div>
+                <div class="summary-card">
+                    <div class="text-uppercase fw-bold small mb-2">Menunggu Approval</div>
+                    <div class="number">{{ $pendingUsers->count() }}</div>
+                </div>
+            </header>
+
+            <div class="admin-content-wrap">
+                @if(session('success'))
+                    <div class="alert alert-success border-0 rounded-4 shadow-sm mb-4">{{ session('success') }}</div>
+                @endif
+
+                <section class="toolbar">
+                    <div class="row g-3">
+                        <div class="col-lg-8">
+                            <div class="search-wrap">
+                                <i class="bi bi-search"></i>
+                                <input type="search" class="form-control search-input" placeholder="Cari nama instansi, desa, email, atau username...">
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <select class="form-select">
+                                <option>Semua akun pending</option>
+                                <option>Registrasi terbaru</option>
+                                <option>Registrasi terlama</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
+
+                @if($pendingUsers->isEmpty())
+                    <section class="empty-card">
+                        <div class="empty-icon">
+                            <i class="bi bi-check2-circle"></i>
+                        </div>
+                        <h2 class="h4 fw-bold mb-2">Tidak Ada Approval Baru</h2>
+                        <p class="text-muted mb-0">Semua akun admin instansi sudah ditinjau.</p>
+                    </section>
+                @else
+                    <section class="table-card">
+                        <div class="table-responsive">
+                            <table class="table approval-table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Nama Instansi</th>
+                                        <th>Wilayah</th>
+                                        <th>Akun Admin</th>
+                                        <th>Status</th>
+                                        <th>Daftar</th>
+                                        <th class="text-end">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($pendingUsers as $user)
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="instansi-icon">
+                                                        <i class="bi bi-bank2"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="instansi-name">{{ $user->nama_instansi ?? $user->name }}</div>
+                                                        <div class="muted-small">{{ $user->username }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="fw-semibold">{{ $user->desa ?? '-' }}</div>
+                                                <div class="muted-small">Wilayah operasional</div>
+                                            </td>
+                                            <td>
+                                                <div class="fw-semibold">{{ $user->name }}</div>
+                                                <div class="muted-small">{{ $user->email }}</div>
+                                            </td>
+                                            <td>
+                                                <span class="status-pill">
+                                                    <i class="bi bi-clock-history"></i>
+                                                    Pending
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="fw-semibold">{{ optional($user->created_at)->format('d M Y') ?? '-' }}</div>
+                                                <div class="muted-small">{{ optional($user->created_at)->format('H:i') ?? '--:--' }} WIB</div>
+                                            </td>
+                                            <td>
+                                                <div class="action-stack">
+                                                    <form method="POST" action="{{ route('superadmin.approve', $user) }}">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-approve">
+                                                            <i class="bi bi-check2 me-1"></i> Setujui
+                                                        </button>
+                                                    </form>
+                                                    <form method="POST" action="{{ route('superadmin.reject', $user) }}">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-reject">
+                                                            <i class="bi bi-x-lg me-1"></i> Tolak
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                @endif
+            </div>
+        </main>
+    </div>
+    <script>
+        const sidebarToggle = document.getElementById('sidebarToggle');
+
+        sidebarToggle?.addEventListener('click', () => {
+            document.body.classList.toggle('sidebar-expanded');
+        });
+    </script>
+</body>
+</html>

@@ -19,13 +19,35 @@ class Penyaluran extends Model
         'bukti_foto'
     ];
 
-    public function program_penyaluran(): BelongsTo
+    protected function casts(): array
+    {
+        return [
+            'tanggal_penyaluran' => 'date',
+        ];
+    }
+
+    public function instansi(): BelongsTo
+    {
+        return $this->belongsTo(Instansi::class);
+    }
+
+    public function programPenyaluran(): BelongsTo
     {
         return $this->belongsTo(ProgramPenyaluran::class, 'program_id');
     }
 
-    public function penyaluran_detail(): HasMany
+    public function program_penyaluran(): BelongsTo
+    {
+        return $this->programPenyaluran();
+    }
+
+    public function penyaluranDetail(): HasMany
     {
         return $this->hasMany(PenyaluranDetail::class);
+    }
+
+    public function penyaluran_detail(): HasMany
+    {
+        return $this->penyaluranDetail();
     }
 }

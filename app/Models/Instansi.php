@@ -8,7 +8,26 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Instansi extends Model
 {
     protected $table = 'instansi';
-    protected $fillable = ['nama', 'kelurahan', 'alamat', 'status', 'kontak', 'logo', 'latitude', 'longitude'];
+    protected $fillable = [
+        'nama',
+        'tipe',
+        'kelurahan',
+        'alamat',
+        'status',
+        'kontak',
+        'email',
+        'nomor_sk',
+        'masa_berlaku',
+        'nama_pimpinan',
+        'logo',
+        'tanda_tangan',
+        'latitude',
+        'longitude',
+    ];
+
+    protected $casts = [
+        'masa_berlaku' => 'date',
+    ];
 
     public function users(): HasMany
     {
@@ -25,5 +44,15 @@ class Instansi extends Model
     public function programPenyaluran(): HasMany
     {
         return $this->hasMany(ProgramPenyaluran::class);
+    }
+
+    public function rekening(): HasMany
+    {
+        return $this->hasMany(RekeningInstansi::class);
+    }
+
+    public function profilNotifications(): HasMany
+    {
+        return $this->hasMany(ProfilInstansiNotification::class);
     }
 }
