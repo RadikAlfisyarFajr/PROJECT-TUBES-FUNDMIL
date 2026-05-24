@@ -550,7 +550,7 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
 
                         <button id="addItemBtn" class="add-item-btn" type="button">
                             <i class="bi bi-plus-lg"></i>
-                            Tambah Item (Fidyah, Infaq, dll)
+                            Tambah Item Dana
                         </button>
 
                         <section class="summary-card">
@@ -693,21 +693,21 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
         "'": '&#039;'
     } [character]));
 
-    const categoryOptions = `
-            <option value="zakat_fitrah">Zakat Fitrah</option>
-            <option value="zakat_maal">Zakat Maal</option>
-            <option value="infaq_sedekah">Infaq & Sedekah</option>
-            <option value="fidyah">Fidyah</option>
-        `;
+    const categoryOptions = @json($kategoriDropdown);
+    const categoryOptionsHtml = categoryOptions.length
+        ? categoryOptions.map((category) => `<option value="${category.key}">${escapeHtml(category.label)}</option>`).join('')
+        : '<option value="" disabled>Belum ada kategori aktif</option>';
+    const firstCategory = categoryOptions[0]?.key || '';
+    const initialCategories = categoryOptions.slice(0, 2).map((category) => category.key);
 
-    function addRow(defaultCategory = 'zakat_fitrah') {
+    function addRow(defaultCategory = firstCategory) {
         const index = rowCounter++;
         const row = document.createElement('tr');
         row.className = 'payment-row';
         row.innerHTML = `
                 <td>
                     <select class="soft-select js-category" name="items[${index}][kategori_utama]">
-                        ${categoryOptions}
+                        ${categoryOptionsHtml}
                     </select>
                 </td>
                 <td>
@@ -880,8 +880,7 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
         form.reset();
         rowsContainer.innerHTML = '';
         rowCounter = 0;
-        addRow('zakat_fitrah');
-        addRow('zakat_maal');
+        initialCategories.forEach((categoryKey) => addRow(categoryKey));
 
         if (nextReceipt) {
             nomorKuitansi.value = nextReceipt;
@@ -976,7 +975,7 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
         }
     });
 
-    addItemBtn.addEventListener('click', () => addRow('infaq_sedekah'));
+    addItemBtn.addEventListener('click', () => addRow(firstCategory));
     resetBtn.addEventListener('click', () => resetForm());
 
     document.getElementById('sidebarToggle')?.addEventListener('click', () => {

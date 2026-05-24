@@ -38,7 +38,7 @@ class PengaturanDistribusiController extends Controller
                 'integer',
                 Rule::exists('program_penyaluran', 'id')->where(fn ($query) => $query->where('instansi_id', $instansi->id)),
             ],
-            'nominal_per_penerima' => ['required', 'numeric', 'min:1'],
+            'nominal_per_penerima' => ['nullable', 'numeric', 'min:0'],
             'tipe_penerima' => ['required', Rule::in(['database_mustahik', 'manual_mitra'])],
             'sumber_dana' => ['required', 'array', 'min:1'],
             'sumber_dana.*' => ['required', Rule::in($sources)],
@@ -53,10 +53,10 @@ class PengaturanDistribusiController extends Controller
             ->where('instansi_id', $instansi->id)
             ->findOrFail($validated['program_id']);
 
-        $nominal = (float) $validated['nominal_per_penerima'];
-        $recipients = $this->recipients($validated, $program, $instansi, $nominal);
+        $recipients = $this->recipients($validated, $program, $instansi, 0);
+        $recipientCount = count($recipients);
 
-        if (count($recipients) === 0) {
+        if ($recipientCount === 0) {
             return back()
                 ->withErrors(['penerima' => 'pilih minimal satu penerima untuk membuat rencana distribusi.'])
                 ->withInput();
@@ -66,6 +66,26 @@ class PengaturanDistribusiController extends Controller
         $saldoAwal = collect($validated['sumber_dana'])->sum(fn (string $source) => $saldo['source_balances'][$source] ?? 0);
         $bookingAktif = $this->bookedForSources($instansi, $validated['sumber_dana']);
         $saldoTersedia = max(0, $saldoAwal - $bookingAktif);
+        $nominal = $validated['tipe_penerima'] === 'database_mustahik'
+            ? $this->autoNominalPerRecipient($saldoTersedia, $recipientCount)
+            : (float) ($validated['nominal_per_penerima'] ?? 0);
+
+        if ($validated['tipe_penerima'] === 'manual_mitra' && $nominal < 1) {
+            return back()
+                ->withErrors(['nominal_per_penerima' => 'nominal per penerima harus diisi untuk penerima manual.'])
+                ->withInput();
+        }
+
+        if ($validated['tipe_penerima'] === 'database_mustahik' && $nominal < 1) {
+            return back()
+                ->withErrors(['saldo' => 'saldo sumber dana belum cukup untuk dibagi rata ke mustahik terpilih.'])
+                ->withInput();
+        }
+
+        if ($validated['tipe_penerima'] === 'database_mustahik') {
+            $recipients = $this->recipients($validated, $program, $instansi, $nominal);
+        }
+
         $totalAlokasi = $nominal * count($recipients);
         $estimasiSisaSaldo = $saldoTersedia - $totalAlokasi;
 
@@ -141,10 +161,15 @@ class PengaturanDistribusiController extends Controller
     {
         $instansi = $this->instansi();
         $term = trim((string) $request->query('q', ''));
+        $program = $this->selectedProgramForRequest($request, $instansi);
+        $allowedAsnaf = $program?->target_asnaf ?? [];
 
         $mustahik = Mustahik::query()
             ->where('instansi_id', $instansi->id)
             ->where('status', 'aktif')
+            ->when(! empty($allowedAsnaf), function ($query) use ($allowedAsnaf) {
+                $query->whereIn('kategori_asnaf', $allowedAsnaf);
+            })
             ->when($term !== '', function ($query) use ($term) {
                 $query->where(function ($search) use ($term) {
                     $search
@@ -155,7 +180,7 @@ class PengaturanDistribusiController extends Controller
                 });
             })
             ->orderBy('nama')
-            ->limit(12)
+            ->when($term !== '', fn ($query) => $query->limit(12))
             ->get()
             ->map(fn (Mustahik $item) => [
                 'id' => $item->id,
@@ -209,6 +234,7 @@ class PengaturanDistribusiController extends Controller
             ->get();
 
         $saldo = $this->saldoRekap($instansi);
+        $allowedAsnaf = $selectedProgram?->target_asnaf ?? [];
 
         return [
             'programs' => $programs,
@@ -219,8 +245,10 @@ class PengaturanDistribusiController extends Controller
             'mustahikOptions' => Mustahik::query()
                 ->where('instansi_id', $instansi->id)
                 ->where('status', 'aktif')
+                ->when(! empty($allowedAsnaf), function ($query) use ($allowedAsnaf) {
+                    $query->whereIn('kategori_asnaf', $allowedAsnaf);
+                })
                 ->orderBy('nama')
-                ->limit(12)
                 ->get(),
             'plans' => PengaturanDistribusi::with('programPenyaluran')
                 ->where('instansi_id', $instansi->id)
@@ -306,6 +334,7 @@ class PengaturanDistribusiController extends Controller
     private function recipients(array $validated, ProgramPenyaluran $program, Instansi $instansi, float $nominal): array
     {
         $tujuan = ($validated['tujuan_penggunaan'] ?? null) ?: 'alokasi program '.$program->nama_program;
+        $allowedAsnaf = $program->target_asnaf ?? [];
 
         if ($validated['tipe_penerima'] === 'manual_mitra') {
             return $this->manualRecipients($validated['manual_recipients'] ?? '[]', $program, $tujuan, $nominal);
@@ -321,6 +350,9 @@ class PengaturanDistribusiController extends Controller
             ->where('instansi_id', $instansi->id)
             ->where('status', 'aktif')
             ->whereIn('id', $ids)
+            ->when(! empty($allowedAsnaf), function ($query) use ($allowedAsnaf) {
+                $query->whereIn('kategori_asnaf', $allowedAsnaf);
+            })
             ->orderBy('nama')
             ->get();
 
@@ -339,6 +371,28 @@ class PengaturanDistribusiController extends Controller
             ])
             ->values()
             ->all();
+    }
+
+    private function autoNominalPerRecipient(float $saldoTersedia, int $jumlahPenerima): float
+    {
+        if ($jumlahPenerima <= 0) {
+            return 0;
+        }
+
+        return (float) floor($saldoTersedia / $jumlahPenerima);
+    }
+
+    private function selectedProgramForRequest(Request $request, Instansi $instansi): ?ProgramPenyaluran
+    {
+        $programId = (int) $request->query('program_id');
+
+        if ($programId <= 0) {
+            return null;
+        }
+
+        return ProgramPenyaluran::query()
+            ->where('instansi_id', $instansi->id)
+            ->find($programId);
     }
 
     private function manualRecipients(string $json, ProgramPenyaluran $program, string $tujuan, float $nominal): array

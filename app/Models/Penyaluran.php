@@ -13,6 +13,7 @@ class Penyaluran extends Model
     protected $fillable = [
         'instansi_id',
         'program_id',
+        'pengaturan_distribusi_id',
         'tanggal_penyaluran',
         'status',
         'keterangan',
@@ -34,6 +35,11 @@ class Penyaluran extends Model
     public function programPenyaluran(): BelongsTo
     {
         return $this->belongsTo(ProgramPenyaluran::class, 'program_id');
+    }
+
+    public function pengaturanDistribusi(): BelongsTo
+    {
+        return $this->belongsTo(PengaturanDistribusi::class, 'pengaturan_distribusi_id');
     }
 
     public function program_penyaluran(): BelongsTo

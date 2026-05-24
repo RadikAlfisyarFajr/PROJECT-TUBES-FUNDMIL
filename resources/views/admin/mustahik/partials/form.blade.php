@@ -24,7 +24,7 @@
                 @include('admin.partials.account-identity', [
                     'nameClass' => 'text-right text-[13px] font-black',
                     'roleClass' => 'mt-1 text-[9px] font-bold uppercase tracking-wide text-[#9ba49e]',
-                    'avatarClass' => 'grid h-[38px] w-[38px] place-items-center overflow-hidden rounded-full bg-[#e8f4ec] text-[13px] font-black text-[#0b751f] ring-2 ring-white',
+                    'avatarClass' => 'admin-avatar',
                     'imageClass' => 'h-full w-full object-cover',
                 ])
             </div>

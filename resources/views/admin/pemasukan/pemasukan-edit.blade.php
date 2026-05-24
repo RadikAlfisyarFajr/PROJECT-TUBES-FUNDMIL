@@ -50,10 +50,10 @@
                             <select class="form-select" id="kategori_id" name="kategori_id" required>
                                 <option value="">Pilih sub-kategori aktif</option>
                                 @forelse ($kategoriDropdown as $kategoriUtama)
-                                    <optgroup label="{{ $kategoriUtama->nama }}">
-                                        @foreach ($kategoriUtama->children as $subKategori)
-                                            <option value="{{ $subKategori->id }}" @selected(old('kategori_id') == $subKategori->id)>
-                                                {{ $subKategori->nama }}
+                                    <optgroup label="{{ $kategoriUtama['label'] }}">
+                                        @foreach ($kategoriUtama['children'] as $subKategori)
+                                            <option value="{{ $subKategori['id'] }}" @selected(old('kategori_id') == $subKategori['id'])>
+                                                {{ $subKategori['nama'] }}
                                             </option>
                                         @endforeach
                                     </optgroup>

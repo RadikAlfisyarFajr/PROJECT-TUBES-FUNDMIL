@@ -6,9 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramPenyaluranRequest;
 use App\Models\Instansi;
 use App\Models\KategoriDana;
-use App\Models\PengaturanDistribusi;
+use App\Models\Mustahik;
 use App\Models\ProgramPenyaluran;
-use App\Models\TransaksiZakat;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -42,23 +41,14 @@ class ProgramPenyaluranController extends Controller
 
         return view('admin.program-penyaluran.program-penyaluran-index', [
             'programs' => $programs,
-            'totalDana' => ProgramPenyaluran::where('instansi_id', $instansi->id)->sum('total_dana'),
-            'alokasiAktif' => ProgramPenyaluran::where('instansi_id', $instansi->id)
-                ->where('status', 'aktif')
-                ->sum('total_dana'),
-            'kategoriDana' => $this->kategoriDanaOptions(),
         ]);
     }
 
     public function create(): View
     {
-        $instansi = $this->instansi();
-
         return view('admin.program-penyaluran.program-penyaluran-create', [
             'program' => new ProgramPenyaluran(['status' => 'aktif']),
-            'kategoriDana' => $this->kategoriDanaOptions(),
-            'selectedKategori' => [],
-            'saldoTersedia' => $this->saldoTersedia($instansi),
+            'selectedTargetAsnaf' => array_keys(Mustahik::KATEGORI),
         ]);
     }
 
@@ -75,10 +65,9 @@ class ProgramPenyaluranController extends Controller
                 'deskripsi' => $validated['deskripsi'] ?? null,
                 'total_dana' => $validated['total_dana'] ?? 0,
                 'target_mustahik' => $validated['target_mustahik'] ?? 0,
+                'target_asnaf' => array_values($validated['target_asnaf']),
                 'status' => $validated['status'],
             ]);
-
-            $program->kategoriDana()->sync($validated['kategori_dana_ids']);
         });
 
         return redirect()
@@ -99,13 +88,10 @@ class ProgramPenyaluranController extends Controller
     public function edit(ProgramPenyaluran $programPenyaluran): View
     {
         $this->authorizeProgram($programPenyaluran);
-        $instansi = $this->instansi();
 
         return view('admin.program-penyaluran.program-penyaluran-edit', [
             'program' => $programPenyaluran,
-            'kategoriDana' => $this->kategoriDanaOptions(),
-            'selectedKategori' => $programPenyaluran->kategoriDana()->pluck('kategori_dana.id')->all(),
-            'saldoTersedia' => $this->saldoTersedia($instansi),
+            'selectedTargetAsnaf' => $programPenyaluran->target_asnaf ?? array_keys(Mustahik::KATEGORI),
         ]);
     }
 
@@ -122,10 +108,9 @@ class ProgramPenyaluranController extends Controller
                 'deskripsi' => $validated['deskripsi'] ?? null,
                 'total_dana' => $validated['total_dana'] ?? 0,
                 'target_mustahik' => $validated['target_mustahik'] ?? 0,
+                'target_asnaf' => array_values($validated['target_asnaf']),
                 'status' => $validated['status'],
             ]);
-
-            $programPenyaluran->kategoriDana()->sync($validated['kategori_dana_ids']);
         });
 
         return redirect()
@@ -177,20 +162,6 @@ class ProgramPenyaluranController extends Controller
             ->where('is_active', true)
             ->orderBy('nama')
             ->get();
-    }
-
-    private function saldoTersedia(Instansi $instansi): float
-    {
-        $kasTotal = (float) TransaksiZakat::query()
-            ->where('instansi_id', $instansi->id)
-            ->sum('jumlah');
-
-        $bookedTotal = (float) PengaturanDistribusi::query()
-            ->where('instansi_id', $instansi->id)
-            ->where('status', 'siap')
-            ->sum('total_alokasi');
-
-        return max(0, $kasTotal - $bookedTotal);
     }
 
     private function authorizeProgram(ProgramPenyaluran $program): void

@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -36,6 +37,8 @@ class PemasukanZakatController extends Controller
 
     public function store(Request $request): JsonResponse|RedirectResponse
     {
+        $instansi = $this->instansi();
+
         $validated = $request->validate([
             'nomor_kuitansi' => ['nullable', 'string', 'max:50'],
             'nama_muzakki' => ['required', 'string', 'max:255'],
@@ -43,7 +46,7 @@ class PemasukanZakatController extends Controller
             'desa' => ['required', 'string', 'max:100'],
             'jenis_pembayaran' => ['required', Rule::in(['tunai', 'transfer', 'qris'])],
             'items' => ['required', 'array', 'min:1'],
-            'items.*.kategori_utama' => ['required', Rule::in(['zakat_fitrah', 'zakat_maal', 'infaq_sedekah', 'fidyah'])],
+            'items.*.kategori_utama' => ['required', Rule::in($this->activeKategoriKeys($instansi))],
             'items.*.fitrah_media' => ['nullable', Rule::in(['uang', 'beras'])],
             'items.*.sub_maal' => ['nullable', Rule::in(['Profesi', 'Simpanan', 'Perdagangan', 'Emas', 'Pertanian', 'Peternakan'])],
             'items.*.jumlah_input' => ['required', 'numeric', 'min:0.01'],
@@ -55,7 +58,6 @@ class PemasukanZakatController extends Controller
         $user = $request->user();
         abort_unless($user, 403);
 
-        $instansi = $this->instansi();
         $nomorKuitansi = $validated['nomor_kuitansi'] ?: $this->generateNomorKuitansi();
         $hargaBeras = $this->hargaBerasPerKg();
         $tanggal = now()->toDateString();
@@ -107,7 +109,10 @@ class PemasukanZakatController extends Controller
 
     public function edit(string $id): View
     {
-        return view('admin.pemasukan.pemasukan-edit', compact('id'));
+        return view('admin.pemasukan.pemasukan-edit', [
+            'id' => $id,
+            'kategoriDropdown' => $this->kategoriDropdown($this->instansi()),
+        ]);
     }
 
     public function update(Request $request, string $id): RedirectResponse
@@ -202,10 +207,19 @@ class PemasukanZakatController extends Controller
 
     private function kategoriDana(Instansi $instansi, string $nama): KategoriDana
     {
-        return KategoriDana::firstOrCreate(
-            ['instansi_id' => $instansi->id, 'nama' => $nama],
-            ['is_active' => true]
-        );
+        $kategori = KategoriDana::query()
+            ->where('instansi_id', $instansi->id)
+            ->where('nama', $nama)
+            ->where('is_active', true)
+            ->first();
+
+        if ($kategori) {
+            return $kategori;
+        }
+
+        throw ValidationException::withMessages([
+            'items' => "Kategori dana {$nama} sedang tidak aktif. Aktifkan dulu di halaman Kategori Dana.",
+        ]);
     }
 
     private function instansi(): Instansi
@@ -249,11 +263,56 @@ class PemasukanZakatController extends Controller
 
     private function createViewData(): array
     {
+        $instansi = $this->instansi();
+
         return [
             'nomorKuitansi' => $this->generateNomorKuitansi(),
             'desaOptions' => $this->desaOptions(),
             'rates' => $this->rates(),
+            'kategoriDropdown' => $this->kategoriDropdown($instansi),
+            'activeKategoriKeys' => $this->activeKategoriKeys($instansi),
         ];
+    }
+
+    private function kategoriDropdown(Instansi $instansi): array
+    {
+        return KategoriDana::query()
+            ->where('instansi_id', $instansi->id)
+            ->whereNull('parent_id')
+            ->where('is_active', true)
+            ->with(['children' => fn ($query) => $query->where('is_active', true)->orderBy('nama')])
+            ->orderBy('nama')
+            ->get()
+            ->map(fn (KategoriDana $category) => [
+                'key' => $this->kategoriKeyFromName($category->nama),
+                'label' => $category->nama,
+                'children' => $category->children->map(fn (KategoriDana $child) => [
+                    'id' => $child->id,
+                    'nama' => $child->nama,
+                ])->values()->all(),
+            ])
+            ->filter(fn (array $category) => $category['key'] !== null)
+            ->values()
+            ->all();
+    }
+
+    private function activeKategoriKeys(Instansi $instansi): array
+    {
+        return collect($this->kategoriDropdown($instansi))
+            ->pluck('key')
+            ->values()
+            ->all();
+    }
+
+    private function kategoriKeyFromName(string $nama): ?string
+    {
+        return match (strtolower(trim($nama))) {
+            'zakat fitrah' => 'zakat_fitrah',
+            'zakat maal' => 'zakat_maal',
+            'infaq & sedekah' => 'infaq_sedekah',
+            'fidyah / kaffarah' => 'fidyah',
+            default => null,
+        };
     }
 
     private function generateNomorKuitansi(): string

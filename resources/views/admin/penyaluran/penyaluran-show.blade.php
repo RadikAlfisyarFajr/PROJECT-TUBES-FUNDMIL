@@ -13,6 +13,10 @@
 <body class="sidebar-expanded">
     <div class="admin-layout">
         @include('admin.partials.sidebar', ['active' => 'penyaluran'])
+        @php
+            $plan = $penyaluran->pengaturanDistribusi;
+            $targetAsnaf = collect($plan?->programPenyaluran?->target_asnaf ?? $penyaluran->programPenyaluran?->target_asnaf ?? []);
+        @endphp
 
         <main class="admin-page-content">
             <header class="admin-page-topbar">
@@ -34,7 +38,7 @@
 
             <div class="admin-content-wrap">
                 <div class="row g-4 mb-4">
-                    <div class="col-lg-4">
+                    <div class="col-lg-3">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
                                 <div class="text-muted">Tanggal Penyaluran</div>
@@ -47,7 +51,19 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4">
+                    <div class="col-lg-3">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="text-muted">Rencana Asal</div>
+                                <strong class="fs-5 d-block">{{ $penyaluran->programPenyaluran?->nama_program ?? '-' }}</strong>
+                                @if($plan)
+                                <div class="mt-2 text-muted small">{{ $plan->kode_rencana }}</div>
+                                @endif
+                                <div class="mt-2 text-muted small">Data mengikuti pengaturan distribusi yang dieksekusi.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
                                 <div class="text-muted">Total Penerima</div>
@@ -55,7 +71,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4">
+                    <div class="col-lg-3">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
                                 <div class="text-muted">Total Tersalur</div>
@@ -70,6 +86,15 @@
                         <section class="card shadow-sm">
                             <div class="card-body">
                                 <h2 class="h5 mb-3">Daftar Penerima</h2>
+                                @if($targetAsnaf->isNotEmpty())
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    @foreach($targetAsnaf as $asnaf)
+                                    <span class="badge bg-light border text-dark">
+                                        {{ \App\Models\Mustahik::KATEGORI[$asnaf] ?? str($asnaf)->replace('_', ' ')->title() }}
+                                    </span>
+                                    @endforeach
+                                </div>
+                                @endif
                                 <div class="table-responsive">
                                     <table class="table align-middle mb-0">
                                         <thead class="table-light">

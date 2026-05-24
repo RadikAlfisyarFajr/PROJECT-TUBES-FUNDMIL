@@ -719,7 +719,7 @@
                     @include('admin.partials.account-identity', [
                         'nameClass' => 'admin-name',
                         'roleClass' => 'admin-role',
-                        'avatarClass' => 'avatar',
+                        'avatarClass' => 'admin-avatar',
                     ])
                 </div>
             </header>

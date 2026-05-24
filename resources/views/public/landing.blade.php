@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,33 +18,40 @@
             --line: #e4ebe4;
             --surface: #f4f7f4;
         }
+
         * {
             letter-spacing: 0;
         }
+
         body {
             background: #f8faf8;
             color: var(--ink);
             font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
+
         .site-nav {
             background: rgba(248, 250, 248, .94);
             border-bottom: 1px solid var(--line);
             backdrop-filter: blur(14px);
         }
+
         .brand {
             color: var(--green-dark);
             font-weight: 800;
             text-decoration: none;
         }
+
         .nav-link {
             color: #263326;
             font-size: .92rem;
             font-weight: 600;
         }
+
         .nav-link.active {
             color: var(--green);
             border-bottom: 2px solid var(--green);
         }
+
         .btn-outline-darkgreen {
             border: 1.5px solid var(--green-dark);
             color: var(--green-dark);
@@ -51,6 +59,7 @@
             font-weight: 700;
             padding: .55rem 1.4rem;
         }
+
         .btn-green {
             background: var(--green);
             color: #fff;
@@ -60,6 +69,7 @@
             font-weight: 800;
             padding: .9rem 1.35rem;
         }
+
         .btn-soft {
             background: #e9eeea;
             color: #263326;
@@ -68,9 +78,11 @@
             font-weight: 700;
             padding: .9rem 1.35rem;
         }
+
         .hero {
             padding: 92px 0 72px;
         }
+
         .eyebrow {
             display: inline-flex;
             color: var(--green);
@@ -80,20 +92,24 @@
             font-weight: 800;
             padding: .35rem .75rem;
         }
+
         .hero h1 {
             font-size: clamp(2.8rem, 7vw, 5.8rem);
             line-height: .95;
             font-weight: 900;
         }
+
         .hero h1 span {
             color: var(--green);
             font-style: italic;
         }
+
         .hero-copy {
             color: #4f5b50;
             font-size: 1.05rem;
             max-width: 650px;
         }
+
         .hero-photo {
             width: 100%;
             min-height: 540px;
@@ -101,12 +117,15 @@
             border-radius: 28px;
             box-shadow: 0 28px 55px rgba(19, 35, 22, .18);
         }
+
         .section-soft {
             background: #eff3f0;
         }
+
         .section-pad {
             padding: 88px 0;
         }
+
         .stat-card,
         .program-card,
         .check-card {
@@ -115,30 +134,36 @@
             border-radius: 12px;
             box-shadow: 0 12px 30px rgba(22, 35, 24, .04);
         }
+
         .stat-card {
             min-height: 170px;
             border-bottom: 3px solid var(--green);
             padding: 34px;
         }
+
         .stat-icon {
             color: var(--green);
             font-size: 1.55rem;
         }
+
         .stat-label {
             color: #677267;
             font-size: .78rem;
             font-weight: 800;
             text-transform: uppercase;
         }
+
         .program-image {
             height: 190px;
             width: 100%;
             object-fit: cover;
             border-radius: 10px 10px 0 0;
         }
+
         .program-card {
             overflow: hidden;
         }
+
         .program-title {
             margin-top: -44px;
             color: #fff;
@@ -146,18 +171,22 @@
             z-index: 1;
             padding: 0 18px 16px;
             font-weight: 900;
-            text-shadow: 0 3px 14px rgba(0,0,0,.45);
+            text-shadow: 0 3px 14px rgba(0, 0, 0, .45);
         }
+
         .program-body {
             padding: 20px;
         }
+
         .progress {
             height: 7px;
             background: #e4e9e4;
         }
+
         .progress-bar {
             background: var(--green);
         }
+
         .check-card {
             max-width: 860px;
             margin: 0 auto;
@@ -165,6 +194,7 @@
             position: relative;
             overflow: hidden;
         }
+
         .check-card::after {
             content: "\F52A";
             font-family: "bootstrap-icons";
@@ -174,6 +204,7 @@
             color: #edf0ed;
             font-size: 5rem;
         }
+
         .nik-input {
             min-height: 52px;
             border: 0;
@@ -181,24 +212,29 @@
             background: #e9eeea;
             padding-left: 44px;
         }
+
         .footer {
             background: #eef3ef;
             border-top: 1px solid #dfe8df;
             color: #4d594f;
         }
+
         @media (max-width: 991px) {
             .hero {
                 padding-top: 48px;
             }
+
             .hero-photo {
                 min-height: 360px;
             }
+
             .site-nav .nav {
                 display: none;
             }
         }
     </style>
 </head>
+
 <body>
     <nav class="site-nav sticky-top">
         <div class="container d-flex align-items-center justify-content-between py-3">
@@ -210,8 +246,8 @@
                 <a class="nav-link px-0" href="#cek-mustahik">Cek Mustahik</a>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <a href="{{ route('register') }}" class="btn btn-sm btn-link text-success fw-bold text-decoration-none d-none d-md-inline-flex">Register</a>
-                <a href="{{ route('login') }}" class="btn btn-outline-darkgreen">Login Admin</a>
+                <a href="{{ route('register') }}" class="btn btn-sm btn-link text-success fw-bold text-decoration-none d-none d-md-inline-flex">Daftarkan Instansi Anda</a>
+                <a href="{{ route('login') }}" class="btn btn-outline-darkgreen">Masuk</a>
             </div>
         </div>
     </nav>
@@ -223,7 +259,7 @@
                     <div class="col-lg-6">
                         <span class="eyebrow mb-4">TRANSPARANSI DIGITAL AMANAH</span>
                         <h1 class="mb-4">Transparansi Zakat &amp; Infaq untuk <span>Soreang</span> yang Lebih Sejahtera</h1>
-                        <p class="hero-copy mb-4">Pantau penyaluran dana ZIS secara real-time. Dari umat, oleh umat, untuk umat. Membangun kepercayaan melalui akuntabilitas digital yang tak terputus.</p>
+                        <p class="hero-copy mb-4">Pantau penyalregister ran dana ZIS secara real-time. Dari umat, oleh umat, untuk umat. Membangun kepercayaan melalui akuntabilitas digital yang tak terputus.</p>
                         <div class="d-flex flex-wrap gap-3">
                             <a href="#statistik" class="btn btn-green">Lihat Laporan Penyaluran</a>
                             <a href="#cek-mustahik" class="btn btn-soft">Cek Status Bantuan</a>
@@ -288,7 +324,9 @@
                             <div class="program-body">
                                 <p class="text-muted">Beasiswa dan perlengkapan sekolah bagi yatim dan dhuafa berprestasi.</p>
                                 <div class="d-flex justify-content-between small fw-bold mb-2"><span>Realisasi Target</span><span>92%</span></div>
-                                <div class="progress"><div class="progress-bar" style="width: 92%"></div></div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 92%"></div>
+                                </div>
                             </div>
                         </article>
                     </div>
@@ -299,7 +337,9 @@
                             <div class="program-body">
                                 <p class="text-muted">Distribusi paket pangan pokok untuk keluarga pra-sejahtera selama bulan suci.</p>
                                 <div class="d-flex justify-content-between small fw-bold mb-2"><span>Realisasi Target</span><span>75%</span></div>
-                                <div class="progress"><div class="progress-bar" style="width: 75%"></div></div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 75%"></div>
+                                </div>
                             </div>
                         </article>
                     </div>
@@ -310,7 +350,9 @@
                             <div class="program-body">
                                 <p class="text-muted">Pemberdayaan ekonomi melalui bantuan modal usaha tanpa bunga.</p>
                                 <div class="d-flex justify-content-between small fw-bold mb-2"><span>Realisasi Target</span><span>60%</span></div>
-                                <div class="progress"><div class="progress-bar" style="width: 60%"></div></div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 60%"></div>
+                                </div>
                             </div>
                         </article>
                     </div>
@@ -368,4 +410,5 @@
         </div>
     </footer>
 </body>
+
 </html>

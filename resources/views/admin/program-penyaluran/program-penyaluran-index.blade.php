@@ -36,7 +36,7 @@
                     @include('admin.partials.account-identity', [
                     'nameClass' => 'text-right text-[13px] font-black leading-none',
                     'roleClass' => 'mt-[7px] text-[9px] font-bold uppercase tracking-wide text-[#89938e]',
-                    'avatarClass' => 'grid h-[40px] w-[40px] place-items-center overflow-hidden rounded-full bg-[#e8f4ec] text-[13px] font-black text-[#0b751f] ring-2 ring-white',
+                    'avatarClass' => 'admin-avatar',
                     'imageClass' => 'h-full w-full object-cover',
                     ])
                 </div>
@@ -58,33 +58,6 @@
                 <div class="mt-6 rounded-[14px] border border-[#bfe6c7] bg-[#ecfff1] px-5 py-3 text-sm font-black text-[#0b751f]">{{ session('success') }}</div>
                 @endif
 
-                <div class="mt-[35px] grid gap-[24px] lg:grid-cols-2">
-                    <div class="h-[205px] rounded-[13px] bg-white px-[32px] py-[31px] shadow-sm ring-1 ring-[#e7eeea]">
-                        <div class="flex items-start justify-between">
-                            <span class="flex h-[48px] w-[48px] items-center justify-center rounded-[15px] bg-[#98f091] text-[#0b751f]">
-                                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M4 4h12v12H4V4Zm3 3v6h6V7H7Zm2 2h2v2H9V9Z" />
-                                </svg>
-                            </span>
-                            <p class="text-[9px] font-black uppercase tracking-[0.28em] text-[#7f8a83]">Dana Terkumpul</p>
-                        </div>
-                        <p class="mt-[40px] text-[36px] font-black leading-none">Rp {{ number_format($totalDana, 0, ',', '.') }}</p>
-                        <p class="mt-[8px] text-[15px] text-[#303b34]">Total Dana Tersedia</p>
-                    </div>
-                    <div class="h-[205px] rounded-[13px] bg-white px-[32px] py-[31px] shadow-sm ring-1 ring-[#e7eeea]">
-                        <div class="flex items-start justify-between">
-                            <span class="flex h-[48px] w-[48px] items-center justify-center rounded-[15px] bg-[#c8efc5] text-[#0b751f]">
-                                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M3 5h14v10H3V5Zm3 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm5 0h4v2h-4V8Zm0 3h3v1h-3v-1Z" />
-                                </svg>
-                            </span>
-                            <p class="text-[9px] font-black uppercase tracking-[0.28em] text-[#7f8a83]">Alokasi Aktif</p>
-                        </div>
-                        <p class="mt-[40px] text-[36px] font-black leading-none">Rp {{ number_format($alokasiAktif, 0, ',', '.') }}</p>
-                        <p class="mt-[8px] text-[15px] text-[#303b34]">Total Dialokasikan</p>
-                    </div>
-                </div>
-
                 <form action="{{ route('program-penyaluran.index') }}" method="GET" class="mt-[31px] flex w-full max-w-[630px] overflow-hidden rounded-[14px] bg-[#eef2f0] p-[3px]">
                     @if (request('search'))
                     <input type="hidden" name="search" value="{{ request('search') }}">
@@ -98,7 +71,9 @@
                     @forelse ($programs as $program)
                     @php
                     $progress = $program->progress ?? ($program->status === 'selesai' ? 100 : 0);
-                    $tags = $program->tags ?? $program->kategoriDana->pluck('nama')->filter()->take(2)->all();
+                    $tags = !empty($program->target_asnaf)
+                        ? collect($program->target_asnaf)->map(fn ($asnaf) => \App\Models\Mustahik::KATEGORI[$asnaf] ?? str($asnaf)->replace('_', ' ')->title())->take(2)->all()
+                        : ($program->tags ?? $program->kategoriDana->pluck('nama')->filter()->take(2)->all());
                     $isSelesai = $program->status === 'selesai';
                     @endphp
                     <article class="min-h-[266px] rounded-[13px] bg-white px-[24px] py-[24px] shadow-sm ring-1 ring-[#e3ebe6]">
