@@ -1,128 +1,168 @@
 <?php
 
+use App\Http\Controllers\KategoriDana\KategoriDanaController;
+use App\Http\Controllers\Laporan\LaporanController;
+use App\Http\Controllers\Mustahik\MustahikController;
+use App\Http\Controllers\Pemasukan\PemasukanZakatController;
+use App\Http\Controllers\PengaturanDistribusi\PengaturanDistribusiController;
+use App\Http\Controllers\Penyaluran\PenyaluranController;
+use App\Http\Controllers\ProfilInstansi\ProfilInstansiController;
+use App\Http\Controllers\ProgramPenyaluran\ProgramPenyaluranController;
 use App\Http\Controllers\AuthController;
-use App\Models\Mustahik;
-use App\Models\PenyaluranDetail;
-use App\Models\TransaksiZakat;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\SuperAdmin\ApprovalAdminInstansi\ApprovalAdminInstansiController;
+use App\Http\Controllers\SuperAdmin\ApprovalProgramPenyaluran\ApprovalProgramPenyaluranController;
+use App\Http\Controllers\SuperAdmin\HargaBeras\HargaBerasController;
+use App\Http\Controllers\SuperAdmin\Instansi\InstansiController;
+use App\Http\Controllers\SuperAdmin\Monitoring\MonitoringController;
+use App\Http\Controllers\SuperAdmin\Nishab\NishabController;
+use App\Http\Controllers\SuperAdmin\Pengguna\PenggunaController;
+
+// =====================
+// PUBLIC ROUTES
+// =====================
 
 Route::get('/', [AuthController::class, 'showLandingPage'])->name('public.home');
 Route::get('/auth', [AuthController::class, 'showAuthForm'])->name('auth');
 
 require __DIR__ . '/auth.php';
 
+// =====================
+// AUTHENTICATED ROUTES
+// =====================
+
 Route::middleware('auth')->group(function () {
+    // =====================
+    // DASHBOARD ROUTES
+    // =====================
+
     Route::get('/dashboard', function () {
-        $user = Auth::user();
-
-        if (! $user instanceof User) {
-            abort(403, 'Unauthorized');
-        }
-
-        return $user->role === 'super_admin'
+        return Auth::user()?->role === 'super_admin'
             ? redirect()->route('dashboard.superadmin')
             : redirect()->route('dashboard.admin');
     })->name('dashboard');
 
-    Route::get('/dashboard/admin', function () {
-        $user = Auth::user();
+    Route::get('/dashboard/admin', [AuthController::class, 'showAdminDashboard'])
+        ->name('dashboard.admin');
 
-        if (! $user instanceof User || $user->role !== 'admin_instansi') {
-            abort(403, 'Unauthorized');
-        }
+    // =====================
+    // SUPERADMIN ROUTES
+    // =====================
 
-        $user->load('instansi');
-        $instansiId = $user->instansi_id;
-        $hargaBeras = (float) (DB::table('harga_beras')
-            ->where('tanggal_berlaku', '<=', now()->toDateString())
-            ->orderByDesc('tanggal_berlaku')
-            ->value('harga_per_kg') ?? 0);
-        $nishabMaal = (float) (DB::table('nishab')
-            ->whereIn('jenis_zakat', ['zakat_maal', 'zakat mal', 'zakat maal', 'maal', 'mal'])
-            ->where('tanggal_berlaku', '<=', now()->toDateString())
-            ->orderByDesc('tanggal_berlaku')
-            ->value('nishab_rupiah') ?? 0);
-        $totalPengumpulan = $instansiId
-            ? (float) TransaksiZakat::where('instansi_id', $instansiId)->sum('jumlah')
-            : 0;
-        $totalTersalurkan = $instansiId
-            ? (float) PenyaluranDetail::whereHas('penyaluran', fn ($query) => $query
-                ->where('instansi_id', $instansiId)
-                ->where('status', 'selesai'))
-                ->sum('jumlah_diterima')
-            : 0;
+    Route::middleware('superadmin')->group(function () {
+        Route::get('/dashboard/superadmin', [AuthController::class, 'showSuperAdminDashboard'])
+            ->name('dashboard.superadmin');
 
-        return view('dashboard.admin', [
-            'instansi' => $user->instansi,
-            'dashboardStats' => [
-                'hargaBeras' => $hargaBeras,
-                'nishabMaal' => $nishabMaal,
-                'totalPengumpulan' => $totalPengumpulan,
-                'totalTersalurkan' => $totalTersalurkan,
-                'saldoSiapDisalurkan' => max(0, $totalPengumpulan - $totalTersalurkan),
-                'totalMuzakki' => $instansiId
-                    ? TransaksiZakat::where('instansi_id', $instansiId)->distinct('nama_muzakki')->count('nama_muzakki')
-                    : 0,
-                'mustahikTersalurkan' => $instansiId
-                    ? PenyaluranDetail::whereHas('penyaluran', fn ($query) => $query
-                        ->where('instansi_id', $instansiId)
-                        ->where('status', 'selesai'))
-                        ->where('status_penerimaan', '!=', 'ditolak')
-                        ->count()
-                    : 0,
-                'totalMustahik' => $instansiId
-                    ? Mustahik::where('instansi_id', $instansiId)->count()
-                    : 0,
-            ],
-            'recentTransactions' => $instansiId
-                ? TransaksiZakat::with('kategori')
-                    ->where('instansi_id', $instansiId)
-                    ->latest('tanggal')
-                    ->latest('id')
-                    ->limit(5)
-                    ->get()
-                : collect(),
-            'topWilayah' => $instansiId
-                ? TransaksiZakat::query()
-                    ->where('instansi_id', $instansiId)
-                    ->whereNotNull('desa')
-                    ->where('desa', '<>', '')
-                    ->select('desa')
-                    ->selectRaw('SUM(jumlah) as total')
-                    ->selectRaw('COUNT(*) as total_transaksi')
-                    ->groupBy('desa')
-                    ->orderByDesc('total')
-                    ->limit(3)
-                    ->get()
-                : collect(),
-        ]);
-    })->name('dashboard.admin');
+        Route::post('/dashboard/superadmin/approve/{user}', [AuthController::class, 'approveAdminInstansi'])
+            ->name('superadmin.approve');
+        Route::post('/dashboard/superadmin/reject/{user}', [AuthController::class, 'rejectAdminInstansi'])
+            ->name('superadmin.reject');
 
-    Route::get('/dashboard/superadmin', [AuthController::class, 'showSuperAdminDashboard'])
-        ->name('dashboard.superadmin');
+        Route::prefix('superadmin')->name('superadmin.')->group(function () {
+            Route::prefix('approval-admin-instansi')
+                ->controller(ApprovalAdminInstansiController::class)
+                ->name('approval-admin-instansi.')
+                ->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::get('/{id}', 'show')->name('show');
+                    Route::post('/{id}/approve', 'approve')->name('approve');
+                    Route::post('/{id}/reject', 'reject')->name('reject');
+                });
 
-    Route::post('/dashboard/superadmin/approve/{user}', [AuthController::class, 'approveAdminInstansi'])
-        ->name('superadmin.approve');
-    Route::post('/dashboard/superadmin/reject/{user}', [AuthController::class, 'rejectAdminInstansi'])
-        ->name('superadmin.reject');
+            Route::resource('instansi', InstansiController::class)->names('instansi');
+            Route::resource('pengguna', PenggunaController::class)->names('pengguna');
+            Route::resource('harga-beras', HargaBerasController::class)->names('harga-beras');
+            Route::resource('nishab', NishabController::class)->names('nishab');
 
-    require __DIR__ . '/admin/profil-instansi.php';
-    require __DIR__ . '/admin/kategori-dana.php';
-    require __DIR__ . '/admin/pemasukan.php';
-    require __DIR__ . '/admin/mustahik.php';
-    require __DIR__ . '/admin/program-penyaluran.php';
-    require __DIR__ . '/admin/pengaturan-distribusi.php';
-    require __DIR__ . '/admin/penyaluran.php';
-    require __DIR__ . '/admin/laporan.php';
+            Route::prefix('approval-program-penyaluran')
+                ->controller(ApprovalProgramPenyaluranController::class)
+                ->name('approval-program-penyaluran.')
+                ->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::get('/{id}', 'show')->name('show');
+                    Route::post('/{id}/approve', 'approve')->name('approve');
+                    Route::post('/{id}/reject', 'reject')->name('reject');
+                });
 
-    require __DIR__ . '/superadmin/approval-admin-instansi.php';
-    require __DIR__ . '/superadmin/instansi.php';
-    require __DIR__ . '/superadmin/pengguna.php';
-    require __DIR__ . '/superadmin/harga-beras.php';
-    require __DIR__ . '/superadmin/nishab.php';
-    require __DIR__ . '/superadmin/approval-program-penyaluran.php';
-    require __DIR__ . '/superadmin/monitoring.php';
+            Route::get('monitoring', [MonitoringController::class, 'index'])->name('monitoring.index');
+        });
+    });
+
+    // =====================
+    // ADMIN INSTANSI ROUTES
+    // =====================
+
+    Route::middleware('admin.instansi')->group(function () {
+        Route::resource('mustahik', MustahikController::class)
+            ->names('mustahik');
+
+        Route::resource('program-penyaluran', ProgramPenyaluranController::class)
+            ->parameters(['program-penyaluran' => 'program_penyaluran'])
+            ->names('program-penyaluran');
+
+        Route::resource('kategori-dana', KategoriDanaController::class)
+            ->names('kategori-dana');
+
+        Route::resource('pemasukan', PemasukanZakatController::class)
+            ->names('pemasukan');
+
+        Route::resource('pengaturan-distribusi', PengaturanDistribusiController::class)
+            ->parameters(['pengaturan-distribusi' => 'program_penyaluran'])
+            ->names('pengaturan-distribusi');
+
+        Route::resource('penyaluran', PenyaluranController::class)
+            ->names('penyaluran');
+    });
+
+    // =====================
+    // SHARED AUTH ROUTES
+    // =====================
+
+    Route::prefix('kategori-dana')
+        ->controller(KategoriDanaController::class)
+        ->name('kategori-dana.')
+        ->group(function () {
+            Route::post('notifikasi/read', 'markNotificationsRead')->name('notifications.read');
+        });
+
+    Route::prefix('pengaturan-distribusi')
+        ->controller(PengaturanDistribusiController::class)
+        ->name('pengaturan-distribusi.')
+        ->group(function () {
+            Route::get('mustahik-search', 'searchMustahik')->name('mustahik-search');
+        });
+
+    Route::prefix('profil-instansi')
+        ->controller(ProfilInstansiController::class)
+        ->name('profil-instansi.')
+        ->group(function () {
+            Route::post('rekening', 'storeRekening')->name('rekening.store');
+            Route::put('rekening/{rekening}', 'updateRekening')->name('rekening.update');
+            Route::delete('rekening/{rekening}', 'destroyRekening')->name('rekening.destroy');
+            Route::post('notifikasi/read', 'markNotificationsRead')->name('notifications.read');
+        });
+
+    Route::resource('profil-instansi', ProfilInstansiController::class)
+        ->names('profil-instansi');
+
+    // =====================
+    // LAPORAN ROUTES
+    // =====================
+
+    Route::prefix('laporan')
+        ->controller(LaporanController::class)
+        ->name('laporan.')
+        ->group(function () {
+            Route::get('pemasukan', 'pemasukan')->name('pemasukan');
+            Route::get('pemasukan/{id}/detail', 'pemasukanDetail')->name('pemasukan.detail')->whereNumber('id');
+            Route::get('mustahik', 'mustahik')->name('mustahik');
+            Route::get('mustahik/{id}/detail', 'mustahikDetail')->name('mustahik.detail')->whereNumber('id');
+            Route::get('penyaluran', 'penyaluran')->name('penyaluran');
+            Route::get('penyaluran/{id}/detail', 'penyaluranDetail')->name('penyaluran.detail')->whereNumber('id');
+            Route::get('keuangan', 'keuangan')->name('keuangan');
+        });
+
+    Route::resource('laporan', LaporanController::class)
+        ->names('laporan');
 });
