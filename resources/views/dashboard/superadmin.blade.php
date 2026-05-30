@@ -1,119 +1,154 @@
+@php
+    $rupiah = fn ($value) => 'Rp ' . number_format((float) $value, 0, ',', '.');
+    $maxPengumpulan = max(1, (float) $chartRows->max('pengumpulan'));
+@endphp
+
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Super Admin</title>
+    <title>Dashboard Global | Super Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
     <link href="{{ asset('css/admin-theme.css') }}" rel="stylesheet">
 </head>
-
 <body class="sidebar-expanded">
     <div class="admin-layout">
         @include('superadmin.partials.sidebar', ['active' => 'dashboard'])
 
         <main class="admin-page-content">
-            <header class="admin-page-topbar mb-4">
-                <h1 class="admin-page-title">Dashboard Super Admin</h1>
-                <p class="admin-page-desc">Selamat datang di dashboard super admin. Silakan pilih menu di samping untuk mengelola aplikasi.</p>
+            <header class="admin-page-topbar">
+                <div>
+                    <h1 class="admin-page-title">Dashboard Global</h1>
+                    <p class="admin-page-desc">Pemantauan kas dan agregasi pengumpulan ZIS antarinstansi Kecamatan Soreang.</p>
+                </div>
+                <div class="admin-top-actions">
+                    <a class="admin-secondary-btn" href="{{ route('superadmin.approval-admin-instansi.index') }}">
+                        <i class="bi bi-person-check-fill"></i>
+                        <span>{{ $summary['pendingApproval'] }} pending</span>
+                    </a>
+                </div>
             </header>
-            <div class="row g-4">
-                <div class="col-md-6 col-lg-4">
-                    <a href="{{ route('superadmin.approval-admin-instansi.index') }}" class="text-decoration-none">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body d-flex align-items-center gap-3">
-                                <i class="bi bi-person-check-fill fs-2 text-success"></i>
-                                <div>
-                                    <div class="fw-bold">Approval Admin Instansi</div>
-                                    <div class="text-muted small">Persetujuan akun admin instansi</div>
-                                </div>
+
+            <div class="admin-content-wrap">
+                <section class="super-stat-grid">
+                    <article class="super-stat-card">
+                        <span>Lembaga amil aktif</span>
+                        <strong>{{ $summary['instansiAktif'] }}</strong>
+                    </article>
+                    <article class="super-stat-card">
+                        <span>Total ZIS terkumpul</span>
+                        <strong>{{ $rupiah($summary['totalPengumpulan']) }}</strong>
+                    </article>
+                    <article class="super-stat-card">
+                        <span>Kas tersalurkan</span>
+                        <strong>{{ $rupiah($summary['totalPenyaluran']) }}</strong>
+                    </article>
+                    <article class="super-stat-card">
+                        <span>Saldo kas agregat</span>
+                        <strong>{{ $rupiah($summary['totalSaldo']) }}</strong>
+                    </article>
+                </section>
+
+                <section class="super-grid mt-4">
+                    <div class="admin-panel">
+                        <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+                            <div>
+                                <h2 class="super-section-title">Performa Pengumpulan ZIS</h2>
+                                <p class="super-section-desc">Delapan instansi dengan total pengumpulan tertinggi.</p>
                             </div>
+                            <i class="bi bi-bar-chart-fill super-panel-icon"></i>
                         </div>
-                    </a>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <a href="{{ route('superadmin.instansi.index') }}" class="text-decoration-none">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body d-flex align-items-center gap-3">
-                                <i class="bi bi-bank2 fs-2 text-primary"></i>
-                                <div>
-                                    <div class="fw-bold">Instansi</div>
-                                    <div class="text-muted small">Manajemen data instansi</div>
+
+                        <div class="super-bar-list">
+                            @forelse($chartRows as $row)
+                                <div class="super-bar-row">
+                                    <div>
+                                        <strong>{{ $row['nama'] }}</strong>
+                                        <span>{{ $row['desa'] }}</span>
+                                    </div>
+                                    <div class="super-bar-track">
+                                        <span style="width: {{ max(4, ($row['pengumpulan'] / $maxPengumpulan) * 100) }}%"></span>
+                                    </div>
+                                    <b>{{ $rupiah($row['pengumpulan']) }}</b>
                                 </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <a href="{{ route('superadmin.pengguna.index') }}" class="text-decoration-none">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body d-flex align-items-center gap-3">
-                                <i class="bi bi-people-fill fs-2 text-info"></i>
-                                <div>
-                                    <div class="fw-bold">Pengguna</div>
-                                    <div class="text-muted small">Manajemen pengguna aplikasi</div>
+                            @empty
+                                <div class="admin-empty-state">
+                                    <div class="admin-empty-icon"><i class="bi bi-graph-up"></i></div>
+                                    <h2>Belum Ada Data ZIS</h2>
+                                    <p>Data grafik akan muncul setelah admin instansi mencatat pemasukan ZIS.</p>
                                 </div>
-                            </div>
+                            @endforelse
                         </div>
-                    </a>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <a href="{{ route('superadmin.harga-beras.index') }}" class="text-decoration-none">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body d-flex align-items-center gap-3">
-                                <i class="bi bi-basket2-fill fs-2 text-warning"></i>
-                                <div>
-                                    <div class="fw-bold">Harga Beras</div>
-                                    <div class="text-muted small">Pengaturan harga beras</div>
-                                </div>
-                            </div>
+                    </div>
+
+                    <div class="admin-panel">
+                        <h2 class="super-section-title">Parameter Nasional</h2>
+                        <p class="super-section-desc">Acuan yang dipakai admin instansi dalam transaksi zakat.</p>
+
+                        <div class="super-param-list">
+                            <a href="{{ route('superadmin.harga-beras.index') }}">
+                                <i class="bi bi-basket2-fill"></i>
+                                <span>Harga beras pasar</span>
+                                <strong>{{ $rupiah($summary['hargaBeras']) }}/kg</strong>
+                            </a>
+                            <a href="{{ route('superadmin.nishab.index') }}">
+                                <i class="bi bi-gem"></i>
+                                <span>Nishab zakat maal</span>
+                                <strong>{{ $rupiah($summary['nishabMaal']) }}</strong>
+                            </a>
+                            <a href="{{ route('superadmin.instansi.index') }}">
+                                <i class="bi bi-bank2"></i>
+                                <span>Akun resmi desa</span>
+                                <strong>Kelola</strong>
+                            </a>
                         </div>
-                    </a>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <a href="{{ route('superadmin.nishab.index') }}" class="text-decoration-none">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body d-flex align-items-center gap-3">
-                                <i class="bi bi-gem fs-2 text-danger"></i>
-                                <div>
-                                    <div class="fw-bold">Nishab</div>
-                                    <div class="text-muted small">Pengaturan nishab zakat</div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <a href="{{ route('superadmin.approval-program-penyaluran.index') }}" class="text-decoration-none">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body d-flex align-items-center gap-3">
-                                <i class="bi bi-clipboard2-check-fill fs-2 text-success"></i>
-                                <div>
-                                    <div class="fw-bold">Approval Program</div>
-                                    <div class="text-muted small">Persetujuan program penyaluran</div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <a href="{{ route('superadmin.monitoring.index') }}" class="text-decoration-none">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body d-flex align-items-center gap-3">
-                                <i class="bi bi-graph-up-arrow fs-2 text-secondary"></i>
-                                <div>
-                                    <div class="fw-bold">Monitoring</div>
-                                    <div class="text-muted small">Monitoring distribusi &amp; program</div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
+                    </div>
+                </section>
+
+                <section class="admin-panel mt-4">
+                    <div class="table-responsive">
+                        <table class="table super-table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Instansi</th>
+                                    <th>Desa</th>
+                                    <th>Tipe</th>
+                                    <th class="text-end">Pengumpulan</th>
+                                    <th class="text-end">Tersalurkan</th>
+                                    <th class="text-end">Saldo Kas</th>
+                                    <th class="text-end">Transaksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($rows as $row)
+                                    <tr>
+                                        <td class="fw-bold">{{ $row['nama'] }}</td>
+                                        <td>{{ $row['desa'] }}</td>
+                                        <td>{{ $row['tipe'] }}</td>
+                                        <td class="text-end">{{ $rupiah($row['pengumpulan']) }}</td>
+                                        <td class="text-end">{{ $rupiah($row['penyaluran']) }}</td>
+                                        <td class="text-end fw-bold">{{ $rupiah($row['saldo']) }}</td>
+                                        <td class="text-end">{{ $row['transaksi'] }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-5">Belum ada instansi aktif.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
-</body>
 
+    <script>
+        document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+            document.body.classList.toggle('sidebar-expanded');
+        });
+    </script>
+</body>
 </html>

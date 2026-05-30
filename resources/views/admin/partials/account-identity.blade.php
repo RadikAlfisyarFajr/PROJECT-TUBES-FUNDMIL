@@ -3,7 +3,11 @@
     $accountInstansi = $instansi ?? $accountUser?->instansi;
     $accountName = $accountInstansi?->nama
         ?: ($accountUser?->nama_instansi ?: ($accountUser?->name ?: 'Admin Instansi'));
-    $accountRole = $accountInstansi?->tipe ?: 'Admin Instansi';
+    $accountRole = match ($accountUser?->role) {
+        \App\Models\User::ROLE_SUPER_ADMIN => 'Super Admin',
+        \App\Models\User::ROLE_ADMIN_KEPALA_DESA => 'Admin Kepala Desa',
+        default => $accountInstansi?->tipe ?: 'Admin Instansi',
+    };
     $accountLogo = $accountInstansi?->logo;
     $accountInitials = collect(preg_split('/\s+/', trim($accountName)))
         ->filter()
@@ -15,6 +19,9 @@
     $roleClass = $roleClass ?? 'admin-user-role';
     $avatarClass = $avatarClass ?? 'admin-avatar';
     $imageClass = $imageClass ?? '';
+    $profileUrl = $accountUser?->role === \App\Models\User::ROLE_ADMIN_KEPALA_DESA
+        ? route('kepala-desa.dashboard')
+        : route('profil-instansi.index');
 @endphp
 
 <style>
@@ -97,7 +104,7 @@
             @endif
         </summary>
         <div class="account-dropdown-menu">
-            <a class="account-dropdown-item" href="{{ route('profil-instansi.index') }}">
+            <a class="account-dropdown-item" href="{{ $profileUrl }}">
                 <i class="bi bi-person-circle"></i>
                 <span>Lihat Profile</span>
             </a>

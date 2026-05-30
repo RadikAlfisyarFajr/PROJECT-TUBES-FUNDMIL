@@ -243,6 +243,10 @@ class PemasukanZakatController extends Controller
     private function hargaBerasPerKg(): float
     {
         return (float) (DB::table('harga_beras')
+            ->where('tanggal_berlaku', '<=', now()->toDateString())
+            ->where(fn ($query) => $query
+                ->whereNull('tanggal_berakhir')
+                ->orWhere('tanggal_berakhir', '>=', now()->toDateString()))
             ->latest('tanggal_berlaku')
             ->value('harga_per_kg') ?: self::DEFAULT_HARGA_BERAS_PER_KG);
     }

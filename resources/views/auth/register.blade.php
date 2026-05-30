@@ -22,7 +22,7 @@
             padding: 32px 16px;
         }
         .auth-card {
-            width: min(100%, 540px);
+            width: min(100%, 760px);
             background: #fff;
             border: 1px solid #e6ece5;
             border-radius: 22px;
@@ -89,27 +89,86 @@
 
             <form method="POST" action="{{ route('register') }}">
                 @csrf
-                <div class="mb-3">
-                    <label class="form-label fw-semibold" for="nama_instansi">Nama Instansi</label>
-                    <input id="nama_instansi" type="text" name="nama_instansi" value="{{ old('nama_instansi') }}" class="form-control @error('nama_instansi') is-invalid @enderror" placeholder="Contoh: Masjid Agung Al-Falah">
-                    @error('nama_instansi')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                <div class="row g-3">
+                    <div class="col-md-7">
+                        <label class="form-label fw-semibold" for="nama_instansi">Nama Instansi</label>
+                        <input id="nama_instansi" type="text" name="nama_instansi" value="{{ old('nama_instansi') }}" class="form-control @error('nama_instansi') is-invalid @enderror" placeholder="Contoh: LAZ Al-Falah Soreang">
+                        @error('nama_instansi')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label fw-semibold" for="tipe">Tipe Lembaga</label>
+                        <select id="tipe" name="tipe" class="form-select @error('tipe') is-invalid @enderror">
+                            <option value="" disabled selected>Pilih Tipe</option>
+                            @foreach(['Masjid', 'UPZ', 'Lembaga Amil Zakat'] as $tipe)
+                                <option value="{{ $tipe }}" {{ old('tipe') === $tipe ? 'selected' : '' }}>{{ $tipe }}</option>
+                            @endforeach
+                        </select>
+                        @error('tipe')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold" for="desa">Desa</label>
-                    <select id="desa" name="desa" class="form-select @error('desa') is-invalid @enderror">
-                        <option value="" disabled selected>Pilih Desa</option>
-                        @foreach($desaOptions as $desa)
-                            <option value="{{ $desa }}" {{ old('desa') === $desa ? 'selected' : '' }}>{{ $desa }}</option>
-                        @endforeach
-                    </select>
-                    @error('desa')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+
+                <div class="row g-3 mt-0">
+                    <div class="col-md-5">
+                        <label class="form-label fw-semibold" for="desa">Desa</label>
+                        <select id="desa" name="desa" class="form-select @error('desa') is-invalid @enderror">
+                            <option value="" disabled selected>Pilih Desa</option>
+                            @foreach($desaOptions as $desa)
+                                <option value="{{ $desa }}" {{ old('desa') === $desa ? 'selected' : '' }}>{{ $desa }}</option>
+                            @endforeach
+                        </select>
+                        @error('desa')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-7">
+                        <label class="form-label fw-semibold" for="alamat">Alamat Lengkap</label>
+                        <input id="alamat" type="text" name="alamat" value="{{ old('alamat') }}" class="form-control @error('alamat') is-invalid @enderror" placeholder="Nama jalan, RT/RW, patokan lokasi">
+                        @error('alamat')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold" for="email">Email</label>
+
+                <div class="row g-3 mt-0">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" for="nomor_sk">Nomor SK/Izin</label>
+                        <input id="nomor_sk" type="text" name="nomor_sk" value="{{ old('nomor_sk') }}" class="form-control @error('nomor_sk') is-invalid @enderror" placeholder="Nomor legalitas lembaga">
+                        @error('nomor_sk')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" for="masa_berlaku">Masa Berlaku SK</label>
+                        <input id="masa_berlaku" type="date" name="masa_berlaku" value="{{ old('masa_berlaku') }}" class="form-control @error('masa_berlaku') is-invalid @enderror">
+                        @error('masa_berlaku')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-0">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" for="nama_pimpinan">Pimpinan/Penanggung Jawab</label>
+                        <input id="nama_pimpinan" type="text" name="nama_pimpinan" value="{{ old('nama_pimpinan') }}" class="form-control @error('nama_pimpinan') is-invalid @enderror" placeholder="Nama lengkap">
+                        @error('nama_pimpinan')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" for="kontak">Nomor Kontak</label>
+                        <input id="kontak" type="text" name="kontak" value="{{ old('kontak') }}" class="form-control @error('kontak') is-invalid @enderror" placeholder="08xx atau nomor kantor">
+                        @error('kontak')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="mt-3 mb-3">
+                    <label class="form-label fw-semibold" for="email">Email Admin</label>
                     <input id="email" type="email" name="email" value="{{ old('email') }}" class="form-control @error('email') is-invalid @enderror" placeholder="admin@instansi.id">
                     @error('email')
                         <div class="invalid-feedback">{{ $message }}</div>

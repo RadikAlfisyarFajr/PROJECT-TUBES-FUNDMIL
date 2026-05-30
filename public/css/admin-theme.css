@@ -198,6 +198,288 @@ textarea,
     line-height: 1.65;
 }
 
+.super-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.super-stat-card {
+    min-height: 118px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: var(--shadow);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.super-stat-card span,
+.super-section-desc {
+    color: var(--muted);
+    font-size: .84rem;
+    line-height: 1.5;
+}
+
+.super-stat-card strong {
+    color: var(--green-dark);
+    font-size: clamp(1.35rem, 2vw, 1.95rem);
+    font-weight: 900;
+    line-height: 1.12;
+}
+
+.super-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(320px, .65fr);
+    gap: 22px;
+    align-items: start;
+}
+
+.super-section-title {
+    margin: 0;
+    font-size: 1.08rem;
+    font-weight: 900;
+}
+
+.super-section-desc {
+    margin: 6px 0 0;
+}
+
+.super-panel-icon {
+    color: var(--green);
+    font-size: 1.5rem;
+}
+
+.super-bar-list {
+    display: grid;
+    gap: 16px;
+}
+
+.super-bar-row {
+    display: grid;
+    grid-template-columns: minmax(160px, .9fr) minmax(180px, 1.4fr) minmax(120px, auto);
+    gap: 14px;
+    align-items: center;
+}
+
+.super-bar-row strong,
+.super-bar-row span {
+    display: block;
+}
+
+.super-bar-row strong {
+    font-size: .9rem;
+    font-weight: 900;
+}
+
+.super-bar-row span {
+    color: var(--muted);
+    font-size: .76rem;
+}
+
+.super-bar-track {
+    height: 12px;
+    border-radius: 999px;
+    background: #ecf1ee;
+    overflow: hidden;
+}
+
+.super-bar-track span {
+    height: 100%;
+    border-radius: inherit;
+    background: #0b7131;
+}
+
+.super-bar-row b {
+    text-align: right;
+    font-size: .84rem;
+}
+
+.super-param-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.super-param-list a {
+    min-height: 72px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #f8fbf9;
+    color: inherit;
+    padding: 14px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 4px 12px;
+    text-decoration: none;
+}
+
+.super-param-list a:hover {
+    border-color: rgba(7, 101, 31, .35);
+    background: #fff;
+}
+
+.super-param-list i {
+    grid-row: span 2;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--green-soft);
+    color: var(--green);
+    display: grid;
+    place-items: center;
+}
+
+.super-param-list span {
+    color: var(--muted);
+    font-size: .8rem;
+}
+
+.super-param-list strong {
+    font-weight: 900;
+}
+
+.super-table th {
+    color: #66746b;
+    font-size: .74rem;
+    font-weight: 900;
+    text-transform: none;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+}
+
+.super-table td {
+    border-bottom: 1px solid #eef2ef;
+}
+
+.super-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.super-count-pill {
+    min-height: 48px;
+    border-radius: 999px;
+    background: var(--green-soft);
+    color: var(--green-dark);
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-weight: 900;
+}
+
+.super-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.super-span-2 {
+    grid-column: 1 / -1;
+}
+
+.super-detail-list {
+    display: grid;
+    gap: 12px;
+    margin: 20px 0 0;
+}
+
+.super-detail-list div {
+    border-bottom: 1px solid #eef2ef;
+    padding-bottom: 12px;
+}
+
+.super-detail-list dt {
+    color: var(--muted);
+    font-size: .76rem;
+    font-weight: 900;
+}
+
+.super-detail-list dd {
+    margin: 4px 0 0;
+    font-weight: 800;
+}
+
+.super-check-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.super-check-list div {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+}
+
+.super-check-list .is-ok {
+    color: #08712c;
+    background: #f3fbf5;
+}
+
+.super-check-list .is-bad {
+    color: #b42335;
+    background: #fff6f7;
+}
+
+.super-verify-box {
+    border: 1px solid #dfe8e2;
+    border-radius: 12px;
+    background: #f8fbf9;
+    padding: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-weight: 800;
+}
+
+.super-verify-box input {
+    margin-top: 4px;
+    accent-color: var(--green);
+}
+
+.super-danger-btn {
+    min-height: 42px;
+    border: 1px solid #f0b6be;
+    border-radius: 12px;
+    background: #fff;
+    color: #b42335;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 900;
+}
+
+.super-danger-btn:hover {
+    background: #fff6f7;
+}
+
+.super-status {
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: .72rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.super-status.is-active {
+    background: var(--green-soft);
+    color: var(--green);
+}
+
+.super-status.is-off {
+    background: #f1f2f1;
+    color: #69736e;
+}
+
 /* Ensure numeric values and display sizes use the admin font and consistent digits */
 .card-body strong,
 .table,
@@ -544,6 +826,34 @@ textarea,
     border-color: rgba(7, 101, 31, .55);
     background: #fff;
     box-shadow: 0 0 0 4px rgba(7, 101, 31, .08);
+}
+
+.password-input-wrap {
+    position: relative;
+}
+
+.password-input-wrap .distribution-input {
+    padding-right: 48px;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #59665f;
+    display: grid;
+    place-items: center;
+    transform: translateY(-50%);
+}
+
+.password-toggle-btn:hover {
+    background: var(--green-soft);
+    color: var(--green);
 }
 
 .recipient-toggle {
@@ -1049,7 +1359,10 @@ body.sidebar-expanded .admin-sidebar .sidebar-toggle span {
 
     .distribution-balance-grid,
     .distribution-status-grid,
-    .distribution-workspace {
+    .distribution-workspace,
+    .super-stat-grid,
+    .super-grid,
+    .super-form-grid {
         grid-template-columns: 1fr;
     }
 
@@ -1106,8 +1419,17 @@ body.sidebar-expanded .admin-sidebar .sidebar-toggle span {
         padding: 18px;
     }
 
-    .distribution-table {
+    .distribution-table,
+    .super-table {
         min-width: 640px;
+    }
+
+    .super-bar-row {
+        grid-template-columns: 1fr;
+    }
+
+    .super-bar-row b {
+        text-align: left;
     }
 
     .admin-sidebar .sidebar-nav {

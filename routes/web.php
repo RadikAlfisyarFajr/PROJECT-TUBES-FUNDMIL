@@ -9,15 +9,13 @@ use App\Http\Controllers\Penyaluran\PenyaluranController;
 use App\Http\Controllers\ProfilInstansi\ProfilInstansiController;
 use App\Http\Controllers\ProgramPenyaluran\ProgramPenyaluranController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\KepalaDesa\KepalaDesaController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\SuperAdmin\ApprovalAdminInstansi\ApprovalAdminInstansiController;
-use App\Http\Controllers\SuperAdmin\ApprovalProgramPenyaluran\ApprovalProgramPenyaluranController;
 use App\Http\Controllers\SuperAdmin\HargaBeras\HargaBerasController;
 use App\Http\Controllers\SuperAdmin\Instansi\InstansiController;
-use App\Http\Controllers\SuperAdmin\Monitoring\MonitoringController;
 use App\Http\Controllers\SuperAdmin\Nishab\NishabController;
-use App\Http\Controllers\SuperAdmin\Pengguna\PenggunaController;
 
 // =====================
 // PUBLIC ROUTES
@@ -38,9 +36,11 @@ Route::middleware('auth')->group(function () {
     // =====================
 
     Route::get('/dashboard', function () {
-        return Auth::user()?->role === 'super_admin'
-            ? redirect()->route('dashboard.superadmin')
-            : redirect()->route('dashboard.admin');
+        return match (Auth::user()?->role) {
+            'super_admin' => redirect()->route('dashboard.superadmin'),
+            'admin_kepala_desa' => redirect()->route('kepala-desa.dashboard'),
+            default => redirect()->route('dashboard.admin'),
+        };
     })->name('dashboard');
 
     Route::get('/dashboard/admin', [AuthController::class, 'showAdminDashboard'])
@@ -54,38 +54,20 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard/superadmin', [AuthController::class, 'showSuperAdminDashboard'])
             ->name('dashboard.superadmin');
 
-        Route::post('/dashboard/superadmin/approve/{user}', [AuthController::class, 'approveAdminInstansi'])
-            ->name('superadmin.approve');
-        Route::post('/dashboard/superadmin/reject/{user}', [AuthController::class, 'rejectAdminInstansi'])
-            ->name('superadmin.reject');
-
         Route::prefix('superadmin')->name('superadmin.')->group(function () {
             Route::prefix('approval-admin-instansi')
                 ->controller(ApprovalAdminInstansiController::class)
                 ->name('approval-admin-instansi.')
                 ->group(function () {
                     Route::get('/', 'index')->name('index');
-                    Route::get('/{id}', 'show')->name('show');
-                    Route::post('/{id}/approve', 'approve')->name('approve');
-                    Route::post('/{id}/reject', 'reject')->name('reject');
+                    Route::get('/{user}', 'show')->name('show');
+                    Route::post('/{user}/approve', 'approve')->name('approve');
+                    Route::post('/{user}/reject', 'reject')->name('reject');
                 });
 
-            Route::resource('instansi', InstansiController::class)->names('instansi');
-            Route::resource('pengguna', PenggunaController::class)->names('pengguna');
-            Route::resource('harga-beras', HargaBerasController::class)->names('harga-beras');
-            Route::resource('nishab', NishabController::class)->names('nishab');
-
-            Route::prefix('approval-program-penyaluran')
-                ->controller(ApprovalProgramPenyaluranController::class)
-                ->name('approval-program-penyaluran.')
-                ->group(function () {
-                    Route::get('/', 'index')->name('index');
-                    Route::get('/{id}', 'show')->name('show');
-                    Route::post('/{id}/approve', 'approve')->name('approve');
-                    Route::post('/{id}/reject', 'reject')->name('reject');
-                });
-
-            Route::get('monitoring', [MonitoringController::class, 'index'])->name('monitoring.index');
+            Route::resource('instansi', InstansiController::class)->except(['show'])->names('instansi');
+            Route::resource('harga-beras', HargaBerasController::class)->except(['show'])->names('harga-beras');
+            Route::resource('nishab', NishabController::class)->except(['show'])->names('nishab');
         });
     });
 
@@ -114,6 +96,22 @@ Route::middleware('auth')->group(function () {
         Route::resource('penyaluran', PenyaluranController::class)
             ->names('penyaluran');
     });
+
+    // =====================
+    // ADMIN KEPALA DESA ROUTES
+    // =====================
+
+    Route::middleware('admin.kepala.desa')
+        ->prefix('kepala-desa')
+        ->name('kepala-desa.')
+        ->controller(KepalaDesaController::class)
+        ->group(function () {
+            Route::get('dashboard', 'dashboard')->name('dashboard');
+            Route::get('approval-program', 'approvalIndex')->name('approval.index');
+            Route::get('approval-program/{program}', 'approvalShow')->name('approval.show');
+            Route::post('approval-program/{program}/approve', 'approve')->name('approval.approve');
+            Route::post('approval-program/{program}/reject', 'reject')->name('approval.reject');
+        });
 
     // =====================
     // SHARED AUTH ROUTES

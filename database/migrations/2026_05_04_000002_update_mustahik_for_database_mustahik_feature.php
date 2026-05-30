@@ -24,15 +24,23 @@ return new class extends Migration
         DB::table('mustahik')->whereIn('status', ['pending', 'verified'])->update(['status' => 'aktif']);
         DB::table('mustahik')->where('status', 'rejected')->update(['status' => 'tidak_aktif']);
 
-        DB::statement("ALTER TABLE mustahik MODIFY status ENUM('aktif', 'tidak_aktif') NOT NULL DEFAULT 'aktif'");
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE mustahik MODIFY status ENUM('aktif', 'tidak_aktif') NOT NULL DEFAULT 'aktif'");
+        }
     }
 
     public function down(): void
     {
-        DB::statement("ALTER TABLE mustahik MODIFY status ENUM('pending', 'verified', 'rejected', 'aktif', 'tidak_aktif') NOT NULL DEFAULT 'pending'");
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE mustahik MODIFY status ENUM('pending', 'verified', 'rejected', 'aktif', 'tidak_aktif') NOT NULL DEFAULT 'pending'");
+        }
+
         DB::table('mustahik')->where('status', 'aktif')->update(['status' => 'verified']);
         DB::table('mustahik')->where('status', 'tidak_aktif')->update(['status' => 'rejected']);
-        DB::statement("ALTER TABLE mustahik MODIFY status ENUM('pending', 'verified', 'rejected') NOT NULL DEFAULT 'pending'");
+
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE mustahik MODIFY status ENUM('pending', 'verified', 'rejected') NOT NULL DEFAULT 'pending'");
+        }
 
         Schema::table('mustahik', function (Blueprint $table) {
             if (Schema::hasColumn('mustahik', 'keterangan')) {
