@@ -19,8 +19,12 @@ class AdminInstansiOnly
         /** @var User|null $user */
         $user = Auth::user();
 
-        if (! $user || ! $user->isAdminInstansi()) {
+        if (! $user || ! $user->isAdminInstansi() || $user->status !== 'active') {
             abort(403, 'Akses hanya untuk Admin Instansi.');
+        }
+
+        if (! $user->instansi || $user->instansi->status !== 'aktif') {
+            abort(403, 'Instansi belum aktif atau sudah dinonaktifkan.');
         }
 
         return $next($request);

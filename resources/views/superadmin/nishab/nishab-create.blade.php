@@ -1,8 +1,48 @@
-@include('admin.partials.simple-page', [
-    'title' => 'Tambah Nishab',
-    'description' => 'Form tambah nishab memakai antarmuka yang sama dengan admin instansi.',
-    'active' => 'nishab',
-    'roleLabel' => 'Super Admin',
-    'sidebar' => 'superadmin.partials.sidebar',
-    'backRoute' => 'superadmin.nishab.index',
-])
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Nishab | Super Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{{ asset('css/admin-theme.css') }}" rel="stylesheet">
+</head>
+<body class="sidebar-expanded">
+    <div class="admin-layout">
+        @include('superadmin.partials.sidebar', ['active' => 'nishab'])
+
+        <main class="admin-page-content">
+            <header class="admin-page-topbar">
+                <div>
+                    <h1 class="admin-page-title">Tambah Nishab</h1>
+                    <p class="admin-page-desc">Tambahkan batas nilai baru yang berlaku nasional.</p>
+                </div>
+                <a class="admin-secondary-btn" href="{{ route('superadmin.nishab.index') }}">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Kembali</span>
+                </a>
+            </header>
+
+            <div class="admin-content-wrap">
+                @if($errors->any())
+                    <div class="alert alert-danger border-0 rounded-4 shadow-sm mb-4">{{ $errors->first() }}</div>
+                @endif
+
+                <section class="admin-panel">
+                    <form method="POST" action="{{ route('superadmin.nishab.store') }}" class="super-form-grid">
+                        @csrf
+                        @include('superadmin.nishab.nishab-form', ['nishab' => null])
+                        <div class="final-actions">
+                            <button class="distribution-submit-btn" type="submit">
+                                <i class="bi bi-check2-circle"></i>
+                                <span>Simpan</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

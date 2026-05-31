@@ -23,10 +23,14 @@ class Instansi extends Model
         'tanda_tangan',
         'latitude',
         'longitude',
+        'verified_by',
+        'verified_at',
+        'verification_note',
     ];
 
     protected $casts = [
         'masa_berlaku' => 'date',
+        'verified_at' => 'datetime',
     ];
 
     public function users(): HasMany

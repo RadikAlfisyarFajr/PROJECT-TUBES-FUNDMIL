@@ -74,8 +74,12 @@ return new class extends Migration
             );
         }
 
+        $idsAggregate = DB::connection()->getDriverName() === 'sqlite'
+            ? 'GROUP_CONCAT(id) as user_ids'
+            : 'GROUP_CONCAT(id ORDER BY id) as user_ids';
+
         $duplicates = DB::table('users')
-            ->select('instansi_id', DB::raw('COUNT(*) as total'), DB::raw('GROUP_CONCAT(id ORDER BY id) as user_ids'))
+            ->select('instansi_id', DB::raw('COUNT(*) as total'), DB::raw($idsAggregate))
             ->whereIn('role', ['admin_instansi', 'petugas'])
             ->whereNotNull('instansi_id')
             ->groupBy('instansi_id')
@@ -101,11 +105,19 @@ return new class extends Migration
 
     private function modifyRoleEnum(string $definition): void
     {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         DB::statement("ALTER TABLE users MODIFY role {$definition}");
     }
 
     private function indexExists(string $indexName): bool
     {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return false;
+        }
+
         return DB::table('information_schema.statistics')
             ->whereRaw('table_schema = DATABASE()')
             ->where('table_name', 'users')

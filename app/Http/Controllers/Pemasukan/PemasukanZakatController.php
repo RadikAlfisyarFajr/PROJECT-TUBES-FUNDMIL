@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Instansi;
 use App\Models\KategoriDana;
 use App\Models\TransaksiZakat;
+use App\Support\OfficialVillageAccount;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -243,6 +244,10 @@ class PemasukanZakatController extends Controller
     private function hargaBerasPerKg(): float
     {
         return (float) (DB::table('harga_beras')
+            ->where('tanggal_berlaku', '<=', now()->toDateString())
+            ->where(fn ($query) => $query
+                ->whereNull('tanggal_berakhir')
+                ->orWhere('tanggal_berakhir', '>=', now()->toDateString()))
             ->latest('tanggal_berlaku')
             ->value('harga_per_kg') ?: self::DEFAULT_HARGA_BERAS_PER_KG);
     }
@@ -327,17 +332,6 @@ class PemasukanZakatController extends Controller
 
     private function desaOptions(): array
     {
-        return [
-            'Desa Cingcin',
-            'Desa Soreang',
-            'Desa Pamekaran',
-            'Desa Sekarwangi',
-            'Desa Parungserab',
-            'Desa Karamatmulya',
-            'Desa Sukapura',
-            'Desa Sadu',
-            'Desa Buninagara',
-            'Desa Cahaya Maju',
-        ];
+        return OfficialVillageAccount::villages();
     }
 }

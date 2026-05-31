@@ -7,6 +7,38 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="{{ asset('css/admin-theme.css') }}" rel="stylesheet">
+    <style>
+        .gender-choice {
+            position: relative;
+            display: block;
+            cursor: pointer;
+        }
+
+        .gender-choice input {
+            position: absolute;
+            inset: 0;
+            cursor: pointer;
+            opacity: 0;
+        }
+
+        .gender-choice span {
+            display: grid;
+            height: 48px;
+            place-items: center;
+            border-radius: 11px;
+            background: #e5eae7;
+            font-size: 14px;
+            font-weight: 700;
+            color: #111813;
+            transition: all .16s ease;
+        }
+
+        .gender-choice input:checked + span {
+            background: #ffffff;
+            color: #0b751f;
+            box-shadow: inset 0 0 0 2px #0b751f;
+        }
+    </style>
 </head>
 <body class="sidebar-expanded bg-[#f6f8f6] font-sans text-[#111813] antialiased">
 <div class="admin-layout">
@@ -64,10 +96,6 @@
                             <input name="nik" value="{{ old('nik', $mustahik->nik ?? '') }}" maxlength="16" inputmode="numeric" class="mt-[10px] h-[48px] w-full rounded-[11px] bg-[#e5eae7] px-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]" placeholder="16 digit angka">
                             @error('nik') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
                         </label>
-                        <label>
-                            <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">No. Kartu Keluarga</span>
-                            <input class="mt-[10px] h-[48px] w-full rounded-[11px] bg-[#e5eae7] px-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]" placeholder="16 digit angka">
-                        </label>
                         <div class="grid gap-[24px] md:grid-cols-2">
                             <label>
                                 <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Tempat Lahir</span>
@@ -81,9 +109,16 @@
                         <div>
                             <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Jenis Kelamin</span>
                             <div class="mt-[10px] grid grid-cols-2 gap-4">
-                                <button type="button" class="h-[48px] rounded-[11px] border-2 border-[#0b751f] bg-white text-sm font-bold">Laki-laki</button>
-                                <button type="button" class="h-[48px] rounded-[11px] bg-[#e5eae7] text-sm font-bold">Perempuan</button>
+                                <label class="gender-choice">
+                                    <input type="radio" name="jenis_kelamin" value="Laki-laki" @checked(old('jenis_kelamin', $mustahik->jenis_kelamin ?? 'Laki-laki') === 'Laki-laki')>
+                                    <span>Laki-laki</span>
+                                </label>
+                                <label class="gender-choice">
+                                    <input type="radio" name="jenis_kelamin" value="Perempuan" @checked(old('jenis_kelamin', $mustahik->jenis_kelamin ?? '') === 'Perempuan')>
+                                    <span>Perempuan</span>
+                                </label>
                             </div>
+                            @error('jenis_kelamin') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
                         </div>
                         <label>
                             <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Nomor Telepon</span>
@@ -130,11 +165,13 @@
                     <div class="mt-[24px] grid gap-[24px] md:grid-cols-3">
                         <label>
                             <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Desa/Kelurahan</span>
-                            <select class="mt-[10px] h-[48px] w-full rounded-[11px] bg-[#e5eae7] px-4 text-sm outline-none">
-                                <option>Cingcin</option>
-                                <option>Soreang</option>
-                                <option>Pamekaran</option>
+                            <select name="desa_kelurahan" class="mt-[10px] h-[48px] w-full rounded-[11px] bg-[#e5eae7] px-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]">
+                                <option value="">Pilih Desa</option>
+                                @foreach ($desaOptions as $desa)
+                                    <option value="{{ $desa }}" @selected(old('desa_kelurahan', $mustahik->desa_kelurahan ?? '') === $desa)>{{ $desa }}</option>
+                                @endforeach
                             </select>
+                            @error('desa_kelurahan') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
                         </label>
                         <label>
                             <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">RW</span>
@@ -154,29 +191,6 @@
                         <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Keterangan</span>
                         <textarea name="keterangan" rows="3" class="mt-[10px] w-full resize-y rounded-[11px] bg-[#e5eae7] px-4 py-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]" placeholder="Catatan tambahan kondisi mustahik">{{ old('keterangan', $mustahik->keterangan ?? '') }}</textarea>
                     </label>
-                </section>
-
-                <section class="mt-[42px]">
-                    <h2 class="flex items-center gap-3 text-[20px] font-black">
-                        <span class="grid h-[30px] w-[30px] place-items-center rounded-[8px] bg-green-50 text-[#0b751f]">
-                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4h12v12H4V4Zm3 3h6v2H7V7Zm0 4h6v2H7v-2Z"/></svg>
-                        </span>
-                        Foto Dokumen
-                    </h2>
-                    <div class="mt-[24px] grid gap-[30px] md:grid-cols-2">
-                        <div class="grid h-[140px] place-items-center rounded-[12px] border-2 border-dashed border-[#c8d6ce] bg-[#fbfcfb] text-center text-[#6c756f]">
-                            <div>
-                                <svg class="mx-auto h-8 w-8" fill="currentColor" viewBox="0 0 20 20"><path d="M4 5h3l1-2h4l1 2h3v11H4V5Zm6 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></svg>
-                                <p class="mt-3 text-[11px] font-black uppercase tracking-[.18em]">Unggah Foto KTP</p>
-                            </div>
-                        </div>
-                        <div class="grid h-[140px] place-items-center rounded-[12px] border-2 border-dashed border-[#c8d6ce] bg-[#fbfcfb] text-center text-[#6c756f]">
-                            <div>
-                                <svg class="mx-auto h-8 w-8" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3h12v14H4V3Zm3 4h6V5H7v2Zm0 4h6V9H7v2Zm0 4h4v-2H7v2Z"/></svg>
-                                <p class="mt-3 text-[11px] font-black uppercase tracking-[.18em]">Unggah Foto KK</p>
-                            </div>
-                        </div>
-                    </div>
                 </section>
 
                 <div class="mt-[48px] flex items-center justify-end gap-8 border-t border-[#e7eeea] pt-[32px]">

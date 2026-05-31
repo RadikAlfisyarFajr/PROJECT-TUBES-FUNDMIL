@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Instansi;
 use App\Models\User;
+use App\Support\OfficialVillageAccount;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -34,6 +35,30 @@ class InstansiSeeder extends Seeder
             'role' => User::ROLE_ADMIN_INSTANSI,
             'status' => 'active',
             'instansi_id' => $instansi->id,
+        ]);
+
+        $desaInstansi = Instansi::updateOrCreate([
+            'email' => 'kepaladesa@example.com',
+        ], [
+            'nama' => 'Pemerintah Desa Cingcin',
+            'tipe' => OfficialVillageAccount::TYPE,
+            'kelurahan' => OfficialVillageAccount::villages()[0],
+            'alamat' => 'Kantor Desa Cingcin',
+            'status' => 'aktif',
+            'nama_pimpinan' => 'Kepala Desa Cingcin',
+        ]);
+
+        User::updateOrCreate([
+            'email' => 'kepaladesa@example.com',
+        ], [
+            'name' => 'Kepala Desa Cingcin',
+            'nama_instansi' => 'Pemerintah Desa Cingcin',
+            'desa' => OfficialVillageAccount::villages()[0],
+            'username' => 'kepaladesa',
+            'password' => Hash::make('KepalaDesa123'),
+            'role' => User::ROLE_ADMIN_KEPALA_DESA,
+            'status' => 'active',
+            'instansi_id' => $desaInstansi->id,
         ]);
     }
 }

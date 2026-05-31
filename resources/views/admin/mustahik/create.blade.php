@@ -5,6 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Tambah Mustahik Baru - Fundmil Soreang</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        .gender-choice {
+            position: relative;
+            display: block;
+            cursor: pointer;
+        }
+
+        .gender-choice input {
+            position: absolute;
+            inset: 0;
+            cursor: pointer;
+            opacity: 0;
+        }
+
+        .gender-choice span {
+            display: flex;
+            height: 56px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: #e9eeeb;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all .16s ease;
+        }
+
+        .gender-choice input:checked + span {
+            background: #ffffff;
+            color: #0b751f;
+            box-shadow: inset 0 0 0 2px #0b751f;
+        }
+    </style>
 </head>
 <body class="bg-[#f4f7f5] font-sans text-[#172018] antialiased">
 <div class="min-h-screen lg:flex">
@@ -62,7 +94,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('mustahik.store') }}" method="POST" enctype="multipart/form-data" class="mt-10 max-w-[930px] rounded-2xl bg-white px-10 py-11 shadow-sm ring-1 ring-[#e8eeeb]">
+            <form action="{{ route('mustahik.store') }}" method="POST" class="mt-10 max-w-[930px] rounded-2xl bg-white px-10 py-11 shadow-sm ring-1 ring-[#e8eeeb]">
                 @csrf
 
                 <section>
@@ -84,11 +116,6 @@
                             <input name="nik" value="{{ old('nik') }}" maxlength="16" class="mt-3 h-14 w-full rounded-xl border-0 bg-[#e9eeeb] px-5 text-base outline-none ring-1 ring-transparent placeholder:text-[#76838a] focus:bg-white focus:ring-[#0b751f]" placeholder="16 digit angka">
                             @error('nik') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
                         </label>
-                        <label class="block">
-                            <span class="text-xs font-black uppercase tracking-[0.14em] text-[#7b877e]">No. Kartu Keluarga</span>
-                            <input name="no_kk" value="{{ old('no_kk') }}" maxlength="16" class="mt-3 h-14 w-full rounded-xl border-0 bg-[#e9eeeb] px-5 text-base outline-none ring-1 ring-transparent placeholder:text-[#76838a] focus:bg-white focus:ring-[#0b751f]" placeholder="16 digit angka">
-                            @error('no_kk') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
-                        </label>
                         <div class="grid gap-4 sm:grid-cols-[1fr_160px]">
                             <label class="block">
                                 <span class="text-xs font-black uppercase tracking-[0.14em] text-[#7b877e]">Tempat Lahir</span>
@@ -106,13 +133,13 @@
                     <div class="mt-7 max-w-[415px]">
                         <p class="text-xs font-black uppercase tracking-[0.14em] text-[#7b877e]">Jenis Kelamin</p>
                         <div class="mt-3 grid grid-cols-2 gap-4">
-                            <label class="cursor-pointer">
-                                <input type="radio" name="jenis_kelamin" value="Laki-laki" class="peer sr-only" @checked(old('jenis_kelamin', 'Laki-laki') === 'Laki-laki')>
-                                <span class="flex h-14 items-center justify-center rounded-xl bg-[#e9eeeb] text-sm font-semibold ring-1 ring-transparent peer-checked:bg-white peer-checked:ring-2 peer-checked:ring-[#0b751f]">Laki-laki</span>
+                            <label class="gender-choice">
+                                <input type="radio" name="jenis_kelamin" value="Laki-laki" @checked(old('jenis_kelamin', 'Laki-laki') === 'Laki-laki')>
+                                <span>Laki-laki</span>
                             </label>
-                            <label class="cursor-pointer">
-                                <input type="radio" name="jenis_kelamin" value="Perempuan" class="peer sr-only" @checked(old('jenis_kelamin') === 'Perempuan')>
-                                <span class="flex h-14 items-center justify-center rounded-xl bg-[#e9eeeb] text-sm font-semibold ring-1 ring-transparent peer-checked:bg-white peer-checked:ring-2 peer-checked:ring-[#0b751f]">Perempuan</span>
+                            <label class="gender-choice">
+                                <input type="radio" name="jenis_kelamin" value="Perempuan" @checked(old('jenis_kelamin') === 'Perempuan')>
+                                <span>Perempuan</span>
                             </label>
                         </div>
                         @error('jenis_kelamin') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
@@ -150,8 +177,9 @@
                         <label class="block">
                             <span class="text-xs font-black uppercase tracking-[0.14em] text-[#7b877e]">Desa/Kelurahan</span>
                             <select name="desa_kelurahan" class="mt-3 h-14 w-full rounded-xl border-0 bg-[#e9eeeb] px-5 text-base outline-none ring-1 ring-transparent focus:bg-white focus:ring-[#0b751f]">
-                                @foreach (['Cingcin', 'Soreang', 'Pamekaran', 'Sekarwangi'] as $desa)
-                                    <option value="{{ $desa }}" @selected(old('desa_kelurahan', 'Cingcin') === $desa)>{{ $desa }}</option>
+                                <option value="">Pilih Desa</option>
+                                @foreach (\App\Support\OfficialVillageAccount::villages() as $desa)
+                                    <option value="{{ $desa }}" @selected(old('desa_kelurahan') === $desa)>{{ $desa }}</option>
                                 @endforeach
                             </select>
                             @error('desa_kelurahan') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
@@ -172,29 +200,6 @@
                         <textarea name="alamat" rows="4" class="mt-3 w-full rounded-xl border-0 bg-[#e9eeeb] px-5 py-4 text-base outline-none ring-1 ring-transparent placeholder:text-[#76838a] focus:bg-white focus:ring-[#0b751f]" placeholder="Nama Jalan, No. Rumah, Patokan, dll.">{{ old('alamat') }}</textarea>
                         @error('alamat') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
                     </label>
-                </section>
-
-                <section class="mt-12">
-                    <div class="mb-8 flex items-center gap-4">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e8f5ec] text-[#0b751f]">
-                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3h8l4 4v10H4V3Zm7 1.5V8h3.5L11 4.5ZM7 12h6v2H7v-2Z"/></svg>
-                        </span>
-                        <h3 class="text-2xl font-black">Foto Dokumen</h3>
-                    </div>
-                    <div class="grid gap-8 md:grid-cols-2">
-                        <label class="flex h-[190px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#bacdbe] bg-[#fbfcfb] text-[#6f7b72] transition hover:border-[#0b751f] hover:bg-[#f7fbf8]">
-                            <input type="file" name="foto_ktp" accept="image/*" class="sr-only">
-                            <svg class="h-10 w-10" fill="currentColor" viewBox="0 0 20 20"><path d="M6 4h3l1 2h4a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3V4Zm5 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm5-11V2h-2v2h-2v2h2v2h2V6h2V4h-2Z"/></svg>
-                            <span class="mt-4 text-xs font-black uppercase tracking-[0.24em]">Unggah Foto KTP</span>
-                        </label>
-                        <label class="flex h-[190px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#bacdbe] bg-[#fbfcfb] text-[#6f7b72] transition hover:border-[#0b751f] hover:bg-[#f7fbf8]">
-                            <input type="file" name="foto_kk" accept="image/*" class="sr-only">
-                            <svg class="h-10 w-10" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3h12v14H4V3Zm3 4h5V5H7v2Zm0 4h2V9H7v2Zm3 0h3V9h-3v2Zm-3 4h6v-2H7v2Zm7-8 1.2 1.2L17.5 6 19 7.4l-3.8 3.8L12.6 8.6 14 7Z"/></svg>
-                            <span class="mt-4 text-xs font-black uppercase tracking-[0.24em]">Unggah Foto KK</span>
-                        </label>
-                    </div>
-                    @error('foto_ktp') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
-                    @error('foto_kk') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
                 </section>
 
                 <div class="mt-12 flex items-center justify-end gap-8 border-t border-[#e4ebe7] pt-8">

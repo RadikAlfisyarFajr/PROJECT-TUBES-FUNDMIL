@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\MustahikRequest;
 use App\Models\Instansi;
 use App\Models\Mustahik;
+use App\Support\OfficialVillageAccount;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -50,6 +51,7 @@ class MustahikController extends Controller
         return view('admin.mustahik.mustahik-create', [
             'mustahik' => null,
             'kategoriAsnaf' => $this->kategoriAsnaf(),
+            'desaOptions' => $this->desaOptions(),
         ]);
     }
 
@@ -79,6 +81,7 @@ class MustahikController extends Controller
         return view('admin.mustahik.mustahik-edit', [
             'mustahik' => $mustahik,
             'kategoriAsnaf' => $this->kategoriAsnaf(),
+            'desaOptions' => $this->desaOptions(),
         ]);
     }
 
@@ -113,6 +116,8 @@ class MustahikController extends Controller
         return [
             'nama' => $validated['nama_lengkap'],
             'nik' => $validated['nik'] ?? null,
+            'jenis_kelamin' => $validated['jenis_kelamin'],
+            'desa_kelurahan' => $validated['desa_kelurahan'],
             'alamat' => $validated['alamat'],
             'kategori_asnaf' => $validated['kategori'],
             'kontak' => $validated['kontak'] ?? null,
@@ -144,6 +149,11 @@ class MustahikController extends Controller
     private function kategoriAsnaf(): array
     {
         return Mustahik::KATEGORI;
+    }
+
+    private function desaOptions(): array
+    {
+        return OfficialVillageAccount::villages();
     }
 
     private function kategoriTerbanyak(): string
