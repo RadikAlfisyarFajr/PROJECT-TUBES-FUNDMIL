@@ -404,7 +404,13 @@
                                 <div class="fw-semibold">Admin Masjid</div>
                                 <div class="text-muted" style="font-size:.95rem;">Kelurahan Soreang</div>
                             </div>
-                            <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center" style="width:52px; height:52px;">AM</div>
+                            <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center overflow-hidden" style="width:52px; height:52px;">
+                                @if ($currentInstansi?->logo)
+                                    <img src="{{ asset('storage/'.$currentInstansi->logo) }}" alt="Foto profil {{ $currentInstansi->nama }}" style="width:100%; height:100%; object-fit:cover;">
+                                @else
+                                    AM
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>

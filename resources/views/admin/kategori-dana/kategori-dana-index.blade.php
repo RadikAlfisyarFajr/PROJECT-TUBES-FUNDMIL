@@ -290,6 +290,14 @@
             place-items: center;
             font-size: .72rem;
             font-weight: 800;
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
         .content-wrap {
@@ -579,7 +587,13 @@
                         <strong>Admin Soreang</strong>
                         <div class="admin-role">Amil Utama</div>
                     </div>
-                    <div class="avatar">A</div>
+                    <div class="avatar">
+                        @if ($currentInstansi?->logo)
+                            <img src="{{ asset('storage/'.$currentInstansi->logo) }}" alt="Foto profil {{ $currentInstansi->nama }}">
+                        @else
+                            A
+                        @endif
+                    </div>
                 </div>
             </header>
 
