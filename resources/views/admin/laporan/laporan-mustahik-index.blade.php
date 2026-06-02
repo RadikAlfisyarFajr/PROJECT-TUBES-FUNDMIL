@@ -369,6 +369,9 @@
         <header class="topbar">
             <h1 class="page-title">Laporan Data Mustahik</h1>
             <div class="top-actions">
+                <a href="{{ route('laporan.mustahik', array_merge(request()->except(['page', 'print']), ['print' => 1])) }}" target="_blank" rel="noopener" class="btn-print">
+                    <i class="bi bi-printer"></i> Cetak PDF
+                </a>
                 <div class="account-profile">
                     <div style="text-align: right;">
                         <strong style="display: block; font-size: .9rem; color: var(--ink);">{{ auth()->user()?->name ?? 'Admin' }}</strong>

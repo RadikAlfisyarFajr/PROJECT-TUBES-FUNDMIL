@@ -40,6 +40,11 @@ class AuthController extends Controller
     {
         $payload = $this->publicZisPayload();
 
+        if (request()->filled('nik') && (request()->boolean('lookup') || request()->expectsJson())) {
+            return response()->json($this->publicNikPayload((string) request()->string('nik')))
+                ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        }
+
         if (request()->expectsJson() || request()->boolean('stats')) {
             return response()->json($payload)
                 ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
@@ -437,10 +442,12 @@ class AuthController extends Controller
             ->where('instansi.status', 'aktif')
             ->leftJoinSub(
                 TransaksiZakat::query()
-                    ->select('instansi_id')
+                    ->join('users', 'transaksi_zakat.admin_id', '=', 'users.id')
+                    ->select('transaksi_zakat.instansi_id')
                     ->selectRaw('COALESCE(SUM(jumlah), 0) as total_dana')
                     ->selectRaw('COUNT(*) as total_transaksi')
-                    ->groupBy('instansi_id'),
+                    ->where('users.role', User::ROLE_ADMIN_INSTANSI)
+                    ->groupBy('transaksi_zakat.instansi_id'),
                 'rekap_zakat',
                 'instansi.id',
                 '=',
@@ -463,6 +470,41 @@ class AuthController extends Controller
             })
             ->values();
 
+        $desaHeatmap = Instansi::query()
+            ->where('instansi.status', 'aktif')
+            ->whereNotNull('instansi.kelurahan')
+            ->where('instansi.kelurahan', '<>', '')
+            ->leftJoinSub(
+                TransaksiZakat::query()
+                    ->join('users', 'transaksi_zakat.admin_id', '=', 'users.id')
+                    ->select('transaksi_zakat.instansi_id')
+                    ->selectRaw('COALESCE(SUM(jumlah), 0) as total_dana')
+                    ->selectRaw('COUNT(*) as total_transaksi')
+                    ->where('users.role', User::ROLE_ADMIN_INSTANSI)
+                    ->groupBy('transaksi_zakat.instansi_id'),
+                'rekap_zakat',
+                'instansi.id',
+                '=',
+                'rekap_zakat.instansi_id'
+            )
+            ->selectRaw('instansi.kelurahan as desa')
+            ->selectRaw('COALESCE(SUM(rekap_zakat.total_dana), 0) as total_dana')
+            ->selectRaw('COALESCE(SUM(rekap_zakat.total_transaksi), 0) as total_transaksi')
+            ->selectRaw('COUNT(DISTINCT instansi.id) as total_instansi')
+            ->groupBy('instansi.kelurahan')
+            ->orderByDesc('total_dana')
+            ->orderBy('instansi.kelurahan')
+            ->get()
+            ->map(function ($desa) {
+                return [
+                    'desa' => $desa->desa,
+                    'totalDana' => (float) $desa->total_dana,
+                    'totalTransaksi' => (int) $desa->total_transaksi,
+                    'totalInstansi' => (int) $desa->total_instansi,
+                ];
+            })
+            ->values();
+
         return [
             'summary' => [
                 'totalDanaMasuk' => $totalDanaMasuk,
@@ -474,6 +516,48 @@ class AuthController extends Controller
                 'lastUpdated' => now()->format('d M Y H:i:s'),
             ],
             'instansiComparison' => $instansiComparison,
+            'desaHeatmap' => $desaHeatmap,
+        ];
+    }
+
+    private function publicNikPayload(string $nik): array
+    {
+        $normalizedNik = preg_replace('/\D+/', '', $nik) ?? '';
+        $mustahik = Mustahik::query()
+            ->with('instansi')
+            ->where('nik', $normalizedNik)
+            ->first();
+
+        if (! $mustahik) {
+            return [
+                'found' => false,
+                'message' => 'NIK tidak ditemukan pada data mustahik publik.',
+            ];
+        }
+
+        $statusLabel = $mustahik->status === 'aktif' ? 'Aktif' : 'Tidak Aktif';
+        $historyDate = $mustahik->tanggal_verifikasi
+            ?? $mustahik->created_at
+            ?? now();
+        $historyYears = max(0, (int) floor($historyDate->diffInDays(now()) / 365));
+        $historyText = $mustahik->status === 'aktif'
+            ? ($historyYears > 0
+                ? "Telah aktif menerima bantuan selama kurang lebih {$historyYears} tahun."
+                : 'Telah aktif menerima bantuan dan tercatat di sistem.')
+            : 'Belum aktif menerima bantuan saat ini.';
+
+        return [
+            'found' => true,
+            'status' => $mustahik->status,
+            'status_label' => $statusLabel,
+            'nama' => $mustahik->nama,
+            'nik' => $mustahik->nik,
+            'alamat' => $mustahik->alamat,
+            'kategori' => $mustahik->kategori_label,
+            'instansi' => $mustahik->instansi?->nama ?: '-',
+            'desa' => $mustahik->instansi?->kelurahan ?: '-',
+            'history' => $historyText,
+            'tanggal_verifikasi' => optional($mustahik->tanggal_verifikasi)->format('d M Y') ?: '-',
         ];
     }
 }

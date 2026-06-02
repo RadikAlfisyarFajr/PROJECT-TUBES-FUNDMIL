@@ -1,6 +1,21 @@
 @php
     $summary = $summary ?? [];
     $instansiComparison = collect($instansiComparison ?? []);
+    $desaHeatmap = collect($desaHeatmap ?? []);
+    $desaHeatmapByName = $desaHeatmap->keyBy('desa');
+    $desaHeatmapMax = (float) $desaHeatmap->max('totalDana');
+    $desaHeatmapLayout = [
+        ['area' => 'cingcin', 'label' => 'Desa Cingcin'],
+        ['area' => 'soreang', 'label' => 'Desa Soreang'],
+        ['area' => 'pamekaran', 'label' => 'Desa Pamekaran'],
+        ['area' => 'sekarwangi', 'label' => 'Desa Sekarwangi'],
+        ['area' => 'parungserab', 'label' => 'Desa Parungserab'],
+        ['area' => 'karamatmulya', 'label' => 'Desa Karamatmulya'],
+        ['area' => 'sukapura', 'label' => 'Desa Sukapura'],
+        ['area' => 'sadu', 'label' => 'Desa Sadu'],
+        ['area' => 'buninagara', 'label' => 'Desa Buninagara'],
+        ['area' => 'cahayamaju', 'label' => 'Desa Cahaya Maju'],
+    ];
 @endphp
 
 <!DOCTYPE html>
@@ -284,6 +299,138 @@
             white-space: nowrap;
         }
 
+        .heatmap-card {
+            background: #fff;
+            border: 1px solid #e8eee8;
+            border-radius: 12px;
+            box-shadow: 0 12px 30px rgba(22, 35, 24, .04);
+            padding: 28px;
+        }
+
+        .heatmap-card .chart-head {
+            margin-bottom: 16px;
+        }
+
+        .heatmap-map-wrap {
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .heatmap-map {
+            display: grid;
+            grid-template-columns: 1.05fr 1fr 1fr 1fr 1.05fr;
+            grid-template-rows: repeat(3, minmax(140px, 1fr));
+            grid-template-areas:
+                ". cingcin soreang pamekaran ."
+                "sekarwangi parungserab karamatmulya sukapura sadu"
+                ". buninagara cahayamaju cahayamaju .";
+            gap: 14px;
+            min-width: 980px;
+            min-height: 520px;
+            padding: 12px;
+            border-radius: 28px;
+            background:
+                radial-gradient(circle at 18% 18%, rgba(15, 114, 43, .08), transparent 30%),
+                radial-gradient(circle at 82% 20%, rgba(15, 114, 43, .06), transparent 28%),
+                linear-gradient(135deg, #f4f7f4 0%, #eef3ef 100%);
+            border: 1px solid #e2e9e2;
+            position: relative;
+        }
+
+        .heatmap-map::before {
+            content: "";
+            position: absolute;
+            inset: 18px;
+            border-radius: 22px;
+            border: 1px dashed rgba(15, 114, 43, .14);
+            pointer-events: none;
+        }
+
+        .heatmap-tile {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            gap: 6px;
+            padding: 18px;
+            border-radius: 22px;
+            border: 1px solid rgba(255, 255, 255, .65);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 12px 26px rgba(15, 35, 18, .08);
+            color: #fff;
+            overflow: hidden;
+            min-height: 140px;
+        }
+
+        .heatmap-tile::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, .1), rgba(0, 0, 0, .08));
+            pointer-events: none;
+        }
+
+        .heatmap-tile.is-empty {
+            color: #607060;
+            background: linear-gradient(145deg, #f5f8f5, #e8eee8);
+            box-shadow: none;
+            border-color: #d9e3da;
+        }
+
+        .heatmap-tile.is-empty::after {
+            background: linear-gradient(180deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, .1));
+        }
+
+        .heatmap-tile-label,
+        .heatmap-tile-meta,
+        .heatmap-tile-value {
+            position: relative;
+            z-index: 1;
+        }
+
+        .heatmap-tile-label {
+            font-size: .78rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .heatmap-tile-value {
+            font-size: clamp(1.05rem, 2vw, 1.55rem);
+            font-weight: 900;
+            line-height: 1.05;
+        }
+
+        .heatmap-tile-meta {
+            font-size: .82rem;
+            font-weight: 700;
+            opacity: .92;
+        }
+
+        .heatmap-legend {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 14px;
+            color: #5f6b61;
+            font-size: .85rem;
+            font-weight: 700;
+        }
+
+        .heatmap-scale {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .heatmap-scale-bar {
+            width: 180px;
+            height: 12px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(15, 114, 43, .16), rgba(15, 114, 43, .9));
+            border: 1px solid #dce6dd;
+        }
+
         .program-image {
             height: 190px;
             width: 100%;
@@ -341,7 +488,104 @@
             border: 0;
             border-radius: 12px;
             background: #e9eeea;
-            padding-left: 44px;
+            padding-left: 16px;
+        }
+
+        .nik-input-group .input-group-text {
+            border: 0;
+            background: #e9eeea;
+            color: var(--muted);
+            border-radius: 12px 0 0 12px;
+            padding-left: 16px;
+            padding-right: 12px;
+        }
+
+        .nik-input-group .nik-input {
+            border-radius: 0 12px 12px 0;
+        }
+
+        .lookup-result {
+            margin-top: 28px;
+            border-radius: 18px;
+            border: 1px solid #dfe8df;
+            background: #fff;
+            padding: 22px;
+            text-align: left;
+        }
+
+        .lookup-result.is-hidden {
+            display: none;
+        }
+
+        .lookup-status {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .35rem .75rem;
+            border-radius: 999px;
+            font-size: .78rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .lookup-status.is-aktif {
+            background: #e6f5e9;
+            color: #0f722b;
+        }
+
+        .lookup-status.is-tidak-aktif {
+            background: #f6ecec;
+            color: #a33a3a;
+        }
+
+        .lookup-title {
+            font-size: 1.2rem;
+            font-weight: 900;
+            margin-bottom: .35rem;
+        }
+
+        .lookup-meta {
+            color: #5f6b61;
+            font-size: .92rem;
+            margin-bottom: 18px;
+        }
+
+        .lookup-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .lookup-item {
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: #f8faf8;
+            border: 1px solid #edf3ee;
+        }
+
+        .lookup-label {
+            display: block;
+            color: #6a756b;
+            font-size: .78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .lookup-value {
+            color: var(--ink);
+            font-weight: 800;
+            word-break: break-word;
+        }
+
+        .lookup-history {
+            margin-top: 16px;
+            padding: 14px 16px;
+            border-left: 4px solid var(--green);
+            background: #f5fbf6;
+            border-radius: 12px;
+            color: #304133;
+            font-weight: 600;
         }
 
         .footer {
@@ -442,8 +686,8 @@
                         <div class="chart-card h-100">
                             <div class="chart-head">
                                 <div>
-                                    <h3 class="chart-title">Perbandingan total pemasukan setiap instansi</h3>
-                                    <p class="chart-subtitle">Detail pemasukan masing-masing instansi.</p>
+                                    <h3 class="chart-title">Kontribusi Dana Terbesar</h3>
+                                    <p class="chart-subtitle">Detail pemasukan yang tercatat.</p>
                                 </div>
                                 <span class="chart-badge">Live Update</span>
                             </div>
@@ -455,7 +699,7 @@
                                     <div class="instansi-row">
                                         <div>
                                             <div class="instansi-name">{{ $index + 1 }}. {{ $instansi['nama'] ?? '-' }}</div>
-                                            <div class="instansi-meta">{{ $instansi['desa'] ?? '-' }} &middot; {{ number_format((int) ($instansi['totalTransaksi'] ?? 0), 0, ',', '.') }} transaksi</div>
+                                            <div class="instansi-meta">{{ $instansi['desa'] ?? '-' }} &middot; {{ number_format((int) ($instansi['totalTransaksi'] ?? 0), 0, ',', '.') }} transaksi admin instansi</div>
                                         </div>
                                         <div class="instansi-amount">{{ 'Rp '.number_format((float) ($instansi['totalDana'] ?? 0), 0, ',', '.') }}</div>
                                     </div>
@@ -468,6 +712,43 @@
                                         <div class="instansi-amount">-</div>
                                     </div>
                                 @endforelse
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-4 mt-4">
+                    <div class="col-12">
+                        <div class="heatmap-card">
+                            <div class="chart-head">
+                                <div>
+                                    <h3 class="chart-title">Kontribusi Dana Setiap Desa</h3>
+                                    <p class="chart-subtitle">Besar kontribusi dana yang tercatat.</p>
+                                </div>
+                                <span class="chart-badge">Live Update</span>
+                            </div>
+                            <div class="heatmap-legend">
+                                <div>Visual ini membantu melihat sebaran kontribusi antar desa secara cepat.</div>
+                                <div class="heatmap-scale">
+                                    <span>Rendah</span>
+                                    <div class="heatmap-scale-bar" aria-hidden="true"></div>
+                                    <span>Tinggi</span>
+                                </div>
+                            </div>
+                            <div class="heatmap-map-wrap">
+                                <div class="heatmap-map" id="desaHeatmapMap" aria-live="polite">
+                                    @foreach ($desaHeatmapLayout as $tile)
+                                        @php
+                                            $desaData = $desaHeatmapByName->get($tile['label'], ['totalDana' => 0, 'totalTransaksi' => 0]);
+                                            $heatRatio = $desaHeatmapMax > 0 ? min(1, (float) ($desaData['totalDana'] ?? 0) / $desaHeatmapMax) : 0;
+                                            $heatAlpha = 0.18 + ($heatRatio * 0.62);
+                                        @endphp
+                                        <div class="heatmap-tile {{ ($desaData['totalDana'] ?? 0) > 0 ? '' : 'is-empty' }}" style="grid-area: {{ $tile['area'] }}; background: {{ ($desaData['totalDana'] ?? 0) > 0 ? 'linear-gradient(145deg, rgba(15, 114, 43, .16), rgba(15, 114, 43, ' . number_format($heatAlpha, 2, '.', '') . '))' : 'linear-gradient(145deg, #f5f8f5, #e8eee8)' }};">
+                                            <div class="heatmap-tile-label">{{ $tile['label'] }}</div>
+                                            <div class="heatmap-tile-value">{{ 'Rp ' . number_format((float) ($desaData['totalDana'] ?? 0), 0, ',', '.') }}</div>
+                                            <div class="heatmap-tile-meta">{{ number_format((int) ($desaData['totalTransaksi'] ?? 0), 0, ',', '.') }} transaksi</div>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -533,15 +814,18 @@
                 <div class="check-card text-center">
                     <h2 class="fw-bold mb-3">Cek Status Mustahik</h2>
                     <p class="text-muted mx-auto mb-4" style="max-width: 520px;">Masukkan NIK untuk memeriksa status penerimaan bantuan ZIS Anda.</p>
-                    <form class="row g-3 justify-content-center">
-                        <div class="col-md-6 position-relative">
-                            <i class="bi bi-person-vcard position-absolute top-50 translate-middle-y ms-3 text-muted"></i>
-                            <input type="text" class="form-control nik-input" placeholder="Masukkan 16 Digit NIK Anda">
+                    <form class="row g-3 justify-content-center" id="nikLookupForm">
+                        <div class="col-md-6">
+                            <div class="input-group nik-input-group">
+                                <span class="input-group-text"><i class="bi bi-person-vcard"></i></span>
+                                <input type="text" id="nikLookupInput" class="form-control nik-input" placeholder="Masukkan 16 Digit NIK Anda" inputmode="numeric" autocomplete="off" maxlength="16">
+                            </div>
                         </div>
                         <div class="col-md-auto">
-                            <button class="btn btn-green w-100" type="button"><i class="bi bi-search me-2"></i>Periksa Status</button>
+                            <button class="btn btn-green w-100" type="submit" id="nikLookupButton"><i class="bi bi-search me-2"></i>Periksa Status</button>
                         </div>
                     </form>
+                    <div class="lookup-result is-hidden" id="nikLookupResult" aria-live="polite"></div>
                     <div class="d-flex justify-content-center gap-4 flex-wrap mt-4 small text-muted">
                         <span><i class="bi bi-shield-check text-success me-1"></i> Data Aman &amp; Terenkripsi</span>
                         <span><i class="bi bi-arrow-repeat text-success me-1"></i> Update Data Mingguan</span>
@@ -588,9 +872,124 @@
             maximumFractionDigits: 0,
         });
         const chartCanvas = document.getElementById('zisChart');
+        const heatmapMap = document.getElementById('desaHeatmapMap');
         let zisChart = null;
+        const nikLookupForm = document.getElementById('nikLookupForm');
+        const nikLookupInput = document.getElementById('nikLookupInput');
+        const nikLookupButton = document.getElementById('nikLookupButton');
+        const nikLookupResult = document.getElementById('nikLookupResult');
+        const heatmapLayout = @json($desaHeatmapLayout);
 
         const formatRupiah = (value) => currencyFormatter.format(Number(value) || 0);
+        const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+        })[character]);
+
+        const renderNikResult = (payload) => {
+            if (!nikLookupResult) {
+                return;
+            }
+
+            if (!payload?.found) {
+                nikLookupResult.classList.remove('is-hidden');
+                nikLookupResult.innerHTML = `
+                    <div class="lookup-status is-tidak-aktif"><i class="bi bi-x-circle"></i> Tidak ditemukan</div>
+                    <div class="lookup-title">NIK tidak ditemukan</div>
+                    <div class="lookup-meta">${payload?.message || 'Data tidak ada pada daftar mustahik publik.'}</div>
+                `;
+                return;
+            }
+
+            const statusClass = payload.status === 'aktif' ? 'is-aktif' : 'is-tidak-aktif';
+            const statusText = payload.status === 'aktif' ? 'Aktif' : 'Tidak Aktif';
+
+            nikLookupResult.classList.remove('is-hidden');
+            nikLookupResult.innerHTML = `
+                <div class="lookup-status ${statusClass}"><i class="bi bi-${payload.status === 'aktif' ? 'check-circle' : 'x-circle'}"></i> ${statusText}</div>
+                <div class="lookup-title">${payload.nama || '-'}</div>
+                <div class="lookup-meta">NIK ${payload.nik || '-'} • ${payload.kategori || '-'} • ${payload.instansi || '-'} (${payload.desa || '-'})</div>
+                <div class="lookup-grid">
+                    <div class="lookup-item">
+                        <span class="lookup-label">Alamat</span>
+                        <div class="lookup-value">${payload.alamat || '-'}</div>
+                    </div>
+                    <div class="lookup-item">
+                        <span class="lookup-label">Tanggal Verifikasi</span>
+                        <div class="lookup-value">${payload.tanggal_verifikasi || '-'}</div>
+                    </div>
+                </div>
+                <div class="lookup-history">${payload.history || 'Belum ada riwayat yang ditampilkan.'}</div>
+            `;
+        };
+
+        const lookupNik = () => {
+            if (!nikLookupInput || !nikLookupResult) {
+                return;
+            }
+
+            const nik = nikLookupInput.value.replace(/\D/g, '').slice(0, 16);
+            nikLookupInput.value = nik;
+
+            if (nik.length < 16) {
+                renderNikResult({
+                    found: false,
+                    message: 'Masukkan 16 digit NIK agar bisa dicek.',
+                });
+                return;
+            }
+
+            nikLookupButton.disabled = true;
+            nikLookupButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Memeriksa';
+
+            fetch(`{{ route('public.home') }}?lookup=1&nik=${encodeURIComponent(nik)}`, {
+                headers: { accept: 'application/json' },
+                cache: 'no-store',
+            })
+                .then((response) => response.json())
+                .then(renderNikResult)
+                .catch(() => {
+                    renderNikResult({
+                        found: false,
+                        message: 'Terjadi kesalahan saat memeriksa NIK.',
+                    });
+                })
+                .finally(() => {
+                    nikLookupButton.disabled = false;
+                    nikLookupButton.innerHTML = '<i class="bi bi-search me-2"></i>Periksa Status';
+                });
+        };
+
+        const renderHeatmap = (desaHeatmap) => {
+            if (!heatmapMap) {
+                return;
+            }
+
+            const heatmapData = new Map((desaHeatmap || []).map((item) => [item.desa, item]));
+            const maxDana = Math.max(...(desaHeatmap || []).map((item) => Number(item.totalDana) || 0), 0);
+
+            heatmapMap.innerHTML = heatmapLayout.map((tile) => {
+                const item = heatmapData.get(tile.label) || {};
+                const totalDana = Number(item.totalDana) || 0;
+                const totalTransaksi = Number(item.totalTransaksi) || 0;
+                const ratio = maxDana > 0 ? Math.min(1, totalDana / maxDana) : 0;
+                const background = totalDana > 0
+                    ? `linear-gradient(145deg, rgba(15, 114, 43, .16), rgba(15, 114, 43, ${ (0.18 + (ratio * 0.62)).toFixed(2) }))`
+                    : 'linear-gradient(145deg, #f5f8f5, #e8eee8)';
+                const tileClass = totalDana > 0 ? 'heatmap-tile' : 'heatmap-tile is-empty';
+
+                return `
+                    <div class="${tileClass}" style="grid-area: ${tile.area}; background: ${background};">
+                        <div class="heatmap-tile-label">${escapeHtml(tile.label)}</div>
+                        <div class="heatmap-tile-value">${formatRupiah(totalDana)}</div>
+                        <div class="heatmap-tile-meta">${Number(totalTransaksi).toLocaleString('id-ID')} transaksi</div>
+                    </div>
+                `;
+            }).join('');
+        };
 
         const renderChart = (instansiComparison) => {
             if (!chartCanvas || typeof Chart === 'undefined') {
@@ -651,6 +1050,7 @@
         const applyStats = (payload) => {
             const summary = payload?.summary || {};
             const instansiComparison = payload?.instansiComparison || [];
+            const desaHeatmap = payload?.desaHeatmap || [];
             document.querySelector('[data-stat="totalDanaMasuk"]').textContent = formatRupiah(summary.totalDanaMasuk);
             document.querySelector('[data-stat="totalTransaksi"]').textContent = `${Number(summary.totalTransaksi || 0).toLocaleString('id-ID')} transaksi`;
             document.querySelector('[data-stat="totalDanaTersalur"]').textContent = formatRupiah(summary.totalDanaTersalur);
@@ -659,6 +1059,7 @@
             document.querySelector('[data-stat="saldoTersedia"]').textContent = formatRupiah(summary.saldoTersedia);
             document.querySelector('[data-stat="lastUpdated"]').textContent = `Diperbarui ${summary.lastUpdated || '-'}`;
             renderChart(instansiComparison);
+            renderHeatmap(desaHeatmap);
         };
 
         const refreshStats = () => {
@@ -673,6 +1074,19 @@
 
         refreshStats();
         setInterval(refreshStats, 30000);
+
+        if (nikLookupInput) {
+            nikLookupInput.addEventListener('input', () => {
+                nikLookupInput.value = nikLookupInput.value.replace(/\D/g, '').slice(0, 16);
+            });
+        }
+
+        if (nikLookupForm) {
+            nikLookupForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                lookupNik();
+            });
+        }
     </script>
 </body>
 

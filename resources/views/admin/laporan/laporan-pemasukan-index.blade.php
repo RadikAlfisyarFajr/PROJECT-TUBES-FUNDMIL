@@ -370,6 +370,9 @@
         <header class="topbar">
             <h1 class="page-title">Laporan Pemasukan</h1>
             <div class="top-actions">
+                <a href="{{ route('laporan.pemasukan', array_merge(request()->except(['page', 'print']), ['print' => 1])) }}" target="_blank" rel="noopener" class="btn-print">
+                    <i class="bi bi-printer"></i> Cetak PDF
+                </a>
                 <div class="account-profile">
                     <div style="text-align: right;">
                         <strong style="display: block; font-size: .9rem; color: #17211b;">{{ auth()->user()?->name ?? 'Admin' }}</strong>
@@ -690,7 +693,7 @@
     function renderDetail(d) {
         document.getElementById('modalSubtitle').textContent  = d.tanggal ?? '';
         document.getElementById('modalReceiptNo').textContent = d.nomor_kuitansi ?? '—';
-        document.getElementById('modalPrintBtn').href         = `{{ url('pemasukan') }}/${d.id}/struk`;
+        document.getElementById('modalPrintBtn').href         = `{{ route('laporan.pemasukan.struk', ['id' => '__ID__']) }}`.replace('__ID__', d.id);
 
         /* Baris item pembayaran */
         const itemRows = (d.items && d.items.length)
