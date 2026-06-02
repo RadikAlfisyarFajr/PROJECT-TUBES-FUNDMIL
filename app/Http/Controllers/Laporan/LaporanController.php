@@ -34,6 +34,31 @@ class LaporanController extends Controller
             });
         }
 
+        if ($request->boolean('print')) {
+            $pemasukanPrint = (clone $query)->get();
+            $breakdownPemasukan = $pemasukanPrint
+                ->groupBy(fn (TransaksiZakat $item) => $item->kategori?->nama ?: ucfirst(str_replace('_', ' ', $item->jenis ?? 'Lainnya')))
+                ->map(function ($items, $label) {
+                    return [
+                        'label' => $label,
+                        'totalTransaksi' => $items->count(),
+                        'totalDana' => (float) $items->sum('jumlah'),
+                    ];
+                })
+                ->sortByDesc('totalDana')
+                ->values();
+
+            return view('admin.laporan.cetak-pdf', [
+                'pemasukan' => $pemasukanPrint,
+                'totalPemasukan' => $pemasukanPrint->sum('jumlah'),
+                'totalTransaksi' => $pemasukanPrint->count(),
+                'breakdownPemasukan' => $breakdownPemasukan,
+                'search' => $request->query('q'),
+                'generatedAt' => now(),
+                'report' => 'pemasukan',
+            ]);
+        }
+
         $pemasukan      = $query->paginate(25)->withQueryString();
         $totalPemasukan = TransaksiZakat::sum('jumlah');
 
@@ -81,6 +106,35 @@ class LaporanController extends Controller
     ]);
 }
 
+    public function pemasukanStruk(int $id)
+    {
+        $trx = TransaksiZakat::with('kategori')->findOrFail($id);
+
+        $labelMap = [
+            'zakat_fitrah'  => 'Zakat Fitrah',
+            'zakat_maal'    => 'Zakat Maal',
+            'infaq_sedekah' => 'Infaq & Sedekah',
+            'fidyah'        => 'Fidyah',
+        ];
+
+        $kategoriKey = $trx->kategori?->slug ?? $trx->jenis ?? '';
+        $items = [[
+            'kategori_utama' => $kategoriKey,
+            'label_kategori' => $labelMap[$kategoriKey] ?? ($trx->kategori?->nama ?? $trx->jenis ?? '—'),
+            'sub' => null,
+            'jumlah_input' => $trx->jumlah ?? 0,
+            'subtotal' => $trx->jumlah ?? 0,
+            'keterangan' => $trx->keterangan ?? '',
+        ]];
+
+        return view('admin.laporan.cetak-pdf', [
+            'trx' => $trx,
+            'items' => $items,
+            'generatedAt' => now(),
+            'report' => 'pemasukan-struk',
+        ]);
+    }
+
     /**
      * Laporan Data Mustahik
      */
@@ -89,7 +143,7 @@ class LaporanController extends Controller
         $user = Auth::user();
         $instansiId = $user->instansi_id ?? 1;
         
-        $query = Mustahik::where('instansi_id', $instansiId)->latest();
+        $query = Mustahik::with('instansi')->where('instansi_id', $instansiId)->latest();
 
         if ($request->filled('search')) {
             $search = $request->string('search');
@@ -105,6 +159,40 @@ class LaporanController extends Controller
 
         if ($request->filled('kategori') && $request->kategori !== 'semua') {
             $query->where('kategori_asnaf', $request->kategori);
+        }
+
+        if ($request->boolean('print')) {
+            $mustahikPrint = (clone $query)->get();
+            $breakdownStatus = $mustahikPrint->groupBy('status')->map(function ($items, $status) {
+                return [
+                    'label' => ucfirst(str_replace('_', ' ', $status ?: '-')),
+                    'total' => $items->count(),
+                ];
+            })->values();
+            $breakdownKategori = $mustahikPrint->groupBy('kategori_asnaf')->map(function ($items, $kategori) use ($instansiId) {
+                return [
+                    'label' => Mustahik::KATEGORI[$kategori] ?? ($kategori ?: '-'),
+                    'total' => $items->count(),
+                ];
+            })->sortByDesc('total')->values();
+
+            return view('admin.laporan.cetak-pdf', [
+                'mustahik' => $mustahikPrint,
+                'totalMustahik' => Mustahik::where('instansi_id', $instansiId)->count(),
+                'aktifMustahik' => Mustahik::where('instansi_id', $instansiId)->where('status', 'aktif')->count(),
+                'tidakAktifMustahik' => Mustahik::where('instansi_id', $instansiId)->where('status', 'tidak_aktif')->count(),
+                'kategoriTerbanyak' => $this->kategoriTerbanyak($instansiId),
+                'kategoriAsnaf' => Mustahik::KATEGORI,
+                'breakdownStatus' => $breakdownStatus,
+                'breakdownKategori' => $breakdownKategori,
+                'filters' => [
+                    'search' => $request->query('search'),
+                    'status' => $request->query('status', 'semua'),
+                    'kategori' => $request->query('kategori', 'semua'),
+                ],
+                'generatedAt' => now(),
+                'report' => 'mustahik',
+            ]);
         }
 
         $mustahik = $query->paginate(10)->withQueryString();
@@ -177,6 +265,33 @@ class LaporanController extends Controller
 
         if ($request->filled('status') && $request->status !== 'semua') {
             $query->where('status', $request->status);
+        }
+
+        if ($request->boolean('print')) {
+            $penyaluranPrint = (clone $query)->get();
+            $breakdownProgram = $penyaluranPrint->map(function (Penyaluran $item) {
+                return [
+                    'label' => $item->programPenyaluran?->nama_program ?? '—',
+                    'totalPenerima' => (int) $item->penyaluranDetail->count(),
+                    'totalDana' => (float) $item->penyaluranDetail->sum('jumlah_diterima'),
+                ];
+            })->sortByDesc('totalDana')->values();
+
+            return view('admin.laporan.cetak-pdf', [
+                'penyaluran' => $penyaluranPrint,
+                'totalPenyaluran' => Penyaluran::where('instansi_id', $instansiId)->count(),
+                'berhasilPenyaluran' => Penyaluran::where('instansi_id', $instansiId)->where('status', 'selesai')->count(),
+                'prosesPenyaluran' => Penyaluran::where('instansi_id', $instansiId)->where('status', 'proses')->count(),
+                'totalDanaPenyaluran' => (float) $penyaluranPrint->sum(fn (Penyaluran $item) => (float) $item->penyaluranDetail->sum('jumlah_diterima')),
+                'totalPenerimaPenyaluran' => (int) $penyaluranPrint->sum(fn (Penyaluran $item) => $item->penyaluranDetail->count()),
+                'breakdownProgram' => $breakdownProgram,
+                'filters' => [
+                    'search' => $request->query('search'),
+                    'status' => $request->query('status', 'semua'),
+                ],
+                'generatedAt' => now(),
+                'report' => 'penyaluran',
+            ]);
         }
 
         $penyaluran = $query->paginate(10)->withQueryString();
@@ -257,6 +372,54 @@ class LaporanController extends Controller
             $penyaluranQuery->whereHas('programPenyaluran', function ($builder) use ($search) {
                 $builder->where('nama_program', 'like', "%{$search}%");
             });
+        }
+
+        if ($request->boolean('print')) {
+            $pemasukanPrint = (clone $pemasukanQuery)->get();
+            $penyaluranPrint = (clone $penyaluranQuery)->get();
+            $totalPemasukanPrint = (float) $pemasukanPrint->sum('jumlah');
+            $totalPenyaluranPrint = (float) $penyaluranPrint->sum(function (Penyaluran $item) {
+                return (float) $item->penyaluranDetail->sum('jumlah_diterima');
+            });
+            $saldoAwal = 0;
+            $breakdownPemasukan = $pemasukanPrint
+                ->groupBy(fn (TransaksiZakat $item) => $item->kategori?->nama ?: ucfirst(str_replace('_', ' ', $item->jenis ?? 'Lainnya')))
+                ->map(function ($items, $label) {
+                    return [
+                        'label' => $label,
+                        'totalTransaksi' => $items->count(),
+                        'totalDana' => (float) $items->sum('jumlah'),
+                    ];
+                })
+                ->sortByDesc('totalDana')
+                ->values();
+            $breakdownPenyaluran = $penyaluranPrint->map(function (Penyaluran $item) {
+                return [
+                    'label' => $item->programPenyaluran?->nama_program ?? '—',
+                    'totalPenerima' => (int) $item->penyaluranDetail->count(),
+                    'totalTransaksi' => 1,
+                    'totalDana' => (float) $item->penyaluranDetail->sum('jumlah_diterima'),
+                ];
+            })->sortByDesc('totalDana')->values();
+
+            return view('admin.laporan.cetak-pdf', [
+                'pemasukan' => $pemasukanPrint,
+                'penyaluran' => $penyaluranPrint,
+                'totalPemasukan' => $totalPemasukanPrint,
+                'totalPenyaluran' => $totalPenyaluranPrint,
+                'saldoAwal' => $saldoAwal,
+                'saldoBersih' => $saldoAwal + $totalPemasukanPrint - $totalPenyaluranPrint,
+                'totalTransaksiPemasukan' => $pemasukanPrint->count(),
+                'totalTransaksiPenyaluran' => $penyaluranPrint->count(),
+                'totalMustahik' => Mustahik::where('instansi_id', $instansiId)->count(),
+                'breakdownPemasukan' => $breakdownPemasukan,
+                'breakdownPenyaluran' => $breakdownPenyaluran,
+                'filters' => [
+                    'search' => $request->query('search'),
+                ],
+                'generatedAt' => now(),
+                'report' => 'keuangan',
+            ]);
         }
 
         $penyaluran = $penyaluranQuery->limit(12)->get();

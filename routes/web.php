@@ -154,6 +154,7 @@ Route::middleware('auth')->group(function () {
         ->group(function () {
             Route::get('pemasukan', 'pemasukan')->name('pemasukan');
             Route::get('pemasukan/{id}/detail', 'pemasukanDetail')->name('pemasukan.detail')->whereNumber('id');
+            Route::get('cetak-pdf/pemasukan-struk/{id}', 'pemasukanStruk')->name('pemasukan.struk')->whereNumber('id');
             Route::get('mustahik', 'mustahik')->name('mustahik');
             Route::get('mustahik/{id}/detail', 'mustahikDetail')->name('mustahik.detail')->whereNumber('id');
             Route::get('penyaluran', 'penyaluran')->name('penyaluran');
