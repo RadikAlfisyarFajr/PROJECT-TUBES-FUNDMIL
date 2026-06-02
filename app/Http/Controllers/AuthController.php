@@ -8,6 +8,7 @@ use App\Models\TransaksiZakat;
 use App\Models\Instansi;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +38,20 @@ class AuthController extends Controller
 
     public function showLandingPage()
     {
-        return view('public.landing');
+        $payload = $this->publicZisPayload();
+
+        if (request()->expectsJson() || request()->boolean('stats')) {
+            return response()->json($payload)
+                ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        }
+
+        return view('public.landing', $payload);
+    }
+
+    public function publicZisStats(): JsonResponse
+    {
+        return response()->json($this->publicZisPayload())
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     }
 
     public function showAuthForm()
@@ -406,5 +420,60 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('public.home');
+    }
+
+    private function publicZisPayload(): array
+    {
+        $totalDanaMasuk = (float) TransaksiZakat::sum('jumlah');
+        $totalTransaksi = TransaksiZakat::count();
+        $totalInstansiAktif = Instansi::where('status', 'aktif')->count();
+        $totalPenerima = (int) PenyaluranDetail::whereHas('penyaluran', fn ($query) => $query->where('status', 'selesai'))
+            ->where('status_penerimaan', '!=', 'ditolak')
+            ->count();
+        $totalDanaTersalur = (float) PenyaluranDetail::whereHas('penyaluran', fn ($query) => $query->where('status', 'selesai'))
+            ->sum('jumlah_diterima');
+        $saldoTersedia = max(0, $totalDanaMasuk - $totalDanaTersalur);
+        $instansiComparison = Instansi::query()
+            ->where('instansi.status', 'aktif')
+            ->leftJoinSub(
+                TransaksiZakat::query()
+                    ->select('instansi_id')
+                    ->selectRaw('COALESCE(SUM(jumlah), 0) as total_dana')
+                    ->selectRaw('COUNT(*) as total_transaksi')
+                    ->groupBy('instansi_id'),
+                'rekap_zakat',
+                'instansi.id',
+                '=',
+                'rekap_zakat.instansi_id'
+            )
+            ->select('instansi.id', 'instansi.nama', 'instansi.kelurahan')
+            ->selectRaw('COALESCE(rekap_zakat.total_dana, 0) as total_dana')
+            ->selectRaw('COALESCE(rekap_zakat.total_transaksi, 0) as total_transaksi')
+            ->orderByDesc('total_dana')
+            ->orderBy('instansi.nama')
+            ->get()
+            ->map(function ($instansi) {
+                return [
+                    'id' => $instansi->id,
+                    'nama' => $instansi->nama,
+                    'desa' => $instansi->kelurahan ?: '-',
+                    'totalDana' => (float) $instansi->total_dana,
+                    'totalTransaksi' => (int) $instansi->total_transaksi,
+                ];
+            })
+            ->values();
+
+        return [
+            'summary' => [
+                'totalDanaMasuk' => $totalDanaMasuk,
+                'totalTransaksi' => $totalTransaksi,
+                'totalInstansiAktif' => $totalInstansiAktif,
+                'totalPenerima' => $totalPenerima,
+                'totalDanaTersalur' => $totalDanaTersalur,
+                'saldoTersedia' => $saldoTersedia,
+                'lastUpdated' => now()->format('d M Y H:i:s'),
+            ],
+            'instansiComparison' => $instansiComparison,
+        ];
     }
 }
