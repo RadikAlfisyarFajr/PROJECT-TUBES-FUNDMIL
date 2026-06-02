@@ -61,9 +61,9 @@ class KepalaDesaController extends Controller
             'desa' => $desa,
             'summary' => [
                 'instansiAktif' => $instansi->count(),
-                'draftProgram' => ProgramPenyaluran::query()
+                'pendingProgram' => ProgramPenyaluran::query()
                     ->whereIn('instansi_id', $instansiIds)
-                    ->where('approval_status', 'draft')
+                    ->whereIn('approval_status', ['pending', 'draft'])
                     ->count(),
                 'totalMasuk' => $rows->sum('kas_masuk'),
                 'totalKeluar' => $rows->sum('kas_keluar'),
@@ -77,7 +77,7 @@ class KepalaDesaController extends Controller
 
     public function approvalIndex(Request $request): View
     {
-        $status = $request->input('status', 'draft');
+        $status = $request->input('status', 'pending');
         $instansiIds = $this->activeInstansi()->pluck('id');
 
         $query = ProgramPenyaluran::query()
@@ -85,16 +85,18 @@ class KepalaDesaController extends Controller
             ->whereIn('instansi_id', $instansiIds)
             ->latest();
 
-        if ($status !== 'semua') {
+        if ($status === 'pending') {
+            $query->whereIn('approval_status', ['pending', 'draft']);
+        } elseif ($status !== 'semua') {
             $query->where('approval_status', $status);
         }
 
         return view('kepala-desa.approval.index', [
             'programs' => $query->paginate(10)->withQueryString(),
             'status' => $status,
-            'draftCount' => ProgramPenyaluran::query()
+            'pendingCount' => ProgramPenyaluran::query()
                 ->whereIn('instansi_id', $instansiIds)
-                ->where('approval_status', 'draft')
+                ->whereIn('approval_status', ['pending', 'draft'])
                 ->count(),
         ]);
     }
@@ -111,14 +113,14 @@ class KepalaDesaController extends Controller
     public function approve(Request $request, ProgramPenyaluran $program): RedirectResponse
     {
         $this->authorizeProgram($program);
-        abort_unless($program->approval_status === 'draft', 422, 'Program ini sudah diproses.');
+        abort_unless(in_array($program->approval_status, ['pending', 'draft'], true), 422, 'Program ini sudah diproses.');
 
         $validated = $request->validate([
             'approval_note' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $program->update([
-            'approval_status' => 'pending',
+            'approval_status' => 'approved',
             'approved_by' => Auth::id(),
             'approved_at' => now(),
             'approval_note' => $validated['approval_note'] ?? null,
@@ -126,13 +128,13 @@ class KepalaDesaController extends Controller
 
         return redirect()
             ->route('kepala-desa.approval.index')
-            ->with('success', 'Program direkomendasikan dan siap dikirim ke kecamatan.');
+            ->with('success', 'Program disetujui.');
     }
 
     public function reject(Request $request, ProgramPenyaluran $program): RedirectResponse
     {
         $this->authorizeProgram($program);
-        abort_unless($program->approval_status === 'draft', 422, 'Program ini sudah diproses.');
+        abort_unless(in_array($program->approval_status, ['pending', 'draft'], true), 422, 'Program ini sudah diproses.');
 
         $validated = $request->validate([
             'approval_note' => ['required', 'string', 'max:1000'],

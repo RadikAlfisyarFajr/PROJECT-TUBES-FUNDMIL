@@ -1,15 +1,13 @@
 @php
     $rupiah = fn ($value) => 'Rp ' . number_format((float) $value, 0, ',', '.');
     $statusOptions = [
-        'draft' => 'Menunggu Desa',
-        'pending' => 'Direkomendasikan',
+        'pending' => 'Pending',
+        'approved' => 'Disetujui',
         'rejected' => 'Ditolak',
-        'approved' => 'Disetujui Kecamatan',
         'semua' => 'Semua',
     ];
     $badgeClass = [
-        'draft' => 'bg-warning text-dark',
-        'pending' => 'bg-info text-dark',
+        'pending' => 'bg-warning text-dark',
         'approved' => 'bg-success',
         'rejected' => 'bg-danger',
     ];
@@ -20,6 +18,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="30">
     <title>Approval Program | Admin Kepala Desa</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
@@ -38,8 +37,8 @@
                 <div class="admin-top-actions">
                     <div class="super-count-pill">
                         <i class="bi bi-hourglass-split"></i>
-                        <strong>{{ $draftCount }}</strong>
-                        <span>draft</span>
+                        <strong>{{ $pendingCount }}</strong>
+                        <span>pending</span>
                     </div>
                     @include('admin.partials.account-identity')
                 </div>

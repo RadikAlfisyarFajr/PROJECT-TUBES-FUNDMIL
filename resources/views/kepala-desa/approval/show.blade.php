@@ -1,10 +1,10 @@
 @php
     $rupiah = fn ($value) => 'Rp ' . number_format((float) $value, 0, ',', '.');
     $statusLabel = [
-        'draft' => 'Menunggu Desa',
-        'pending' => 'Direkomendasikan ke Kecamatan',
-        'approved' => 'Disetujui Kecamatan',
+        'pending' => 'Pending',
+        'approved' => 'Disetujui',
         'rejected' => 'Ditolak',
+        'draft' => 'Pending',
     ][$program->approval_status] ?? $program->approval_status;
 @endphp
 
@@ -13,6 +13,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="30">
     <title>Detail Approval Program | Admin Kepala Desa</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
@@ -61,26 +62,26 @@
 
                     <div class="admin-panel">
                         <h2 class="super-section-title">Rekomendasi Kepala Desa</h2>
-                        <p class="super-section-desc">Persetujuan akan mengubah status menjadi pending agar dapat diteruskan ke kecamatan.</p>
+                        <p class="super-section-desc">Persetujuan akan mengubah status program menjadi disetujui.</p>
 
-                        @if($program->approval_status === 'draft')
+                        @if($program->approval_status === 'pending' || $program->approval_status === 'draft')
                             <form method="POST" action="{{ route('kepala-desa.approval.approve', $program) }}" class="mt-4">
                                 @csrf
                                 <label class="distribution-label" for="approval_note">Catatan Rekomendasi</label>
                                 <textarea id="approval_note" name="approval_note" class="distribution-textarea" placeholder="Contoh: Program sesuai kebutuhan warga dan data sasaran desa.">{{ old('approval_note') }}</textarea>
                                 <button class="distribution-submit-btn w-100 mt-3" type="submit">
                                     <i class="bi bi-check-circle-fill"></i>
-                                    <span>Rekomendasikan ke Kecamatan</span>
+                                    <span>Setujui Program</span>
                                 </button>
                             </form>
 
                             <form method="POST" action="{{ route('kepala-desa.approval.reject', $program) }}" class="mt-3">
                                 @csrf
                                 <label class="distribution-label" for="reject_note">Alasan Penolakan</label>
-                                <textarea id="reject_note" name="approval_note" class="distribution-textarea" required placeholder="Tuliskan alasan penolakan agar admin instansi dapat memperbaiki draf.">{{ old('approval_note') }}</textarea>
+                                <textarea id="reject_note" name="approval_note" class="distribution-textarea" required placeholder="Tuliskan alasan penolakan agar admin instansi dapat memperbaiki pengajuan.">{{ old('approval_note') }}</textarea>
                                 <button class="super-danger-btn w-100 mt-3" type="submit">
                                     <i class="bi bi-x-circle-fill"></i>
-                                    <span>Tolak Draf Program</span>
+                                    <span>Tolak Program</span>
                                 </button>
                             </form>
                         @else

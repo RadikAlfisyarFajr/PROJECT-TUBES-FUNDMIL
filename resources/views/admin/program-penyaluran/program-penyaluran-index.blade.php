@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="refresh" content="30">
     <title>Program Penyaluran - Fundmil Soreang</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
     @include('admin.partials.tailwind-assets')
@@ -76,10 +77,10 @@
                         : ($program->tags ?? $program->kategoriDana->pluck('nama')->filter()->take(2)->all());
                     $isSelesai = $program->status === 'selesai';
                     $approvalLabels = [
-                        'draft' => 'Menunggu Desa',
-                        'pending' => 'Direkomendasikan',
+                        'draft' => 'Pending',
+                        'pending' => 'Pending',
                         'approved' => 'Disetujui',
-                        'rejected' => 'Ditolak Desa',
+                        'rejected' => 'Ditolak',
                     ];
                     @endphp
                     <article class="min-h-[266px] rounded-[13px] bg-white px-[24px] py-[24px] shadow-sm ring-1 ring-[#e3ebe6]">
@@ -105,7 +106,7 @@
                             </span>
                             <div class="flex flex-col items-end gap-2">
                                 <span class="rounded-full px-[12px] py-[5px] text-[9px] font-black uppercase {{ $isSelesai ? 'bg-[#ddddda] text-[#5e645f]' : 'bg-[#98f091] text-[#0b751f]' }}">{{ $isSelesai ? 'Selesai' : 'Aktif' }}</span>
-                                <span class="rounded-full bg-[#eef2f0] px-[12px] py-[5px] text-[9px] font-black uppercase text-[#58635d]">{{ $approvalLabels[$program->approval_status] ?? 'Menunggu Desa' }}</span>
+                                <span class="rounded-full bg-[#eef2f0] px-[12px] py-[5px] text-[9px] font-black uppercase text-[#58635d]">{{ $approvalLabels[$program->approval_status] ?? 'Pending' }}</span>
                             </div>
                         </div>
                         <h3 class="mt-[25px] text-[18px] font-black leading-[24px]">{{ $program->nama_program }}</h3>

@@ -67,7 +67,7 @@ class ProgramPenyaluranController extends Controller
                 'target_mustahik' => $validated['target_mustahik'] ?? 0,
                 'target_asnaf' => array_values($validated['target_asnaf']),
                 'status' => $validated['status'],
-                'approval_status' => 'draft',
+                'approval_status' => 'pending',
             ]);
         });
 
@@ -111,7 +111,7 @@ class ProgramPenyaluranController extends Controller
                 'target_mustahik' => $validated['target_mustahik'] ?? 0,
                 'target_asnaf' => array_values($validated['target_asnaf']),
                 'status' => $validated['status'],
-                'approval_status' => 'draft',
+                'approval_status' => 'pending',
                 'approved_by' => null,
                 'approved_at' => null,
                 'approval_note' => null,

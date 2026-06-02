@@ -110,7 +110,7 @@
                 <div class="admin-top-actions">
                     <a class="admin-secondary-btn" href="{{ route('kepala-desa.approval.index') }}">
                         <i class="bi bi-clipboard-check-fill"></i>
-                        <span>{{ $summary['draftProgram'] }} draft</span>
+                        <span>{{ $summary['pendingProgram'] }} pending</span>
                     </a>
                     @include('admin.partials.account-identity')
                 </div>
@@ -180,8 +180,8 @@
                         <div class="super-param-list">
                             <a href="{{ route('kepala-desa.approval.index') }}">
                                 <i class="bi bi-hourglass-split"></i>
-                                <span>Draft butuh rekomendasi</span>
-                                <strong>{{ $summary['draftProgram'] }}</strong>
+                                <span>Pengajuan pending</span>
+                                <strong>{{ $summary['pendingProgram'] }}</strong>
                             </a>
                             <a href="{{ route('kepala-desa.dashboard') }}">
                                 <i class="bi bi-bank2"></i>
