@@ -133,8 +133,8 @@ textarea,
 }
 
 .admin-avatar {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     background: var(--green-soft);
     border: 3px solid #5ab879;
@@ -150,6 +150,7 @@ textarea,
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
 }
 
 .admin-content-wrap {

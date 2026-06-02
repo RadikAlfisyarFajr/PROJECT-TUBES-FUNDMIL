@@ -58,31 +58,7 @@
                     <p class="text-xs font-black uppercase tracking-[.14em] text-[#6c756f]">Keterangan</p>
                     <p class="mt-2 min-h-[80px] rounded-[10px] bg-[#eef2f0] px-4 py-3 leading-7">{{ $mustahik->keterangan ?: '-' }}</p>
                 </div>
-                <div class="md:col-span-2">
-                    <p class="text-xs font-black uppercase tracking-[.14em] text-[#6c756f]">Foto Dokumen</p>
-                    <div class="mt-2 grid gap-4 md:grid-cols-2">
-                        <div class="overflow-hidden rounded-[12px] bg-[#eef2f0]">
-                            <div class="border-b border-[#dde7e1] px-4 py-3 text-xs font-black uppercase tracking-[.14em] text-[#6c756f]">KTP</div>
-                            @if ($mustahik->foto_ktp)
-                                <a href="{{ asset('storage/'.$mustahik->foto_ktp) }}" target="_blank" class="block">
-                                    <img src="{{ asset('storage/'.$mustahik->foto_ktp) }}" alt="Foto KTP {{ $mustahik->nama }}" class="h-56 w-full object-cover">
-                                </a>
-                            @else
-                                <div class="grid h-56 place-items-center px-4 text-sm font-bold text-[#6c756f]">Belum ada foto KTP.</div>
-                            @endif
-                        </div>
-                        <div class="overflow-hidden rounded-[12px] bg-[#eef2f0]">
-                            <div class="border-b border-[#dde7e1] px-4 py-3 text-xs font-black uppercase tracking-[.14em] text-[#6c756f]">KK</div>
-                            @if ($mustahik->foto_kk)
-                                <a href="{{ asset('storage/'.$mustahik->foto_kk) }}" target="_blank" class="block">
-                                    <img src="{{ asset('storage/'.$mustahik->foto_kk) }}" alt="Foto KK {{ $mustahik->nama }}" class="h-56 w-full object-cover">
-                                </a>
-                            @else
-                                <div class="grid h-56 place-items-center px-4 text-sm font-bold text-[#6c756f]">Belum ada foto KK.</div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
+
             </div>
             <div class="flex justify-end gap-3 border-t border-[#edf1ef] px-8 py-6">
                 <a href="{{ route('mustahik.index') }}" class="inline-flex h-11 items-center rounded-[10px] bg-gray-200 px-5 text-sm font-black text-gray-800">Kembali ke Daftar</a>

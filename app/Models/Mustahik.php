@@ -34,8 +34,6 @@ class Mustahik extends Model
         'kategori_asnaf',
         'kontak',
         'keterangan',
-        'foto_ktp',
-        'foto_kk',
         'status',
         'tanggal_verifikasi',
         'latitude',
