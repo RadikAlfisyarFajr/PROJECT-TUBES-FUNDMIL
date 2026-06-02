@@ -34,12 +34,12 @@ class Mustahik extends Model
         'kategori_asnaf',
         'kontak',
         'keterangan',
-        'status',
-        'tanggal_verifikasi',
         'foto_ktp',
         'foto_kk',
+        'status',
+        'tanggal_verifikasi',
         'latitude',
-        'longitude'
+        'longitude',
     ];
 
     protected $casts = [

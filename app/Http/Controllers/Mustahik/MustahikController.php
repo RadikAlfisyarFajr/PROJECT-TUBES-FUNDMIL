@@ -9,6 +9,7 @@ use App\Models\Mustahik;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class MustahikController extends Controller
@@ -56,8 +57,9 @@ class MustahikController extends Controller
     public function store(MustahikRequest $request): RedirectResponse
     {
         $validated = $this->payload($request);
+        $documents = $this->storeDocuments($request);
 
-        Mustahik::create($validated + [
+        Mustahik::create($validated + $documents + [
             'instansi_id' => $this->instansi()->id,
             'tanggal_verifikasi' => $validated['status'] === 'aktif' ? now() : null,
         ]);
@@ -87,9 +89,10 @@ class MustahikController extends Controller
         $this->authorizeInstansi($mustahik);
 
         $validated = $this->payload($request);
+        $documents = $this->storeDocuments($request, $mustahik);
         $wasActive = $mustahik->status === 'aktif';
 
-        $mustahik->update($validated + [
+        $mustahik->update($validated + $documents + [
             'tanggal_verifikasi' => $validated['status'] === 'aktif'
                 ? ($wasActive ? $mustahik->tanggal_verifikasi : now())
                 : null,
@@ -101,6 +104,7 @@ class MustahikController extends Controller
     public function destroy(Mustahik $mustahik): RedirectResponse
     {
         $this->authorizeInstansi($mustahik);
+        $this->deleteDocuments($mustahik);
         $mustahik->delete();
 
         return redirect()->route('mustahik.index')->with('success', 'Data mustahik berhasil dihapus.');
@@ -113,12 +117,40 @@ class MustahikController extends Controller
         return [
             'nama' => $validated['nama_lengkap'],
             'nik' => $validated['nik'] ?? null,
+            'jenis_kelamin' => $validated['jenis_kelamin'] ?? null,
             'alamat' => $validated['alamat'],
             'kategori_asnaf' => $validated['kategori'],
             'kontak' => $validated['kontak'] ?? null,
             'keterangan' => $validated['keterangan'] ?? null,
             'status' => $validated['status'] ?? 'tidak_aktif',
         ];
+    }
+
+    private function storeDocuments(MustahikRequest $request, ?Mustahik $mustahik = null): array
+    {
+        $documents = [];
+
+        foreach (['foto_ktp', 'foto_kk'] as $field) {
+            if (! $request->hasFile($field)) {
+                continue;
+            }
+
+            if ($mustahik?->{$field}) {
+                Storage::disk('public')->delete($mustahik->{$field});
+            }
+
+            $documents[$field] = $request->file($field)->store('mustahik/dokumen', 'public');
+        }
+
+        return $documents;
+    }
+
+    private function deleteDocuments(Mustahik $mustahik): void
+    {
+        Storage::disk('public')->delete(array_filter([
+            $mustahik->foto_ktp,
+            $mustahik->foto_kk,
+        ]));
     }
 
     private function instansi(): Instansi
