@@ -23,17 +23,27 @@ class Mustahik extends Model
         'instansi_id',
         'nama',
         'nik',
+        'no_kk',
+        'tempat_lahir',
+        'tanggal_lahir',
+        'jenis_kelamin',
+        'desa_kelurahan',
+        'rw',
+        'rt',
         'alamat',
         'kategori_asnaf',
         'kontak',
         'keterangan',
         'status',
         'tanggal_verifikasi',
+        'foto_ktp',
+        'foto_kk',
         'latitude',
         'longitude'
     ];
 
     protected $casts = [
+        'tanggal_lahir' => 'date',
         'tanggal_verifikasi' => 'datetime',
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
