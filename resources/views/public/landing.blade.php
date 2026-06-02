@@ -1,3 +1,8 @@
+@php
+    $summary = $summary ?? [];
+    $instansiComparison = collect($instansiComparison ?? []);
+@endphp
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -141,6 +146,11 @@
             padding: 34px;
         }
 
+        .stat-card.is-compact {
+            min-height: 140px;
+            padding: 26px 28px;
+        }
+
         .stat-icon {
             color: var(--green);
             font-size: 1.55rem;
@@ -151,6 +161,127 @@
             font-size: .78rem;
             font-weight: 800;
             text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: clamp(1.55rem, 2.8vw, 2.15rem);
+            font-weight: 900;
+            line-height: 1.05;
+        }
+
+        .stat-meta {
+            color: #5f6b61;
+            font-size: .84rem;
+            font-weight: 700;
+        }
+
+        .stats-grid {
+            display: grid;
+            gap: 18px;
+        }
+
+        .chart-card {
+            background: #fff;
+            border: 1px solid #e8eee8;
+            border-radius: 12px;
+            box-shadow: 0 12px 30px rgba(22, 35, 24, .04);
+            padding: 28px;
+        }
+
+        .chart-head {
+            display: flex;
+            align-items: start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .chart-title {
+            margin: 0;
+            font-size: 1.15rem;
+            font-weight: 900;
+        }
+
+        .chart-subtitle {
+            margin: 4px 0 0;
+            color: #637065;
+            font-size: .92rem;
+        }
+
+        .chart-badge {
+            padding: .45rem .8rem;
+            border-radius: 999px;
+            background: #eaf4ec;
+            color: var(--green);
+            font-size: .76rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .chart-wrap {
+            height: 360px;
+        }
+
+        .breakdown-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .breakdown-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: #f8faf8;
+            border: 1px solid #edf3ee;
+        }
+
+        .breakdown-name {
+            font-size: .86rem;
+            font-weight: 800;
+        }
+
+        .breakdown-value {
+            color: var(--green-dark);
+            font-size: .9rem;
+            font-weight: 900;
+        }
+
+        .instansi-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .instansi-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: #f8faf8;
+            border: 1px solid #edf3ee;
+        }
+
+        .instansi-name {
+            font-size: .92rem;
+            font-weight: 800;
+            color: var(--ink);
+        }
+
+        .instansi-meta {
+            color: var(--muted);
+            font-size: .8rem;
+        }
+
+        .instansi-amount {
+            color: var(--green-dark);
+            font-size: .95rem;
+            font-weight: 900;
+            white-space: nowrap;
         }
 
         .program-image {
@@ -259,7 +390,7 @@
                     <div class="col-lg-6">
                         <span class="eyebrow mb-4">TRANSPARANSI DIGITAL AMANAH</span>
                         <h1 class="mb-4">Transparansi Zakat &amp; Infaq untuk <span>Soreang</span> yang Lebih Sejahtera</h1>
-                        <p class="hero-copy mb-4">Pantau penyalregister ran dana ZIS secara real-time. Dari umat, oleh umat, untuk umat. Membangun kepercayaan melalui akuntabilitas digital yang tak terputus.</p>
+                        <p class="hero-copy mb-4">Pantau penyaluran dana ZIS secara real-time. Dari umat, oleh umat, untuk umat. Membangun kepercayaan melalui akuntabilitas digital yang tak terputus.</p>
                         <div class="d-flex flex-wrap gap-3">
                             <a href="#statistik" class="btn btn-green">Lihat Laporan Penyaluran</a>
                             <a href="#cek-mustahik" class="btn btn-soft">Cek Status Bantuan</a>
@@ -272,35 +403,72 @@
             </div>
         </section>
 
-        <section id="statistik" class="section-soft section-pad">
+                <section id="statistik" class="section-soft section-pad" data-stats-url="{{ route('public.home') }}?stats=1">
             <div class="container">
                 <div class="text-center mb-5">
-                    <h2 class="fw-bold">Laporan Filantropi Terkini</h2>
-                    <p class="text-muted mb-0">Update real-time kontribusi masyarakat Soreang hingga hari ini.</p>
+                    <h2 class="fw-bold">Grafik Akumulasi Dana ZIS</h2>
+                    <p class="text-muted mb-0">Data di bawah ini memperlihatkan instansi mana yang sedang menerima pemasukan.</p>
                 </div>
-                <div class="row g-4">
-                    <div class="col-md-4">
-                        <div class="stat-card">
-                            <i class="bi bi-cash-stack stat-icon"></i>
-                            <div class="stat-label mt-4 mb-2">Total Dana Terkumpul</div>
-                            <div class="h3 fw-bold">Rp 2.450.800.000</div>
-                            <small class="text-success fw-bold">+12% Bulan ini</small>
+                <div class="row g-4 align-items-stretch">
+                    <div class="col-lg-4">
+                        <div class="stats-grid h-100">
+                            <div class="stat-card is-compact">
+                                <i class="bi bi-cash-stack stat-icon"></i>
+                                <div class="stat-label mt-3 mb-2">Total Dana Terkumpul</div>
+                                <div class="stat-value" data-stat="totalDanaMasuk">{{ 'Rp '.number_format((float) ($summary['totalDanaMasuk'] ?? 0), 0, ',', '.') }}</div>
+                                <div class="stat-meta" data-stat="totalTransaksi">{{ number_format((int) ($summary['totalTransaksi'] ?? 0), 0, ',', '.') }} transaksi</div>
+                            </div>
+                            <div class="stat-card is-compact">
+                                <i class="bi bi-hand-thumbs-up-fill stat-icon"></i>
+                                <div class="stat-label mt-3 mb-2">Total Dana Tersalurkan</div>
+                                <div class="stat-value" data-stat="totalDanaTersalur">{{ 'Rp '.number_format((float) ($summary['totalDanaTersalur'] ?? 0), 0, ',', '.') }}</div>
+                                <div class="stat-meta" data-stat="totalPenerima">{{ number_format((int) ($summary['totalPenerima'] ?? 0), 0, ',', '.') }} penerima manfaat</div>
+                            </div>
+                            <div class="stat-card is-compact">
+                                <i class="bi bi-people-fill stat-icon"></i>
+                                <div class="stat-label mt-3 mb-2">Instansi Aktif</div>
+                                <div class="stat-value" data-stat="totalInstansiAktif">{{ number_format((int) ($summary['totalInstansiAktif'] ?? 0), 0, ',', '.') }}</div>
+                                <div class="stat-meta">Akun instansi yang terdata</div>
+                            </div>
+                            <div class="stat-card is-compact">
+                                <i class="bi bi-wallet2 stat-icon"></i>
+                                <div class="stat-label mt-3 mb-2">Saldo Siap Salur</div>
+                                <div class="stat-value" data-stat="saldoTersedia">{{ 'Rp '.number_format((float) ($summary['saldoTersedia'] ?? 0), 0, ',', '.') }}</div>
+                                <div class="stat-meta" data-stat="lastUpdated">Diperbarui {{ $summary['lastUpdated'] ?? now()->format('d M Y H:i:s') }}</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="stat-card">
-                            <i class="bi bi-hand-thumbs-up-fill stat-icon"></i>
-                            <div class="stat-label mt-4 mb-2">Total Dana Tersalurkan</div>
-                            <div class="h3 fw-bold">Rp 2.083.180.000</div>
-                            <small class="text-success fw-bold">85% Tersalurkan</small>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="stat-card">
-                            <i class="bi bi-people-fill stat-icon"></i>
-                            <div class="stat-label mt-4 mb-2">Jumlah Penerima Manfaat</div>
-                            <div class="h3 fw-bold">12.840 Jiwa</div>
-                            <small class="text-success fw-bold">Tersebar di 18 Desa</small>
+                    <div class="col-lg-8">
+                        <div class="chart-card h-100">
+                            <div class="chart-head">
+                                <div>
+                                    <h3 class="chart-title">Perbandingan total pemasukan setiap instansi</h3>
+                                    <p class="chart-subtitle">Detail pemasukan masing-masing instansi.</p>
+                                </div>
+                                <span class="chart-badge">Live Update</span>
+                            </div>
+                            <div class="chart-wrap">
+                                <canvas id="zisChart"></canvas>
+                            </div>
+                            <div class="instansi-list mt-3">
+                                @forelse ($instansiComparison as $index => $instansi)
+                                    <div class="instansi-row">
+                                        <div>
+                                            <div class="instansi-name">{{ $index + 1 }}. {{ $instansi['nama'] ?? '-' }}</div>
+                                            <div class="instansi-meta">{{ $instansi['desa'] ?? '-' }} &middot; {{ number_format((int) ($instansi['totalTransaksi'] ?? 0), 0, ',', '.') }} transaksi</div>
+                                        </div>
+                                        <div class="instansi-amount">{{ 'Rp '.number_format((float) ($instansi['totalDana'] ?? 0), 0, ',', '.') }}</div>
+                                    </div>
+                                @empty
+                                    <div class="instansi-row">
+                                        <div>
+                                            <div class="instansi-name">Belum ada data instansi</div>
+                                            <div class="instansi-meta">Menunggu pemasukan pertama masuk</div>
+                                        </div>
+                                        <div class="instansi-amount">-</div>
+                                    </div>
+                                @endforelse
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -409,6 +577,103 @@
             </div>
         </div>
     </footer>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script>
+        const statsSection = document.getElementById('statistik');
+        const statsUrl = statsSection?.dataset.statsUrl || '{{ route('public.home') }}?stats=1';
+        const currencyFormatter = new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            maximumFractionDigits: 0,
+        });
+        const chartCanvas = document.getElementById('zisChart');
+        let zisChart = null;
+
+        const formatRupiah = (value) => currencyFormatter.format(Number(value) || 0);
+
+        const renderChart = (instansiComparison) => {
+            if (!chartCanvas || typeof Chart === 'undefined') {
+                return;
+            }
+
+            const labels = (instansiComparison || []).map((item) => item.nama || '-');
+            const totals = (instansiComparison || []).map((item) => Number(item.totalDana) || 0);
+
+            if (zisChart) {
+                zisChart.destroy();
+            }
+
+            zisChart = new Chart(chartCanvas, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Pemasukan per Instansi',
+                        data: totals,
+                        borderColor: '#0f722b',
+                        backgroundColor: labels.map((_, index) => index === 0 ? 'rgba(15, 114, 43, .86)' : 'rgba(15, 114, 43, .22)'),
+                        borderRadius: 12,
+                        barPercentage: .72,
+                        categoryPercentage: .68,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => formatRupiah(context.parsed.x),
+                            },
+                        },
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#5f6b61',
+                                callback: (value) => formatRupiah(value),
+                            },
+                            grid: { color: '#edf2ed' },
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#5f6b61' },
+                        },
+                    },
+                },
+            });
+        };
+
+        const applyStats = (payload) => {
+            const summary = payload?.summary || {};
+            const instansiComparison = payload?.instansiComparison || [];
+            document.querySelector('[data-stat="totalDanaMasuk"]').textContent = formatRupiah(summary.totalDanaMasuk);
+            document.querySelector('[data-stat="totalTransaksi"]').textContent = `${Number(summary.totalTransaksi || 0).toLocaleString('id-ID')} transaksi`;
+            document.querySelector('[data-stat="totalDanaTersalur"]').textContent = formatRupiah(summary.totalDanaTersalur);
+            document.querySelector('[data-stat="totalPenerima"]').textContent = `${Number(summary.totalPenerima || 0).toLocaleString('id-ID')} penerima manfaat`;
+            document.querySelector('[data-stat="totalInstansiAktif"]').textContent = Number(summary.totalInstansiAktif || 0).toLocaleString('id-ID');
+            document.querySelector('[data-stat="saldoTersedia"]').textContent = formatRupiah(summary.saldoTersedia);
+            document.querySelector('[data-stat="lastUpdated"]').textContent = `Diperbarui ${summary.lastUpdated || '-'}`;
+            renderChart(instansiComparison);
+        };
+
+        const refreshStats = () => {
+            fetch(statsUrl, {
+                headers: { accept: 'application/json' },
+                cache: 'no-store',
+            })
+                .then((response) => response.json())
+                .then(applyStats)
+                .catch(() => {});
+        };
+
+        refreshStats();
+        setInterval(refreshStats, 30000);
+    </script>
 </body>
 
 </html>
