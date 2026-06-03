@@ -584,9 +584,12 @@
         }
 
         .signature-img {
+            display: block;
+            margin: 0 auto;
             max-width: 100%;
-            max-height: 112px;
+            max-height: 120px;
             object-fit: contain;
+            object-position: center;
         }
 
         .bank-table {
@@ -670,6 +673,7 @@
         }
     </style>
     <link href="{{ asset('css/admin-theme.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/images-patch.css') }}" rel="stylesheet"> <!-- patch: gambar tampil proporsional -->
 </head>
 
 <body class="sidebar-expanded">
@@ -717,9 +721,9 @@
                         </div>
                     </div>
                     @include('admin.partials.account-identity', [
-                        'nameClass' => 'admin-name',
-                        'roleClass' => 'admin-role',
-                        'avatarClass' => 'admin-avatar',
+                    'nameClass' => 'admin-name',
+                    'roleClass' => 'admin-role',
+                    'avatarClass' => 'admin-avatar',
                     ])
                 </div>
             </header>

@@ -73,7 +73,7 @@ class MustahikController extends Controller
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
             'nik' => ['required', 'digits:16'],
-            'no_kk' => ['required', 'digits:16'],
+            'no_kk' => ['nullable', 'digits:16'],
             'tempat_lahir' => ['required', 'string', 'max:255'],
             'tanggal_lahir' => ['required', 'date'],
             'jenis_kelamin' => ['required', 'in:Laki-laki,Perempuan'],

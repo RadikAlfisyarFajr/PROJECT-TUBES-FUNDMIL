@@ -43,6 +43,9 @@ Route::middleware('auth')->group(function () {
         };
     })->name('dashboard');
 
+    Route::get('/dashboard/admin', [AuthController::class, 'showAdminDashboard'])
+        ->name('dashboard.admin');
+
     // =====================
     // SUPERADMIN ROUTES
     // =====================
@@ -73,9 +76,6 @@ Route::middleware('auth')->group(function () {
     // =====================
 
     Route::middleware('admin.instansi')->group(function () {
-        Route::get('/dashboard/admin', [AuthController::class, 'showAdminDashboard'])
-            ->name('dashboard.admin');
-
         Route::resource('mustahik', MustahikController::class)
             ->names('mustahik');
 
@@ -95,53 +95,6 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('penyaluran', PenyaluranController::class)
             ->names('penyaluran');
-
-        Route::prefix('kategori-dana')
-            ->controller(KategoriDanaController::class)
-            ->name('kategori-dana.')
-            ->group(function () {
-                Route::post('notifikasi/read', 'markNotificationsRead')->name('notifications.read');
-            });
-
-        Route::prefix('pengaturan-distribusi')
-            ->controller(PengaturanDistribusiController::class)
-            ->name('pengaturan-distribusi.')
-            ->group(function () {
-                Route::get('mustahik-search', 'searchMustahik')->name('mustahik-search');
-            });
-
-        Route::prefix('profil-instansi')
-            ->controller(ProfilInstansiController::class)
-            ->name('profil-instansi.')
-            ->group(function () {
-                Route::post('rekening', 'storeRekening')->name('rekening.store');
-                Route::put('rekening/{rekening}', 'updateRekening')->name('rekening.update');
-                Route::delete('rekening/{rekening}', 'destroyRekening')->name('rekening.destroy');
-                Route::post('notifikasi/read', 'markNotificationsRead')->name('notifications.read');
-            });
-
-        Route::resource('profil-instansi', ProfilInstansiController::class)
-            ->names('profil-instansi');
-
-        // =====================
-        // LAPORAN ROUTES
-        // =====================
-
-        Route::prefix('laporan')
-            ->controller(LaporanController::class)
-            ->name('laporan.')
-            ->group(function () {
-                Route::get('pemasukan', 'pemasukan')->name('pemasukan');
-                Route::get('pemasukan/{id}/detail', 'pemasukanDetail')->name('pemasukan.detail')->whereNumber('id');
-                Route::get('mustahik', 'mustahik')->name('mustahik');
-                Route::get('mustahik/{id}/detail', 'mustahikDetail')->name('mustahik.detail')->whereNumber('id');
-                Route::get('penyaluran', 'penyaluran')->name('penyaluran');
-                Route::get('penyaluran/{id}/detail', 'penyaluranDetail')->name('penyaluran.detail')->whereNumber('id');
-                Route::get('keuangan', 'keuangan')->name('keuangan');
-            });
-
-        Route::resource('laporan', LaporanController::class)
-            ->names('laporan');
     });
 
     // =====================
@@ -159,4 +112,56 @@ Route::middleware('auth')->group(function () {
             Route::post('approval-program/{program}/approve', 'approve')->name('approval.approve');
             Route::post('approval-program/{program}/reject', 'reject')->name('approval.reject');
         });
+
+    // =====================
+    // SHARED AUTH ROUTES
+    // =====================
+
+    Route::prefix('kategori-dana')
+        ->controller(KategoriDanaController::class)
+        ->name('kategori-dana.')
+        ->group(function () {
+            Route::post('notifikasi/read', 'markNotificationsRead')->name('notifications.read');
+        });
+
+    Route::prefix('pengaturan-distribusi')
+        ->controller(PengaturanDistribusiController::class)
+        ->name('pengaturan-distribusi.')
+        ->group(function () {
+            Route::get('mustahik-search', 'searchMustahik')->name('mustahik-search');
+        });
+
+    Route::prefix('profil-instansi')
+        ->controller(ProfilInstansiController::class)
+        ->name('profil-instansi.')
+        ->group(function () {
+            Route::post('rekening', 'storeRekening')->name('rekening.store');
+            Route::put('rekening/{rekening}', 'updateRekening')->name('rekening.update');
+            Route::delete('rekening/{rekening}', 'destroyRekening')->name('rekening.destroy');
+            Route::post('notifikasi/read', 'markNotificationsRead')->name('notifications.read');
+        });
+
+    Route::resource('profil-instansi', ProfilInstansiController::class)
+        ->names('profil-instansi');
+
+    // =====================
+    // LAPORAN ROUTES
+    // =====================
+
+    Route::prefix('laporan')
+        ->controller(LaporanController::class)
+        ->name('laporan.')
+        ->group(function () {
+            Route::get('pemasukan', 'pemasukan')->name('pemasukan');
+            Route::get('pemasukan/{id}/detail', 'pemasukanDetail')->name('pemasukan.detail')->whereNumber('id');
+            Route::get('cetak-pdf/pemasukan-struk/{id}', 'pemasukanStruk')->name('pemasukan.struk')->whereNumber('id');
+            Route::get('mustahik', 'mustahik')->name('mustahik');
+            Route::get('mustahik/{id}/detail', 'mustahikDetail')->name('mustahik.detail')->whereNumber('id');
+            Route::get('penyaluran', 'penyaluran')->name('penyaluran');
+            Route::get('penyaluran/{id}/detail', 'penyaluranDetail')->name('penyaluran.detail')->whereNumber('id');
+            Route::get('keuangan', 'keuangan')->name('keuangan');
+        });
+
+    Route::resource('laporan', LaporanController::class)
+        ->names('laporan');
 });

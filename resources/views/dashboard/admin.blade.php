@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -143,6 +144,70 @@
             align-items: flex-start;
             justify-content: space-between;
             gap: 24px;
+        }
+
+        .account-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .account-dropdown {
+            position: relative;
+        }
+
+        .account-dropdown summary {
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .account-dropdown summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .account-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 190px;
+            padding: 8px;
+            border: 1px solid #e2ebe4;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 18px 38px rgba(20, 47, 27, .13);
+            z-index: 30;
+        }
+
+        .account-dropdown-item {
+            width: 100%;
+            min-height: 40px;
+            padding: 0 10px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: #26352b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: .84rem;
+            font-weight: 800;
+            text-decoration: none;
+            text-align: left;
+        }
+
+        .account-dropdown-item:hover {
+            background: #eaf3eb;
+            color: #0f722b;
+        }
+
+        .account-dropdown-item.logout {
+            color: #b42318;
+        }
+
+        .account-dropdown-item.logout:hover {
+            background: #fff0ee;
+            color: #9f1f14;
         }
 
         .welcome-title {
@@ -440,32 +505,33 @@
     </style>
     <link href="{{ asset('css/admin-theme.css') }}" rel="stylesheet">
 </head>
+
 <body class="sidebar-expanded">
     @php
-        $user = auth()->user();
-        $dashboardInstansi = $instansi ?? $user?->instansi;
-        $instansiName = $dashboardInstansi?->nama ?: ($user?->nama_instansi ?: $user?->name ?: 'Admin Instansi');
-        $instansiRole = $dashboardInstansi?->tipe ?: 'Admin Instansi';
-        $instansiLogo = $dashboardInstansi?->logo;
-        $initials = collect(preg_split('/\s+/', trim($instansiName)))
-            ->filter()
-            ->take(2)
-            ->map(fn ($word) => mb_strtoupper(mb_substr($word, 0, 1)))
-            ->implode('');
-        $initials = $initials ?: 'A';
-        $stats = array_merge([
-            'hargaBeras' => 0,
-            'nishabMaal' => 0,
-            'totalPengumpulan' => 0,
-            'totalTersalurkan' => 0,
-            'saldoSiapDisalurkan' => 0,
-            'totalMuzakki' => 0,
-            'mustahikTersalurkan' => 0,
-            'totalMustahik' => 0,
-        ], $dashboardStats ?? []);
-        $recentTransactions = collect($recentTransactions ?? []);
-        $topWilayah = collect($topWilayah ?? []);
-        $rupiah = fn ($value) => 'Rp '.number_format((float) $value, 0, ',', '.');
+    $user = auth()->user();
+    $dashboardInstansi = $instansi ?? $user?->instansi;
+    $instansiName = $dashboardInstansi?->nama ?: ($user?->nama_instansi ?: $user?->name ?: 'Admin Instansi');
+    $instansiRole = $dashboardInstansi?->tipe ?: 'Admin Instansi';
+    $instansiLogo = $dashboardInstansi?->logo;
+    $initials = collect(preg_split('/\s+/', trim($instansiName)))
+    ->filter()
+    ->take(2)
+    ->map(fn ($word) => mb_strtoupper(mb_substr($word, 0, 1)))
+    ->implode('');
+    $initials = $initials ?: 'A';
+    $stats = array_merge([
+    'hargaBeras' => 0,
+    'nishabMaal' => 0,
+    'totalPengumpulan' => 0,
+    'totalTersalurkan' => 0,
+    'saldoSiapDisalurkan' => 0,
+    'totalMuzakki' => 0,
+    'mustahikTersalurkan' => 0,
+    'totalMustahik' => 0,
+    ], $dashboardStats ?? []);
+    $recentTransactions = collect($recentTransactions ?? []);
+    $topWilayah = collect($topWilayah ?? []);
+    $rupiah = fn ($value) => 'Rp '.number_format((float) $value, 0, ',', '.');
     @endphp
 
     <div class="admin-layout">
@@ -485,16 +551,33 @@
                     <button class="icon-btn has-dot" type="button" aria-label="Notifikasi">
                         <i class="bi bi-bell-fill"></i>
                     </button>
-                    <div class="admin-name">
-                        <strong>{{ $instansiName }}</strong>
-                        <div class="admin-role">{{ $instansiRole }}</div>
-                    </div>
-                    <div class="avatar">
-                        @if ($instansiLogo)
-                            <img src="{{ asset('storage/'.$instansiLogo) }}" alt="Logo {{ $instansiName }}">
-                        @else
-                            {{ $initials }}
-                        @endif
+                    <div class="account-profile">
+                        <div class="admin-name">
+                            <strong>{{ $instansiName }}</strong>
+                            <div class="admin-role">{{ $instansiRole }}</div>
+                        </div>
+                        <details class="account-dropdown">
+                            <summary class="avatar" aria-label="Buka menu profil">
+                                @if ($instansiLogo)
+                                <img src="{{ asset('storage/'.$instansiLogo) }}" alt="Logo {{ $instansiName }}">
+                                @else
+                                {{ $initials }}
+                                @endif
+                            </summary>
+                            <div class="account-dropdown-menu">
+                                <a class="account-dropdown-item" href="{{ route('profil-instansi.index', $dashboardInstansi->id) }}">
+                                    <i class="bi bi-person-circle"></i>
+                                    <span>Lihat Profile</span>
+                                </a>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button class="account-dropdown-item logout" type="submit">
+                                        <i class="bi bi-box-arrow-right"></i>
+                                        <span>Logout Akun</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </details>
                     </div>
                 </div>
             </header>
@@ -623,17 +706,17 @@
                             </thead>
                             <tbody>
                                 @forelse ($recentTransactions as $transaction)
-                                    <tr>
-                                        <td><strong>{{ $transaction->nama_muzakki }}</strong></td>
-                                        <td><span class="badge-soft">{{ $transaction->kategori?->nama ?? str($transaction->jenis)->replace('_', ' ')->title() }}</span></td>
-                                        <td>{{ $rupiah($transaction->jumlah) }}</td>
-                                        <td>{{ $transaction->tanggal ? \Illuminate\Support\Carbon::parse($transaction->tanggal)->format('d/m/Y') : '-' }}</td>
-                                        <td class="text-end"><a class="receipt-btn text-decoration-none" href="{{ route('pemasukan.show', $transaction->id) }}">Detail</a></td>
-                                    </tr>
+                                <tr>
+                                    <td><strong>{{ $transaction->nama_muzakki }}</strong></td>
+                                    <td><span class="badge-soft">{{ $transaction->kategori?->nama ?? str($transaction->jenis)->replace('_', ' ')->title() }}</span></td>
+                                    <td>{{ $rupiah($transaction->jumlah) }}</td>
+                                    <td>{{ $transaction->tanggal ? \Illuminate\Support\Carbon::parse($transaction->tanggal)->format('d/m/Y') : '-' }}</td>
+                                    <td class="text-end"><a class="receipt-btn text-decoration-none" href="{{ route('pemasukan.show', $transaction->id) }}">Detail</a></td>
+                                </tr>
                                 @empty
-                                    <tr>
-                                        <td colspan="5" class="text-center text-muted py-4">Belum ada transaksi pemasukan.</td>
-                                    </tr>
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">Belum ada transaksi pemasukan.</td>
+                                </tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -689,4 +772,5 @@
         });
     </script>
 </body>
+
 </html>

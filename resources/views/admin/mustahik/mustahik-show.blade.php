@@ -37,6 +37,12 @@
                     <p class="mt-2 rounded-[10px] bg-[#eef2f0] px-4 py-3 font-bold">{{ $mustahik->kategori_label }}</p>
                 </div>
                 <div>
+                    <p class="text-xs font-black uppercase tracking-[.14em] text-[#6c756f]">Jenis Kelamin</p>
+                    <p class="mt-2 rounded-[10px] bg-[#eef2f0] px-4 py-3 font-bold">
+                        {{ $mustahik->jenis_kelamin === 'laki_laki' ? 'Laki-laki' : ($mustahik->jenis_kelamin === 'perempuan' ? 'Perempuan' : '-') }}
+                    </p>
+                </div>
+                <div>
                     <p class="text-xs font-black uppercase tracking-[.14em] text-[#6c756f]">Kontak</p>
                     <p class="mt-2 rounded-[10px] bg-[#eef2f0] px-4 py-3 font-bold">{{ $mustahik->kontak ?: '-' }}</p>
                 </div>
@@ -52,6 +58,7 @@
                     <p class="text-xs font-black uppercase tracking-[.14em] text-[#6c756f]">Keterangan</p>
                     <p class="mt-2 min-h-[80px] rounded-[10px] bg-[#eef2f0] px-4 py-3 leading-7">{{ $mustahik->keterangan ?: '-' }}</p>
                 </div>
+
             </div>
             <div class="flex justify-end gap-3 border-t border-[#edf1ef] px-8 py-6">
                 <a href="{{ route('mustahik.index') }}" class="inline-flex h-11 items-center rounded-[10px] bg-gray-200 px-5 text-sm font-black text-gray-800">Kembali ke Daftar</a>

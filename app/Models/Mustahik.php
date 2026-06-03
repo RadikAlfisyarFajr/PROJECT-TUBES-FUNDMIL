@@ -36,10 +36,8 @@ class Mustahik extends Model
         'keterangan',
         'status',
         'tanggal_verifikasi',
-        'foto_ktp',
-        'foto_kk',
         'latitude',
-        'longitude'
+        'longitude',
     ];
 
     protected $casts = [

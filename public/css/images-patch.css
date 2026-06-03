@@ -1,0 +1,23 @@
+/* patch aman minimal untuk gambar di halaman admin */
+
+/* signature/tanda tangan: jangan crop, tampilkan proporsional */
+.signature-img {
+    display: block; /* patch */
+    margin: 0 auto; /* patch */
+    max-width: 100%; /* patch */
+    max-height: 120px; /* patch */
+    height: auto; /* patch */
+    object-fit: contain; /* patch */
+    object-position: center; /* patch */
+}
+
+/* preview upload di form: jangan stretch */
+.preview-img {
+    display: block; /* patch */
+    max-width: 100%; /* patch */
+    height: auto; /* patch */
+    object-fit: contain; /* patch */
+    object-position: center; /* patch */
+    margin: 0 auto; /* patch */
+}
+

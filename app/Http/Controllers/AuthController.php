@@ -9,6 +9,7 @@ use App\Models\Instansi;
 use App\Models\User;
 use App\Support\OfficialVillageAccount;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +28,25 @@ class AuthController extends Controller
 
     public function showLandingPage()
     {
-        return view('public.landing');
+        $payload = $this->publicZisPayload();
+
+        if (request()->filled('nik') && (request()->boolean('lookup') || request()->expectsJson())) {
+            return response()->json($this->publicNikPayload((string) request()->string('nik')))
+                ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        }
+
+        if (request()->expectsJson() || request()->boolean('stats')) {
+            return response()->json($payload)
+                ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        }
+
+        return view('public.landing', $payload);
+    }
+
+    public function publicZisStats(): JsonResponse
+    {
+        return response()->json($this->publicZisPayload())
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     }
 
     public function showAuthForm()
@@ -51,7 +70,7 @@ class AuthController extends Controller
         $instansiId = $user->instansi_id;
         $hargaBeras = (float) (DB::table('harga_beras')
             ->where('tanggal_berlaku', '<=', now()->toDateString())
-            ->where(fn ($query) => $query
+            ->where(fn($query) => $query
                 ->whereNull('tanggal_berakhir')
                 ->orWhere('tanggal_berakhir', '>=', now()->toDateString()))
             ->orderByDesc('tanggal_berlaku')
@@ -59,7 +78,7 @@ class AuthController extends Controller
         $nishabMaal = (float) (DB::table('nishab')
             ->whereIn('jenis_zakat', ['zakat_maal', 'zakat mal', 'zakat maal', 'maal', 'mal'])
             ->where('tanggal_berlaku', '<=', now()->toDateString())
-            ->where(fn ($query) => $query
+            ->where(fn($query) => $query
                 ->whereNull('tanggal_berakhir')
                 ->orWhere('tanggal_berakhir', '>=', now()->toDateString()))
             ->orderByDesc('tanggal_berlaku')
@@ -358,7 +377,7 @@ class AuthController extends Controller
 
         $latestHargaBeras = DB::table('harga_beras')
             ->where('tanggal_berlaku', '<=', now()->toDateString())
-            ->where(fn ($query) => $query
+            ->where(fn($query) => $query
                 ->whereNull('tanggal_berakhir')
                 ->orWhere('tanggal_berakhir', '>=', now()->toDateString()))
             ->orderByDesc('tanggal_berlaku')
@@ -367,7 +386,7 @@ class AuthController extends Controller
         $latestNishab = DB::table('nishab')
             ->whereIn('jenis_zakat', ['zakat_maal', 'zakat mal', 'zakat maal', 'maal', 'mal'])
             ->where('tanggal_berlaku', '<=', now()->toDateString())
-            ->where(fn ($query) => $query
+            ->where(fn($query) => $query
                 ->whereNull('tanggal_berakhir')
                 ->orWhere('tanggal_berakhir', '>=', now()->toDateString()))
             ->orderByDesc('tanggal_berlaku')
@@ -396,5 +415,140 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('public.home');
+    }
+
+    private function publicZisPayload(): array
+    {
+        $totalDanaMasuk = (float) TransaksiZakat::sum('jumlah');
+        $totalTransaksi = TransaksiZakat::count();
+        $totalInstansiAktif = Instansi::where('status', 'aktif')->count();
+        $totalPenerima = (int) PenyaluranDetail::whereHas('penyaluran', fn($query) => $query->where('status', 'selesai'))
+            ->where('status_penerimaan', '!=', 'ditolak')
+            ->count();
+        $totalDanaTersalur = (float) PenyaluranDetail::whereHas('penyaluran', fn($query) => $query->where('status', 'selesai'))
+            ->sum('jumlah_diterima');
+        $saldoTersedia = max(0, $totalDanaMasuk - $totalDanaTersalur);
+        $instansiComparison = Instansi::query()
+            ->where('instansi.status', 'aktif')
+            ->whereHas('users', fn($q) => $q->where('role', User::ROLE_ADMIN_INSTANSI))
+            ->leftJoinSub(
+                TransaksiZakat::query()
+                    ->join('users', 'transaksi_zakat.admin_id', '=', 'users.id')
+                    ->select('transaksi_zakat.instansi_id')
+                    ->selectRaw('COALESCE(SUM(jumlah), 0) as total_dana')
+                    ->selectRaw('COUNT(*) as total_transaksi')
+                    ->where('users.role', User::ROLE_ADMIN_INSTANSI)
+                    ->groupBy('transaksi_zakat.instansi_id'),
+                'rekap_zakat',
+                'instansi.id',
+                '=',
+                'rekap_zakat.instansi_id'
+            )
+            ->select('instansi.id', 'instansi.nama', 'instansi.kelurahan')
+            ->selectRaw('COALESCE(rekap_zakat.total_dana, 0) as total_dana')
+            ->selectRaw('COALESCE(rekap_zakat.total_transaksi, 0) as total_transaksi')
+            ->orderByDesc('total_dana')
+            ->orderBy('instansi.nama')
+            ->get()
+            ->map(function ($instansi) {
+                return [
+                    'id' => $instansi->id,
+                    'nama' => $instansi->nama,
+                    'desa' => $instansi->kelurahan ?: '-',
+                    'totalDana' => (float) $instansi->total_dana,
+                    'totalTransaksi' => (int) $instansi->total_transaksi,
+                ];
+            })
+            ->values();
+
+        $desaHeatmap = Instansi::query()
+            ->where('instansi.status', 'aktif')
+            ->whereNotNull('instansi.kelurahan')
+            ->where('instansi.kelurahan', '<>', '')
+            ->leftJoinSub(
+                TransaksiZakat::query()
+                    ->join('users', 'transaksi_zakat.admin_id', '=', 'users.id')
+                    ->select('transaksi_zakat.instansi_id')
+                    ->selectRaw('COALESCE(SUM(jumlah), 0) as total_dana')
+                    ->selectRaw('COUNT(*) as total_transaksi')
+                    ->where('users.role', User::ROLE_ADMIN_INSTANSI)
+                    ->groupBy('transaksi_zakat.instansi_id'),
+                'rekap_zakat',
+                'instansi.id',
+                '=',
+                'rekap_zakat.instansi_id'
+            )
+            ->selectRaw('instansi.kelurahan as desa')
+            ->selectRaw('COALESCE(SUM(rekap_zakat.total_dana), 0) as total_dana')
+            ->selectRaw('COALESCE(SUM(rekap_zakat.total_transaksi), 0) as total_transaksi')
+            ->selectRaw('COUNT(DISTINCT instansi.id) as total_instansi')
+            ->groupBy('instansi.kelurahan')
+            ->orderByDesc('total_dana')
+            ->orderBy('instansi.kelurahan')
+            ->get()
+            ->map(function ($desa) {
+                return [
+                    'desa' => $desa->desa,
+                    'totalDana' => (float) $desa->total_dana,
+                    'totalTransaksi' => (int) $desa->total_transaksi,
+                    'totalInstansi' => (int) $desa->total_instansi,
+                ];
+            })
+            ->values();
+
+        return [
+            'summary' => [
+                'totalDanaMasuk' => $totalDanaMasuk,
+                'totalTransaksi' => $totalTransaksi,
+                'totalInstansiAktif' => $totalInstansiAktif,
+                'totalPenerima' => $totalPenerima,
+                'totalDanaTersalur' => $totalDanaTersalur,
+                'saldoTersedia' => $saldoTersedia,
+                'lastUpdated' => now()->format('d M Y H:i:s'),
+            ],
+            'instansiComparison' => $instansiComparison,
+            'desaHeatmap' => $desaHeatmap,
+        ];
+    }
+
+    private function publicNikPayload(string $nik): array
+    {
+        $normalizedNik = preg_replace('/\D+/', '', $nik) ?? '';
+        $mustahik = Mustahik::query()
+            ->with('instansi')
+            ->where('nik', $normalizedNik)
+            ->first();
+
+        if (! $mustahik) {
+            return [
+                'found' => false,
+                'message' => 'NIK tidak ditemukan pada data mustahik publik.',
+            ];
+        }
+
+        $statusLabel = $mustahik->status === 'aktif' ? 'Aktif' : 'Tidak Aktif';
+        $historyDate = $mustahik->tanggal_verifikasi
+            ?? $mustahik->created_at
+            ?? now();
+        $historyYears = max(0, (int) floor($historyDate->diffInDays(now()) / 365));
+        $historyText = $mustahik->status === 'aktif'
+            ? ($historyYears > 0
+                ? "Telah aktif menerima bantuan selama kurang lebih {$historyYears} tahun."
+                : 'Telah aktif menerima bantuan dan tercatat di sistem.')
+            : 'Belum aktif menerima bantuan saat ini.';
+
+        return [
+            'found' => true,
+            'status' => $mustahik->status,
+            'status_label' => $statusLabel,
+            'nama' => $mustahik->nama,
+            'nik' => $mustahik->nik,
+            'alamat' => $mustahik->alamat,
+            'kategori' => $mustahik->kategori_label,
+            'instansi' => $mustahik->instansi?->nama ?: '-',
+            'desa' => $mustahik->instansi?->kelurahan ?: '-',
+            'history' => $historyText,
+            'tanggal_verifikasi' => optional($mustahik->tanggal_verifikasi)->format('d M Y') ?: '-',
+        ];
     }
 }
