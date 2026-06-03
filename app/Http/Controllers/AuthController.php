@@ -80,7 +80,7 @@ class AuthController extends Controller
         $instansiId = $user->instansi_id;
         $hargaBeras = (float) (DB::table('harga_beras')
             ->where('tanggal_berlaku', '<=', now()->toDateString())
-            ->where(fn ($query) => $query
+            ->where(fn($query) => $query
                 ->whereNull('tanggal_berakhir')
                 ->orWhere('tanggal_berakhir', '>=', now()->toDateString()))
             ->orderByDesc('tanggal_berlaku')
@@ -88,7 +88,7 @@ class AuthController extends Controller
         $nishabMaal = (float) (DB::table('nishab')
             ->whereIn('jenis_zakat', ['zakat_maal', 'zakat mal', 'zakat maal', 'maal', 'mal'])
             ->where('tanggal_berlaku', '<=', now()->toDateString())
-            ->where(fn ($query) => $query
+            ->where(fn($query) => $query
                 ->whereNull('tanggal_berakhir')
                 ->orWhere('tanggal_berakhir', '>=', now()->toDateString()))
             ->orderByDesc('tanggal_berlaku')
@@ -387,7 +387,7 @@ class AuthController extends Controller
 
         $latestHargaBeras = DB::table('harga_beras')
             ->where('tanggal_berlaku', '<=', now()->toDateString())
-            ->where(fn ($query) => $query
+            ->where(fn($query) => $query
                 ->whereNull('tanggal_berakhir')
                 ->orWhere('tanggal_berakhir', '>=', now()->toDateString()))
             ->orderByDesc('tanggal_berlaku')
@@ -396,7 +396,7 @@ class AuthController extends Controller
         $latestNishab = DB::table('nishab')
             ->whereIn('jenis_zakat', ['zakat_maal', 'zakat mal', 'zakat maal', 'maal', 'mal'])
             ->where('tanggal_berlaku', '<=', now()->toDateString())
-            ->where(fn ($query) => $query
+            ->where(fn($query) => $query
                 ->whereNull('tanggal_berakhir')
                 ->orWhere('tanggal_berakhir', '>=', now()->toDateString()))
             ->orderByDesc('tanggal_berlaku')
@@ -432,14 +432,15 @@ class AuthController extends Controller
         $totalDanaMasuk = (float) TransaksiZakat::sum('jumlah');
         $totalTransaksi = TransaksiZakat::count();
         $totalInstansiAktif = Instansi::where('status', 'aktif')->count();
-        $totalPenerima = (int) PenyaluranDetail::whereHas('penyaluran', fn ($query) => $query->where('status', 'selesai'))
+        $totalPenerima = (int) PenyaluranDetail::whereHas('penyaluran', fn($query) => $query->where('status', 'selesai'))
             ->where('status_penerimaan', '!=', 'ditolak')
             ->count();
-        $totalDanaTersalur = (float) PenyaluranDetail::whereHas('penyaluran', fn ($query) => $query->where('status', 'selesai'))
+        $totalDanaTersalur = (float) PenyaluranDetail::whereHas('penyaluran', fn($query) => $query->where('status', 'selesai'))
             ->sum('jumlah_diterima');
         $saldoTersedia = max(0, $totalDanaMasuk - $totalDanaTersalur);
         $instansiComparison = Instansi::query()
             ->where('instansi.status', 'aktif')
+            ->whereHas('users', fn($q) => $q->where('role', User::ROLE_ADMIN_INSTANSI))
             ->leftJoinSub(
                 TransaksiZakat::query()
                     ->join('users', 'transaksi_zakat.admin_id', '=', 'users.id')
