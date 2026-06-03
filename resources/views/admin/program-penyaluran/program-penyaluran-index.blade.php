@@ -50,7 +50,7 @@
                     </div>
                     <a href="{{ route('program-penyaluran.create') }}" class="inline-flex h-[72px] w-[267px] items-center justify-center gap-[22px] rounded-[15px] bg-[#0b751f] text-[16px] font-black leading-[20px] text-white shadow-[0_12px_20px_rgba(8,117,31,0.28)]">
                         <span class="flex h-[20px] w-[20px] items-center justify-center rounded-full bg-white text-[18px] text-[#0b751f]">+</span>
-                        [+] Buat Program<br>Baru
+                        Tambah Program<br>Penyaluran
                     </a>
                 </div>
 

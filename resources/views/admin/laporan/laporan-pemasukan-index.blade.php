@@ -680,11 +680,14 @@
     function metodeBadge(m) {
         const styles = {
             tunai:    'background:#e6f4ea; color:#06451f;',
-            transfer: 'background:#e0eeff; color:#1a4f8a;',
-            qris:     'background:#f3e8ff; color:#5b1e99;',
+            non_tunai: 'background:#e0eeff; color:#1a4f8a;',
+        };
+        const labels = {
+            tunai: 'Tunai',
+            non_tunai: 'Non Tunai',
         };
         const style = styles[m] || 'background:#f0f0f0; color:#555;';
-        return `<span style="padding:4px 10px; border-radius:999px; ${style} font-size:.68rem; font-weight:900; text-transform:uppercase;">${safe(m)}</span>`;
+        return `<span style="padding:4px 10px; border-radius:999px; ${style} font-size:.68rem; font-weight:900; text-transform:uppercase;">${safe(labels[m] || m)}</span>`;
     }
 
     /* ════════════════════════════════

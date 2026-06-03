@@ -177,6 +177,30 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
             max-width: 100%;
         }
 
+        .category-select-wrap {
+            display: grid;
+            grid-template-columns: 46px minmax(0, 1fr);
+            gap: 10px;
+            align-items: center;
+        }
+
+        .category-select-icon {
+            width: 46px;
+            height: 50px;
+            border-radius: 15px;
+            background: var(--green-soft);
+            color: var(--green);
+            display: grid;
+            place-items: center;
+            font-size: 1.12rem;
+            flex: 0 0 auto;
+        }
+
+        .category-select-icon.is-fidyah {
+            background: #f4eee4;
+            color: #8a5a15;
+        }
+
         .payment-row-shell {
             padding: 16px 0;
             border-bottom: 1px solid var(--line);
@@ -571,12 +595,8 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
                                             <span>Tunai</span>
                                         </label>
                                         <label>
-                                            <input type="radio" name="jenis_pembayaran" value="transfer">
-                                            <span>Transfer</span>
-                                        </label>
-                                        <label>
-                                            <input type="radio" name="jenis_pembayaran" value="qris">
-                                            <span>QRIS</span>
+                                            <input type="radio" name="jenis_pembayaran" value="non_tunai">
+                                            <span>Non Tunai</span>
                                         </label>
                                     </div>
                                 </div>
@@ -706,9 +726,12 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
         row.className = 'payment-row';
         row.innerHTML = `
                 <td>
-                    <select class="soft-select js-category" name="items[${index}][kategori_utama]">
-                        ${categoryOptionsHtml}
-                    </select>
+                    <div class="category-select-wrap">
+                        <span class="category-select-icon js-category-icon"><i class="bi bi-tags-fill"></i></span>
+                        <select class="soft-select js-category" name="items[${index}][kategori_utama]">
+                            ${categoryOptionsHtml}
+                        </select>
+                    </div>
                 </td>
                 <td>
                     <div class="js-fitrah-type segmented">
@@ -825,14 +848,18 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
         const data = rowData(row);
         const fitrahType = row.querySelector('.js-fitrah-type');
         const maalType = row.querySelector('.js-maal-type');
+        const categoryIcon = row.querySelector('.js-category-icon');
         const amountLabel = row.querySelector('.js-amount-label');
         const note = row.querySelector('.js-note');
         const subtotal = row.querySelector('.js-subtotal');
         const fidyahBudget = row.querySelector('.js-fidyah-budget');
+        const categoryMeta = categoryOptions.find((category) => category.key === data.category);
 
         fitrahType.classList.toggle('d-none', data.category !== 'zakat_fitrah');
         maalType.classList.toggle('d-none', data.category !== 'zakat_maal');
         fidyahBudget.classList.toggle('d-none', data.category !== 'fidyah');
+        categoryIcon.innerHTML = `<i class="bi ${escapeHtml(categoryMeta?.icon || 'bi-tags-fill')}"></i>`;
+        categoryIcon.classList.toggle('is-fidyah', data.category === 'fidyah');
 
         if (data.category === 'zakat_fitrah') {
             amountLabel.textContent = 'Jumlah Jiwa';

@@ -164,65 +164,18 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
                     <input id="initial_selected_mustahik" type="hidden" value="{{ $initialSelectedMustahikJson }}">
                     <input id="initial_manual_recipients" type="hidden" value="{{ $initialManualRecipientsJson }}">
                     <div class="distribution-workspace">
-                        <section class="distribution-panel" aria-label="Pratinjau rencana distribusi">
-                            <div class="distribution-panel-head">
-                                <div>
-                                    <h2 class="distribution-panel-title">Pratinjau Penerima</h2>
-                                    <p class="distribution-panel-desc">Daftar ini yang akan disimpan sebagai rencana distribusi.</p>
-                                </div>
-                                <span class="distribution-badge"><span id="queue-count">0</span> penerima</span>
-                            </div>
-
-                            <div class="distribution-empty-guide" id="queue-empty-guide">
-                                <i class="bi bi-person-plus-fill"></i>
-                                <div>
-                                    <strong>Belum ada penerima dipilih</strong>
-                                    <span>Tambahkan penerima dari panel kanan untuk melihat nominal distribusi.</span>
-                                </div>
-                            </div>
-
-                            <div class="table-responsive">
-                                <table class="distribution-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Penerima</th>
-                                            <th>Program</th>
-                                            <th>Tujuan</th>
-                                            <th class="text-end">Nominal</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="queue-body">
-                                        <tr>
-                                            <td colspan="4" class="text-center text-muted py-4">Belum ada penerima.</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            @if($plans->isNotEmpty())
-                            <div class="plan-history">
-                                <div class="plan-history-head">
-                                    <h3>Rencana Terakhir</h3>
-                                    <span>{{ $readyPlans->count() }} siap, {{ $completedPlans->count() }} selesai</span>
-                                </div>
-                                @foreach($plans as $plan)
-                                <div class="plan-history-item">
-                                    <div>
-                                        <strong>{{ $plan->kode_rencana }} - {{ $plan->programPenyaluran?->nama_program }}</strong>
-                                        <span>{{ $plan->jumlah_penerima }} penerima - {{ str($plan->status)->title() }}</span>
-                                    </div>
-                                    <small>Rp {{ number_format($plan->total_alokasi, 0, ',', '.') }}</small>
-                                </div>
-                                @endforeach
-                            </div>
-                            @endif
-                        </section>
-
-                        <aside class="distribution-panel" aria-label="Form rencana distribusi">
+                        <section class="distribution-panel distribution-detail-panel" aria-label="Form rencana distribusi">
                             <div class="distribution-panel-head">
                                 <div>
                                     <h2 class="distribution-panel-title">Detail Rencana</h2>
                                     <p class="distribution-panel-desc">Isi data rencana sebelum disimpan ke antrean eksekusi.</p>
+                                </div>
+                                <div class="distribution-head-actions">
+                                    <button class="distribution-ghost-btn" type="button" data-bs-toggle="modal" data-bs-target="#previewModal">
+                                        <i class="bi bi-eye-fill"></i>
+                                        Pratinjau
+                                        <span class="distribution-badge"><span id="queue-count">0</span></span>
+                                    </button>
                                 </div>
                             </div>
 
@@ -271,7 +224,7 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
                                     </div>
                                 </div>
 
-                                <div id="database-recipient-panel" class="distribution-field">
+                                <div id="database-recipient-panel" class="distribution-field distribution-span-2">
                                     <label for="mustahik_search">Cari mustahik aktif</label>
                                     <div class="recipient-search-box">
                                         <input id="mustahik_search" class="distribution-input" type="search" placeholder="Nama, NIK, alamat, atau asnaf">
@@ -293,7 +246,7 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
                                     <div id="selected-mustahik-inputs"></div>
                                 </div>
 
-                                <div id="manual-recipient-panel" class="distribution-field d-none">
+                                <div id="manual-recipient-panel" class="distribution-field distribution-span-2 d-none">
                                     <span class="distribution-label">Penerima manual / mitra</span>
                                     <div class="manual-entry-grid">
                                         <div>
@@ -312,7 +265,7 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
                                     <input id="manual_recipients" name="manual_recipients" type="hidden" value="{{ $oldManualRecipients }}">
                                 </div>
 
-                                <div class="distribution-field">
+                                <div class="distribution-field distribution-span-2">
                                     <label for="tujuan_penggunaan">Tujuan default</label>
                                     <input id="tujuan_penggunaan" name="tujuan_penggunaan" class="distribution-input" type="text" value="{{ old('tujuan_penggunaan', 'bantuan sesuai program') }}" placeholder="Contoh bantuan biaya hidup">
                                 </div>
@@ -344,28 +297,90 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
                                     <p id="sim-warning" class="simulation-warning">Saldo sumber dana tidak cukup untuk rencana ini.</p>
                                 </div>
                             </div>
-                        </aside>
+                        </section>
                     </div>
 
                     <div class="final-actions">
-                        <button class="distribution-ghost-btn" type="button" onclick="window.print()">
-                            <i class="bi bi-printer"></i>
-                            Cetak Pratinjau
-                        </button>
-                        <a class="distribution-ghost-btn" href="{{ route('penyaluran.create') }}">
-                            <i class="bi bi-send-check"></i>
-                            Buka Eksekusi
-                        </a>
                         <button id="save-plan-button" class="distribution-submit-btn" type="submit">
                             <i class="bi bi-lock-fill"></i>
                             Simpan Rencana Distribusi
                         </button>
+                    </div>
+
+                    <div class="modal fade distribution-preview-modal" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <div>
+                                        <h2 class="modal-title distribution-panel-title" id="previewModalLabel">Pratinjau Penerima</h2>
+                                        <p class="distribution-panel-desc mb-0">Daftar ini yang akan disimpan sebagai rencana distribusi.</p>
+                                    </div>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="distribution-empty-guide" id="queue-empty-guide">
+                                        <i class="bi bi-person-plus-fill"></i>
+                                        <div>
+                                            <strong>Belum ada penerima dipilih</strong>
+                                            <span>Tambahkan penerima dari detail rencana untuk melihat nominal distribusi.</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-responsive">
+                                        <table class="distribution-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Penerima</th>
+                                                    <th>Program</th>
+                                                    <th>Tujuan</th>
+                                                    <th class="text-end">Nominal</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="queue-body">
+                                                <tr>
+                                                    <td colspan="4" class="text-center text-muted py-4">Belum ada penerima.</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    @if($plans->isNotEmpty())
+                                    <div class="plan-history">
+                                        <div class="plan-history-head">
+                                            <h3>Rencana Terakhir</h3>
+                                            <span>{{ $readyPlans->count() }} siap, {{ $completedPlans->count() }} selesai</span>
+                                        </div>
+                                        @foreach($plans as $plan)
+                                        <div class="plan-history-item">
+                                            <div>
+                                                <strong>{{ $plan->kode_rencana }} - {{ $plan->programPenyaluran?->nama_program }}</strong>
+                                                <span>{{ $plan->jumlah_penerima }} penerima - {{ str($plan->status)->title() }}</span>
+                                            </div>
+                                            <small>Rp {{ number_format($plan->total_alokasi, 0, ',', '.') }}</small>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                    @endif
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="distribution-ghost-btn" type="button" onclick="window.print()">
+                                        <i class="bi bi-printer"></i>
+                                        Cetak
+                                    </button>
+                                    <button class="distribution-submit-btn" type="button" data-bs-dismiss="modal">
+                                        <i class="bi bi-check2"></i>
+                                        Selesai
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
         </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const sidebarToggle = document.getElementById('sidebarToggle');
         sidebarToggle?.addEventListener('click', () => document.body.classList.toggle('sidebar-expanded'));

@@ -44,7 +44,7 @@ class PemasukanZakatController extends Controller
             'nama_muzakki' => ['required', 'string', 'max:255'],
             'nomor_wa' => ['nullable', 'string', 'max:30'],
             'desa' => ['required', 'string', 'max:100'],
-            'jenis_pembayaran' => ['required', Rule::in(['tunai', 'transfer', 'qris'])],
+            'jenis_pembayaran' => ['required', Rule::in(['tunai', 'non_tunai'])],
             'items' => ['required', 'array', 'min:1'],
             'items.*.kategori_utama' => ['required', Rule::in($this->activeKategoriKeys($instansi))],
             'items.*.fitrah_media' => ['nullable', Rule::in(['uang', 'beras'])],
@@ -290,6 +290,7 @@ class PemasukanZakatController extends Controller
             ->map(fn (KategoriDana $category) => [
                 'key' => $this->kategoriKeyFromName($category->nama),
                 'label' => $category->nama,
+                'icon' => $this->kategoriIconFromName($category->nama),
                 'children' => $category->children->map(fn (KategoriDana $child) => [
                     'id' => $child->id,
                     'nama' => $child->nama,
@@ -298,6 +299,17 @@ class PemasukanZakatController extends Controller
             ->filter(fn (array $category) => $category['key'] !== null)
             ->values()
             ->all();
+    }
+
+    private function kategoriIconFromName(string $nama): string
+    {
+        return match (strtolower(trim($nama))) {
+            'zakat fitrah' => 'bi-flower1',
+            'zakat maal' => 'bi-wallet2',
+            'infaq & sedekah' => 'bi-heart-fill',
+            'fidyah / kaffarah' => 'bi-cup-hot-fill',
+            default => 'bi-tags-fill',
+        };
     }
 
     private function activeKategoriKeys(Instansi $instansi): array

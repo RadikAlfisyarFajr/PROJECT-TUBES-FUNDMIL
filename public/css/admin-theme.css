@@ -512,6 +512,10 @@ textarea,
     padding-bottom: 120px;
 }
 
+.distribution-page .admin-content-wrap {
+    max-width: none;
+}
+
 .distribution-overview {
     display: grid;
     gap: 18px;
@@ -661,7 +665,7 @@ textarea,
 .distribution-workspace {
     margin-top: 24px;
     display: grid;
-    grid-template-columns: minmax(0, 1.25fr) minmax(360px, .75fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 22px;
     align-items: start;
 }
@@ -670,12 +674,23 @@ textarea,
     padding: 24px;
 }
 
+.distribution-detail-panel {
+    min-height: calc(100vh - 230px);
+}
+
 .distribution-panel-head {
     margin-bottom: 20px;
     display: flex;
     align-items: start;
     justify-content: space-between;
     gap: 18px;
+}
+
+.distribution-head-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
 }
 
 .distribution-panel-title {
@@ -745,6 +760,11 @@ textarea,
     white-space: nowrap;
 }
 
+.distribution-ghost-btn .distribution-badge {
+    margin-left: 2px;
+    padding: 4px 8px;
+}
+
 .distribution-table {
     width: 100%;
     border-collapse: separate;
@@ -783,7 +803,13 @@ textarea,
 
 .distribution-form-grid {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px;
+}
+
+.distribution-span-2,
+.simulation-widget {
+    grid-column: 1 / -1;
 }
 
 .distribution-field label,
@@ -935,7 +961,7 @@ textarea,
 }
 
 .search-result-list {
-    max-height: 230px;
+    max-height: 300px;
     overflow: auto;
     border: 1px solid var(--line);
     border-radius: 14px;
@@ -1047,6 +1073,10 @@ textarea,
     padding: 20px;
 }
 
+.distribution-detail-panel .simulation-widget {
+    position: static;
+}
+
 .simulation-row {
     display: flex;
     justify-content: space-between;
@@ -1144,6 +1174,22 @@ textarea,
 .plan-history-item small {
     color: var(--muted);
     font-size: .76rem;
+}
+
+.distribution-preview-modal .modal-content {
+    border: 0;
+    border-radius: 18px;
+    box-shadow: 0 24px 70px rgba(16, 20, 17, .18);
+}
+
+.distribution-preview-modal .modal-header,
+.distribution-preview-modal .modal-footer {
+    border-color: var(--line);
+    padding: 20px 24px;
+}
+
+.distribution-preview-modal .modal-body {
+    padding: 24px;
 }
 
 .app-layout,
@@ -1361,6 +1407,7 @@ body.sidebar-expanded .admin-sidebar .sidebar-toggle span {
     .distribution-balance-grid,
     .distribution-status-grid,
     .distribution-workspace,
+    .distribution-form-grid,
     .super-stat-grid,
     .super-grid,
     .super-form-grid {
