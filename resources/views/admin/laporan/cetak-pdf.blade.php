@@ -147,7 +147,7 @@
                     <div class="detail"><small>Desa / Kelurahan</small><strong>{{ $trx->desa ?? '-' }}</strong></div>
                     <div class="detail"><small>Telepon / WhatsApp</small><strong>{{ $trx->nomor_wa ?? '-' }}</strong></div>
                     <div class="detail"><small>RW / RT</small><strong>{{ $trx->alamat_detail ?? '-' }}</strong></div>
-                    <div class="detail"><small>Metode Pembayaran</small><strong>{{ ucfirst($trx->jenis_pembayaran ?? 'tunai') }}</strong></div>
+                    <div class="detail"><small>Metode Pembayaran</small><strong>{{ ($trx->jenis_pembayaran ?? 'tunai') === 'non_tunai' ? 'Non Tunai' : 'Tunai' }}</strong></div>
                 </div>
 
                 <div class="section-title">Rincian Dana</div>

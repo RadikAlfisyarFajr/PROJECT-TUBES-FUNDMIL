@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 104" role="img" aria-labelledby="title desc">
+  <title id="title">FUNDMIL SOREANG</title>
+  <desc id="desc">Logo Fundmil Soreang dengan monogram FM dan aksen masjid modern.</desc>
+  <defs>
+    <linearGradient id="g" x1="12" x2="84" y1="10" y2="94" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#16a34a"/>
+      <stop offset="1" stop-color="#064e2a"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <rect x="5" y="5" width="94" height="94" rx="22" fill="#ecfdf3"/>
+    <path d="M52 14c10 11 23 18 28 32 5 12 2 26-9 37H33c-11-11-14-25-9-37 5-14 18-21 28-32Z" fill="none" stroke="url(#g)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M25 74V45h30v10H37v9h16v10H37v15H25V74Z" fill="url(#g)"/>
+    <path d="M60 89V45h12l10 14 10-14h12v44H92V62L82 75 72 62v27H60Z" fill="url(#g)"/>
+    <path d="M38 40c2-10 9-16 16-16s14 6 16 16H38Z" fill="url(#g)"/>
+    <path d="M52 18h5v9h-5z" fill="url(#g)"/>
+    <path d="M74 37h9v18h-9z" fill="#ecfdf3"/>
+    <path d="M72 34c1-6 4-9 7-9s6 3 7 9H72Z" fill="url(#g)"/>
+  </g>
+  <text x="116" y="55" fill="#064e2a" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="900" letter-spacing="0">FUNDMIL</text>
+  <text x="116" y="82" fill="#15803d" font-family="Inter, Arial, sans-serif" font-size="21" font-weight="800" letter-spacing="1.2">SOREANG</text>
+</svg>

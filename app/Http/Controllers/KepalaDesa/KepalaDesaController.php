@@ -57,7 +57,7 @@ class KepalaDesaController extends Controller
 
         $monthlyRows = $this->monthlyCirculation($instansiIds);
 
-        return view('kepala-desa.dashboard', [
+        return view('kepala-desa.dashboard-kepala-desa', [
             'desa' => $desa,
             'summary' => [
                 'instansiAktif' => $instansi->count(),

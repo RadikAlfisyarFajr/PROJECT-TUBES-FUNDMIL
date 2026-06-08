@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('sub_jenis')->nullable(); // beras, uang
             $table->decimal('jumlah', 15, 2);
             $table->decimal('harga_beras_snapshot', 10, 2)->nullable();
-            $table->enum('jenis_pembayaran', ['tunai', 'transfer', 'qris'])->default('tunai');
+            $table->enum('jenis_pembayaran', ['tunai', 'non_tunai'])->default('tunai');
             $table->string('bukti_pembayaran')->nullable(); // path file
             $table->text('keterangan')->nullable();
             $table->date('tanggal');

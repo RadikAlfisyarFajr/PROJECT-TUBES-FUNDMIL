@@ -93,7 +93,7 @@ class AuthController extends Controller
                 ->sum('jumlah_diterima')
             : 0;
 
-        return view('dashboard.admin', [
+        return view('admin.dashboard-admin-instansi', [
             'instansi' => $user->instansi,
             'dashboardStats' => [
                 'hargaBeras' => $hargaBeras,
@@ -392,7 +392,7 @@ class AuthController extends Controller
             ->orderByDesc('tanggal_berlaku')
             ->first();
 
-        return view('dashboard.superadmin', [
+        return view('superadmin.dashboard-superadmin', [
             'summary' => [
                 'instansiAktif' => $instansi->count(),
                 'pendingApproval' => User::where('role', 'admin_instansi')->where('status', 'pending')->count(),

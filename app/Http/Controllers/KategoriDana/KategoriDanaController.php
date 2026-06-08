@@ -196,7 +196,7 @@ class KategoriDanaController extends Controller
             [
                 'nama' => 'Fidyah / Kaffarah',
                 'description' => 'Fokus: Pembayaran denda atau tebusan atas kewajiban ibadah yang tertinggal.',
-                'icon' => 'bi-fork-knife',
+                'icon' => 'bi-cup-hot-fill',
                 'color' => 'gray',
                 'tags' => ['Denda / Tebusan', 'Konversi Makanan'],
                 'children' => ['Fidyah', 'Kaffarah'],

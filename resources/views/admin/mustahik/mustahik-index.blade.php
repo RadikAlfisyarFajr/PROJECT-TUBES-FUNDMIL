@@ -39,7 +39,7 @@
                         <input type="hidden" name="status" value="{{ request('status') }}">
                     @endif
                     <i class="bi bi-search text-[#909a94]"></i>
-                    <input name="search" value="{{ request('search') }}" class="w-full bg-transparent text-[14px] outline-none placeholder:text-[#87918c]" placeholder="Cari mustahik...">
+                    <input name="search" value="{{ request('search') }}" class="w-full border-0 bg-transparent p-0 text-[14px] outline-none ring-0 placeholder:text-[#87918c] focus:border-0 focus:outline-none focus:ring-0" placeholder="Cari mustahik...">
                 </form>
                 <div class="hidden items-center gap-[24px] md:flex">
                     <i class="bi bi-bell-fill text-[18px] text-[#71807a]"></i>
@@ -116,7 +116,7 @@
             <form action="{{ route('mustahik.index') }}" method="GET" class="mt-[31px] grid max-w-full gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(150px,210px)_minmax(140px,190px)_48px_auto]">
                 <label class="flex h-[42px] items-center gap-3 rounded-[11px] bg-white px-4 shadow-sm ring-0 focus-within:ring-2 focus-within:ring-[#cfe8d5]">
                     <i class="bi bi-search text-[#536058]"></i>
-                    <input name="search" value="{{ request('search') }}" class="w-full bg-transparent text-sm outline-none placeholder:text-[#738078]" placeholder="Cari berdasarkan Nama atau Alamat">
+                    <input name="search" value="{{ request('search') }}" class="w-full border-0 bg-transparent p-0 text-sm outline-none ring-0 placeholder:text-[#738078] focus:border-0 focus:outline-none focus:ring-0" placeholder="Cari berdasarkan Nama atau Alamat">
                 </label>
                 <select name="kategori" class="h-[42px] min-w-0 rounded-[11px] border-0 bg-white px-4 text-sm font-bold outline-none shadow-sm focus:ring-2 focus:ring-[#cfe8d5]">
                     <option value="semua">Kategori Asnaf</option>
