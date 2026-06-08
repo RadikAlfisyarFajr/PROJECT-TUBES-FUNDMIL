@@ -8,6 +8,20 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="{{ asset('css/admin-theme.css') }}" rel="stylesheet">
+    <style>
+        .mustahik-form input:not([type="radio"]):not([type="checkbox"]),
+        .mustahik-form select,
+        .mustahik-form textarea {
+            border-color: transparent;
+            box-shadow: none;
+        }
+
+        .mustahik-form input:focus,
+        .mustahik-form select:focus,
+        .mustahik-form textarea:focus {
+            outline: none;
+        }
+    </style>
 </head>
 
 <body class="sidebar-expanded bg-[#f6f8f6] font-sans text-[#111813] antialiased">
@@ -42,7 +56,7 @@
                     <p class="mt-[9px] text-[17px] text-[#758078]">Input data lengkap warga penerima manfaat baru untuk proses verifikasi asnaf.</p>
                 </div>
 
-                <form action="{{ $action }}" method="POST" enctype="multipart/form-data" class="mt-[38px] max-w-[1040px] rounded-[15px] bg-white px-[44px] py-[42px] shadow-sm ring-1 ring-[#e6ece9]">
+                <form action="{{ $action }}" method="POST" enctype="multipart/form-data" class="mustahik-form mt-[38px] max-w-[1040px] rounded-[15px] bg-white px-[44px] py-[42px] shadow-sm ring-1 ring-[#e6ece9]">
                     @csrf
                     @if ($method !== 'POST')
                     @method($method)

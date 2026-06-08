@@ -1226,7 +1226,7 @@ body.sidebar-expanded .admin-sidebar {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     overflow: hidden;
     transition: padding .25s ease;
 }
@@ -1240,10 +1240,7 @@ body.sidebar-expanded .admin-sidebar .brand {
     width: 28px;
     height: 28px;
     border-radius: 10px;
-    background: var(--green);
-    color: #fff;
-    display: grid;
-    place-items: center;
+    object-fit: contain;
     flex: 0 0 auto;
 }
 

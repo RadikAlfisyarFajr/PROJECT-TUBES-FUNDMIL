@@ -41,9 +41,15 @@ $instansiComparison = collect($instansiComparison ?? []);
         }
 
         .brand {
-            color: var(--green-dark);
-            font-weight: 800;
+            align-items: center;
+            display: inline-flex;
             text-decoration: none;
+        }
+
+        .brand-lockup {
+            width: clamp(210px, 26vw, 286px);
+            height: auto;
+            display: block;
         }
 
         .nav-link {
@@ -466,7 +472,9 @@ $instansiComparison = collect($instansiComparison ?? []);
 <body>
     <nav class="site-nav sticky-top">
         <div class="container d-flex align-items-center justify-content-between py-3">
-            <a class="brand" href="{{ route('public.home') }}">FUNDMIL SOREANG</a>
+            <a class="brand" href="{{ route('public.home') }}">
+                <img class="brand-lockup" src="{{ asset('assets/fundmil-lockup.svg') }}" alt="FUNDMIL SOREANG">
+            </a>
             <div class="nav gap-4">
                 <a class="nav-link active px-0" href="#beranda">Beranda</a>
                 <a class="nav-link px-0" href="#statistik">Statistik</a>
@@ -494,7 +502,7 @@ $instansiComparison = collect($instansiComparison ?? []);
                         </div>
                     </div>
                     <div class="col-lg-6">
-                        <img class="hero-photo" src="https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=1000&q=80" alt="Masjid sebagai simbol pengelolaan zakat">
+                        <img class="hero-photo" src="{{ asset('assets/fotozakat.png') }}" alt="Penyaluran zakat Fundmil Soreang">
                     </div>
                 </div>
             </div>
