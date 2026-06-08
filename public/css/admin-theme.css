@@ -1222,7 +1222,6 @@ body.sidebar-expanded .admin-sidebar {
 
 .admin-sidebar .brand {
     min-height: 52px;
-    height: 52px;
     padding: 0;
     display: flex;
     align-items: center;
@@ -1233,23 +1232,41 @@ body.sidebar-expanded .admin-sidebar {
 }
 
 body.sidebar-expanded .admin-sidebar .brand {
-    justify-content: center;
+    justify-content: flex-start;
     padding: 0 18px;
 }
 
-.admin-sidebar .brand-logo {
-    width: 58px;
-    height: auto;
+.admin-sidebar .brand-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
     object-fit: contain;
     flex: 0 0 auto;
-    transform: scale(1.18);
-    transform-origin: center;
-    transition: transform .25s ease, width .25s ease;
 }
 
-body.sidebar-expanded .admin-sidebar .brand-logo {
-    width: 190px;
-    transform: scale(1.22);
+.admin-sidebar .brand-copy {
+    display: none;
+    white-space: nowrap;
+}
+
+body.sidebar-expanded .admin-sidebar .brand-copy {
+    display: block;
+}
+
+.admin-sidebar .brand-title {
+    margin: 0 0 6px;
+    color: var(--green-dark);
+    font-size: 1.28rem;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.admin-sidebar .brand-subtitle {
+    color: #a0a8a2;
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .28em;
+    white-space: nowrap;
 }
 
 .admin-sidebar .sidebar-nav {
