@@ -1221,7 +1221,7 @@ body.sidebar-expanded .admin-sidebar {
 }
 
 .admin-sidebar .brand {
-    min-height: 52px;
+    height: auto;
     padding: 0;
     display: flex;
     align-items: center;
@@ -1237,8 +1237,8 @@ body.sidebar-expanded .admin-sidebar .brand {
 }
 
 .admin-sidebar .brand-icon {
-    width: 28px;
-    height: 28px;
+    width: 220px;
+    height: 220px;
     border-radius: 10px;
     object-fit: contain;
     flex: 0 0 auto;

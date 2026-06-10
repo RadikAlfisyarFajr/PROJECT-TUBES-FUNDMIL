@@ -38,10 +38,6 @@ $ariaLabel = $ariaLabel ?? 'Navigasi Admin Instansi';
 <aside class="sidebar admin-sidebar">
     <div class="brand">
         <img class="brand-icon" src="{{ asset('assets/logo_amil.png') }}" alt="Logo UNFMIL Amil Beras">
-        <div class="brand-copy">
-            <div class="brand-title">UNFMIL</div>
-            <div class="brand-subtitle"></div>
-        </div>
     </div>
 
     <nav class="sidebar-nav" aria-label="{{ $ariaLabel }}">

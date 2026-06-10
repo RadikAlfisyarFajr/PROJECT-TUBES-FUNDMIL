@@ -47,9 +47,11 @@ $instansiComparison = collect($instansiComparison ?? []);
         }
 
         .brand-lockup {
-            width: clamp(210px, 26vw, 286px);
-            height: auto;
+            width: 48px;
+            height: 48px;
             display: block;
+            object-fit: contain;
+            border-radius: 10px;
         }
 
         .nav-link {
@@ -473,7 +475,7 @@ $instansiComparison = collect($instansiComparison ?? []);
     <nav class="site-nav sticky-top">
         <div class="container d-flex align-items-center justify-content-between py-3">
             <a class="brand" href="{{ route('public.home') }}">
-                <img class="brand-lockup" src="{{ asset('assets/fundmil-lockup.svg') }}" alt="FUNDMIL SOREANG">
+                <img class="brand-lockup" src="{{ asset('assets/logo_amil.png') }}" alt="Logo UNFMIL Amil Beras">
             </a>
             <div class="nav gap-4">
                 <a class="nav-link active px-0" href="#beranda">Beranda</a>
