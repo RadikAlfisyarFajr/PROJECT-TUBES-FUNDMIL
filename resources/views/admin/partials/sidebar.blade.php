@@ -37,7 +37,7 @@ $ariaLabel = $ariaLabel ?? 'Navigasi Admin Instansi';
 
 <aside class="sidebar admin-sidebar">
     <div class="brand">
-        <img class="brand-icon" src="{{ asset('assets/logo_amil.png') }}" alt="Logo UNFMIL Amil Beras">
+        <img class="brand-logo" src="{{ asset('assets/logo_amil.png') }}" alt="Logo Amil">
     </div>
 
     <nav class="sidebar-nav" aria-label="{{ $ariaLabel }}">
@@ -54,13 +54,15 @@ $ariaLabel = $ariaLabel ?? 'Navigasi Admin Instansi';
         @endforeach
     </nav>
 
-    <div class="sidebar-footer">
-        <form method="POST" action="{{ route('logout') }}" class="m-0">
-            @csrf
-            <button type="submit" class="nav-item-link">
-                <i class="bi bi-box-arrow-right"></i>
-                <span>Logout</span>
-            </button>
-        </form>
-    </div>
+    @if ($sidebarRole !== \App\Models\User::ROLE_ADMIN_INSTANSI)
+        <div class="sidebar-footer">
+            <form method="POST" action="{{ route('logout') }}" class="m-0">
+                @csrf
+                <button type="submit" class="nav-item-link">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                </button>
+            </form>
+        </div>
+    @endif
 </aside>
