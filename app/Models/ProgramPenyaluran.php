@@ -24,6 +24,15 @@ class ProgramPenyaluran extends Model
         'approval_note',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'tanggal_mulai' => 'date',
+            'tanggal_selesai' => 'date',
+            'approved_at' => 'datetime',
+        ];
+    }
+
     public function instansi(): BelongsTo
     {
         return $this->belongsTo(Instansi::class);

@@ -15,9 +15,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         $user = Auth::user();
-        return $user->role === 'super_admin'
-            ? redirect()->route('dashboard.superadmin')
-            : redirect()->route('dashboard.admin');
+        return match ($user->role) {
+            'super_admin' => redirect()->route('dashboard.superadmin'),
+            'admin_kepala_desa' => redirect()->route('kepala-desa.approval.index'),
+            default => redirect()->route('dashboard.admin'),
+        };
     })->name('dashboard.home');
 
     Route::get('/dashboard/admin', function () {
@@ -52,4 +54,5 @@ Route::middleware('auth')->group(function () {
     require __DIR__.'/superadmin/nishab.php';
     require __DIR__.'/superadmin/approval-program-penyaluran.php';
     require __DIR__.'/superadmin/monitoring.php';
+    require __DIR__.'/kepala-desa/approval-program.php';
 });

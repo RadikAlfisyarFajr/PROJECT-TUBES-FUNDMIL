@@ -13,6 +13,7 @@ class User extends Authenticatable
 
     public const ROLE_SUPER_ADMIN = 'super_admin';
     public const ROLE_ADMIN_INSTANSI = 'admin_instansi';
+    public const ROLE_ADMIN_KEPALA_DESA = 'admin_kepala_desa';
 
     protected $fillable = [
         'name',
@@ -56,5 +57,10 @@ class User extends Authenticatable
     public function isAdminInstansi(): bool
     {
         return $this->role === self::ROLE_ADMIN_INSTANSI;
+    }
+
+    public function isAdminKepalaDesa(): bool
+    {
+        return $this->role === self::ROLE_ADMIN_KEPALA_DESA;
     }
 }
