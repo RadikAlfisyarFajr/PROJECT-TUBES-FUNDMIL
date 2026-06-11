@@ -70,6 +70,7 @@ class ProfilInstansiController extends Controller
                 'max:255',
                 Rule::unique('users', 'email')->ignore($user?->id),
             ],
+            'kelurahan' => ['nullable', 'string', 'max:255'],
             'alamat' => ['nullable', 'string'],
             'nomor_sk' => ['nullable', 'string', 'max:255'],
             'masa_berlaku' => ['nullable', 'date'],

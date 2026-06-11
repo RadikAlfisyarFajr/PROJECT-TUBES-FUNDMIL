@@ -762,6 +762,10 @@
                         <div class="field-box">{{ $instansi->email ?: '-' }}</div>
                     </div>
                     <div class="col-lg-6">
+                        <div class="field-label">Desa/Kelurahan</div>
+                        <div class="field-box">{{ $instansi->kelurahan ?: '-' }}</div>
+                    </div>
+                    <div class="col-12">
                         <div class="field-label">Alamat Lengkap</div>
                         <div class="field-box tall">{{ $instansi->alamat ?: '-' }}</div>
                     </div>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -62,105 +63,111 @@
     </style>
     <link href="{{ asset('css/admin-theme.css') }}" rel="stylesheet">
 </head>
+
 <body class="sidebar-expanded">
     <div class="admin-layout">
         @include('admin.partials.sidebar', ['active' => 'profil'])
 
         <main class="admin-page-content">
             <div class="page-shell">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-            <div>
-                <h1 class="fw-black mb-1">Update Profil Instansi</h1>
-                <p class="text-muted mb-0">Lengkapi informasi profil, foto profil, dan tanda tangan digital.</p>
-            </div>
-            <a class="btn btn-outline-secondary" href="{{ route('profil-instansi.index') }}">
-                <i class="bi bi-arrow-left me-2"></i>Kembali
-            </a>
-        </div>
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                    <div>
+                        <h1 class="fw-black mb-1">Update Profil Instansi</h1>
+                        <p class="text-muted mb-0">Lengkapi informasi profil, foto profil, dan tanda tangan digital.</p>
+                    </div>
+                    <a class="btn btn-outline-secondary" href="{{ route('profil-instansi.index') }}">
+                        <i class="bi bi-arrow-left me-2"></i>Kembali
+                    </a>
+                </div>
 
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <strong>Data belum bisa disimpan.</strong>
-                <div>Periksa kembali field yang ditandai.</div>
-            </div>
-        @endif
+                @if ($errors->any())
+                <div class="alert alert-danger">
+                    <strong>Data belum bisa disimpan.</strong>
+                    <div>Periksa kembali field yang ditandai.</div>
+                </div>
+                @endif
 
-        <form class="panel" action="{{ route('profil-instansi.update', $instansi->id) }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            @method('PUT')
+                <form class="panel" action="{{ route('profil-instansi.update', $instansi->id) }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
 
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <label class="form-label" for="nama">Nama Instansi</label>
-                    <input id="nama" class="form-control @error('nama') is-invalid @enderror" name="nama" value="{{ old('nama', $instansi->nama) }}" required>
-                    @error('nama')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label" for="tipe">Tipe Instansi</label>
-                    <select id="tipe" class="form-select @error('tipe') is-invalid @enderror" name="tipe">
-                        @foreach (['Masjid', 'Mushola', 'Lembaga Amil', 'Yayasan', 'Lainnya'] as $tipe)
-                            <option value="{{ $tipe }}" @selected(old('tipe', $instansi->tipe) === $tipe)>{{ $tipe }}</option>
-                        @endforeach
-                    </select>
-                    @error('tipe')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label" for="kontak">WhatsApp Admin</label>
-                    <input id="kontak" class="form-control @error('kontak') is-invalid @enderror" name="kontak" value="{{ old('kontak', $instansi->kontak) }}">
-                    @error('kontak')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label" for="email">Email Resmi</label>
-                    <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email', $instansi->email) }}">
-                    @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                </div>
-                <div class="col-12">
-                    <label class="form-label" for="alamat">Alamat Lengkap</label>
-                    <textarea id="alamat" class="form-control @error('alamat') is-invalid @enderror" name="alamat" rows="4">{{ old('alamat', $instansi->alamat) }}</textarea>
-                    @error('alamat')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label" for="nomor_sk">Nomor SK/Izin Operasional</label>
-                    <input id="nomor_sk" class="form-control @error('nomor_sk') is-invalid @enderror" name="nomor_sk" value="{{ old('nomor_sk', $instansi->nomor_sk) }}">
-                    @error('nomor_sk')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label" for="masa_berlaku">Masa Berlaku</label>
-                    <input id="masa_berlaku" type="date" class="form-control @error('masa_berlaku') is-invalid @enderror" name="masa_berlaku" value="{{ old('masa_berlaku', optional($instansi->masa_berlaku)->format('Y-m-d')) }}">
-                    @error('masa_berlaku')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label" for="nama_pimpinan">Nama Ketua/DKM</label>
-                    <input id="nama_pimpinan" class="form-control @error('nama_pimpinan') is-invalid @enderror" name="nama_pimpinan" value="{{ old('nama_pimpinan', $instansi->nama_pimpinan) }}">
-                    @error('nama_pimpinan')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label" for="logo">Foto Profil Instansi</label>
-                    <input id="logo" type="file" class="form-control @error('logo') is-invalid @enderror" name="logo" accept="image/png,image/jpeg,image/webp">
-                    @error('logo')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    @if ($instansi->logo)
-                        <img class="preview-img mt-3 w-100" src="{{ asset('storage/'.$instansi->logo) }}" alt="Foto profil instansi">
-                    @endif
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label" for="tanda_tangan">Tanda Tangan Digital</label>
-                    <input id="tanda_tangan" type="file" class="form-control @error('tanda_tangan') is-invalid @enderror" name="tanda_tangan" accept="image/png,image/jpeg,image/webp">
-                    @error('tanda_tangan')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    @if ($instansi->tanda_tangan)
-                        <img class="preview-img mt-3 w-100" src="{{ asset('storage/'.$instansi->tanda_tangan) }}" alt="Tanda tangan digital">
-                    @endif
-                </div>
-            </div>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label" for="nama">Nama Instansi</label>
+                            <input id="nama" class="form-control @error('nama') is-invalid @enderror" name="nama" value="{{ old('nama', $instansi->nama) }}" required>
+                            @error('nama')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="tipe">Tipe Instansi</label>
+                            <select id="tipe" class="form-select @error('tipe') is-invalid @enderror" name="tipe">
+                                @foreach (['Masjid', 'Mushola', 'Lembaga Amil', 'Yayasan', 'Lainnya'] as $tipe)
+                                <option value="{{ $tipe }}" @selected(old('tipe', $instansi->tipe) === $tipe)>{{ $tipe }}</option>
+                                @endforeach
+                            </select>
+                            @error('tipe')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="kontak">WhatsApp Admin</label>
+                            <input id="kontak" class="form-control @error('kontak') is-invalid @enderror" name="kontak" value="{{ old('kontak', $instansi->kontak) }}">
+                            @error('kontak')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="email">Email Resmi</label>
+                            <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email', $instansi->email) }}">
+                            @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="kelurahan">Desa/Kelurahan</label>
+                            <input id="kelurahan" class="form-control @error('kelurahan') is-invalid @enderror" name="kelurahan" value="{{ old('kelurahan', $instansi->kelurahan) }}">
+                            @error('kelurahan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="alamat">Alamat Lengkap</label>
+                            <textarea id="alamat" class="form-control @error('alamat') is-invalid @enderror" name="alamat" rows="4">{{ old('alamat', $instansi->alamat) }}</textarea>
+                            @error('alamat')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="nomor_sk">Nomor SK/Izin Operasional</label>
+                            <input id="nomor_sk" class="form-control @error('nomor_sk') is-invalid @enderror" name="nomor_sk" value="{{ old('nomor_sk', $instansi->nomor_sk) }}">
+                            @error('nomor_sk')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="masa_berlaku">Masa Berlaku</label>
+                            <input id="masa_berlaku" type="date" class="form-control @error('masa_berlaku') is-invalid @enderror" name="masa_berlaku" value="{{ old('masa_berlaku', optional($instansi->masa_berlaku)->format('Y-m-d')) }}">
+                            @error('masa_berlaku')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="nama_pimpinan">Nama Ketua/DKM</label>
+                            <input id="nama_pimpinan" class="form-control @error('nama_pimpinan') is-invalid @enderror" name="nama_pimpinan" value="{{ old('nama_pimpinan', $instansi->nama_pimpinan) }}">
+                            @error('nama_pimpinan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="logo">Foto Profil Instansi</label>
+                            <input id="logo" type="file" class="form-control @error('logo') is-invalid @enderror" name="logo" accept="image/png,image/jpeg,image/webp">
+                            @error('logo')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            @if ($instansi->logo)
+                            <img class="preview-img mt-3 w-100" src="{{ asset('storage/'.$instansi->logo) }}" alt="Foto profil instansi">
+                            @endif
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="tanda_tangan">Tanda Tangan Digital</label>
+                            <input id="tanda_tangan" type="file" class="form-control @error('tanda_tangan') is-invalid @enderror" name="tanda_tangan" accept="image/png,image/jpeg,image/webp">
+                            @error('tanda_tangan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            @if ($instansi->tanda_tangan)
+                            <img class="preview-img mt-3 w-100" src="{{ asset('storage/'.$instansi->tanda_tangan) }}" alt="Tanda tangan digital">
+                            @endif
+                        </div>
+                    </div>
 
-            <div class="d-flex justify-content-end gap-2 mt-4">
-                <a class="btn btn-light" href="{{ route('profil-instansi.index') }}">Batal</a>
-                <button class="btn-save" type="submit">
-                    <i class="bi bi-floppy-fill me-2"></i>Simpan Profil
-                </button>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a class="btn btn-light" href="{{ route('profil-instansi.index') }}">Batal</a>
+                        <button class="btn-save" type="submit">
+                            <i class="bi bi-floppy-fill me-2"></i>Simpan Profil
+                        </button>
+                    </div>
+                </form>
             </div>
-        </form>
-            </div>
-    </main>
+        </main>
     </div>
     <script>
         const sidebarToggle = document.getElementById('sidebarToggle');
@@ -170,4 +177,5 @@
         });
     </script>
 </body>
+
 </html>
