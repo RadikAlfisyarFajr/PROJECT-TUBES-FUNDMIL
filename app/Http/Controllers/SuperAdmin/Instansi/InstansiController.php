@@ -63,11 +63,8 @@ class InstansiController extends Controller
             'kontak.regex' => 'Kontak hanya boleh berisi angka, spasi, tanda +, tanda -, dan kurung.',
         ]);
 
-        $exists = Instansi::query()
-            ->where('tipe', OfficialVillageAccount::TYPE)
-            ->where('kelurahan', $validated['desa'])
-            ->whereIn('status', ['pending', 'aktif'])
-            ->exists();
+        $validated['desa'] = OfficialVillageAccount::normalizeVillageName($validated['desa']);
+        $exists = $this->officialAccountExists($validated['desa']);
 
         if ($exists) {
             return back()
@@ -149,12 +146,8 @@ class InstansiController extends Controller
             'kontak.regex' => 'Kontak hanya boleh berisi angka, spasi, tanda +, tanda -, dan kurung.',
         ]);
 
-        $exists = Instansi::query()
-            ->whereKeyNot($instansi->id)
-            ->where('tipe', OfficialVillageAccount::TYPE)
-            ->where('kelurahan', $validated['desa'])
-            ->whereIn('status', ['pending', 'aktif'])
-            ->exists();
+        $validated['desa'] = OfficialVillageAccount::normalizeVillageName($validated['desa']);
+        $exists = $this->officialAccountExists($validated['desa'], $instansi->id);
 
         if ($instansi->tipe === OfficialVillageAccount::TYPE && $exists) {
             return back()
@@ -206,5 +199,17 @@ class InstansiController extends Controller
         return redirect()
             ->route('superadmin.instansi.index')
             ->with('success', 'Akun desa berhasil dinonaktifkan.');
+    }
+
+    private function officialAccountExists(string $desa, ?int $exceptId = null): bool
+    {
+        $normalizedDesa = OfficialVillageAccount::normalizeVillageName($desa);
+
+        return Instansi::query()
+            ->where('tipe', OfficialVillageAccount::TYPE)
+            ->whereIn('status', ['pending', 'aktif'])
+            ->when($exceptId, fn ($query) => $query->whereKeyNot($exceptId))
+            ->get(['kelurahan'])
+            ->contains(fn (Instansi $instansi) => OfficialVillageAccount::normalizeVillageName($instansi->kelurahan) === $normalizedDesa);
     }
 }

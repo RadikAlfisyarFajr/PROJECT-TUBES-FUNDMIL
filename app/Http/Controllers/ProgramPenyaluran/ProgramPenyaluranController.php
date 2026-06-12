@@ -8,6 +8,7 @@ use App\Models\Instansi;
 use App\Models\KategoriDana;
 use App\Models\Mustahik;
 use App\Models\ProgramPenyaluran;
+use App\Support\OfficialVillageAccount;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -73,7 +74,7 @@ class ProgramPenyaluranController extends Controller
 
         return redirect()
             ->route('program-penyaluran.index')
-            ->with('success', 'Program penyaluran berhasil dibuat.');
+            ->with('success', 'Program penyaluran berhasil dibuat dan menunggu diproses kepala desa.');
     }
 
     public function show(ProgramPenyaluran $programPenyaluran): View
@@ -120,7 +121,7 @@ class ProgramPenyaluranController extends Controller
 
         return redirect()
             ->route('program-penyaluran.index')
-            ->with('success', 'Program penyaluran berhasil diperbarui.');
+            ->with('success', 'Program penyaluran berhasil diperbarui dan menunggu diproses ulang kepala desa.');
     }
 
     public function destroy(ProgramPenyaluran $programPenyaluran): RedirectResponse
@@ -145,7 +146,7 @@ class ProgramPenyaluranController extends Controller
         return Instansi::firstOrCreate(
             ['nama' => $user?->nama_instansi ?: 'FUNDMIL SOREANG'],
             [
-                'kelurahan' => $user?->desa,
+                'kelurahan' => OfficialVillageAccount::normalizeVillageName($user?->desa),
                 'email' => $user?->email,
                 'status' => 'aktif',
             ]

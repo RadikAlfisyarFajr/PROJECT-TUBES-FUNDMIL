@@ -77,8 +77,10 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
                                 <h2 class="distribution-card-title">Zakat Fitrah</h2>
                                 <span class="distribution-card-icon"><i class="bi bi-basket2-fill"></i></span>
                             </div>
-                            <p class="distribution-card-value">Rp {{ number_format($saldo['fitrah_uang'], 0, ',', '.') }}</p>
+                            <p class="distribution-card-value">Rp {{ number_format($saldo['fitrah_total_setara'], 0, ',', '.') }}</p>
                             <p class="distribution-card-note">
+                                Uang Rp {{ number_format($saldo['fitrah_uang'], 0, ',', '.') }}
+                                <br>
                                 Beras {{ number_format($saldo['fitrah_beras_kg'], 2, ',', '.') }} kg
                                 <br>
                                 Setara Rp {{ number_format($saldo['fitrah_beras_setara'], 0, ',', '.') }}
@@ -214,10 +216,15 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
                                     <div class="source-grid">
                                         @foreach($sourceLabels as $key => $label)
                                         <label class="source-option">
-                                            <input type="checkbox" name="sumber_dana[]" value="{{ $key }}" data-balance="{{ $saldo['source_balances'][$key] ?? 0 }}" @checked(in_array($key, $selectedSources, true))>
+                                            <input type="checkbox" name="sumber_dana[]" value="{{ $key }}" data-balance="{{ $saldo['source_balances'][$key] ?? 0 }}" data-beras="{{ $key === 'zakat_fitrah' ? $saldo['fitrah_beras_kg'] : 0 }}" @checked(in_array($key, $selectedSources, true))>
                                             <span>
                                                 {{ str($label)->title() }}
-                                                <small>Rp {{ number_format($saldo['source_balances'][$key] ?? 0, 0, ',', '.') }}</small>
+                                                <small>
+                                                    Rp {{ number_format($saldo['source_balances'][$key] ?? 0, 0, ',', '.') }}
+                                                    @if($key === 'zakat_fitrah' && $saldo['fitrah_beras_kg'] > 0)
+                                                        + {{ number_format($saldo['fitrah_beras_kg'], 2, ',', '.') }} kg beras
+                                                    @endif
+                                                </small>
                                             </span>
                                         </label>
                                         @endforeach
@@ -334,11 +341,12 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
                                                     <th>Program</th>
                                                     <th>Tujuan</th>
                                                     <th class="text-end">Nominal</th>
+                                                    <th class="text-end">Beras</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="queue-body">
                                                 <tr>
-                                                    <td colspan="4" class="text-center text-muted py-4">Belum ada penerima.</td>
+                                                    <td colspan="5" class="text-center text-muted py-4">Belum ada penerima.</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -440,6 +448,10 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
             const prefix = number < 0 ? '-Rp ' : 'Rp ';
             return prefix + Math.abs(Math.round(number)).toLocaleString('id-ID');
         };
+        const cleanNumber = (value) => {
+            const number = Number(value || 0);
+            return Number.isInteger(number) ? String(number) : number.toFixed(3).replace(/\.?0+$/, '');
+        };
 
         const activeType = () => document.querySelector('input[name="tipe_penerima"]:checked')?.value || 'database_mustahik';
         const currentNominal = () => {
@@ -454,6 +466,12 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
             .reduce((total, input) => {
                 const raw = input.dataset.balance;
                 const value = raw === undefined || raw === '' ? 0 : Number(raw);
+                return total + (Number.isNaN(value) ? 0 : value);
+            }, 0);
+        const currentBerasKg = () => sourceInputs
+            .filter((input) => input.checked)
+            .reduce((total, input) => {
+                const value = Number(input.dataset.beras || 0);
                 return total + (Number.isNaN(value) ? 0 : value);
             }, 0);
 
@@ -471,6 +489,15 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
             }
 
             return Math.floor(balance / recipients);
+        };
+        const autoBerasPerRecipient = () => {
+            const recipients = activeRecipients().length;
+
+            if (activeType() !== 'database_mustahik' || recipients === 0) {
+                return 0;
+            }
+
+            return currentBerasKg() / recipients;
         };
 
         const rowPurpose = (item) => item.tujuan || tujuanPenggunaan.value || 'bantuan sesuai program';
@@ -544,7 +571,7 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
             renderHiddenMustahikInputs();
 
             if (recipients.length === 0) {
-                queueBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">Belum ada penerima.</td></tr>';
+                queueBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Belum ada penerima.</td></tr>';
                 updateSimulation();
                 return;
             }
@@ -554,6 +581,8 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
                 const safeProgram = escapeHtml(selectedProgramName());
                 const safePurpose = escapeHtml(rowPurpose(item));
                 const safeMeta = escapeHtml(item.kategori || item.alamat || 'mitra manual');
+                const berasKg = autoBerasPerRecipient();
+                const safeBeras = berasKg > 0 ? `${cleanNumber(berasKg)} kg` : '-';
                 const removeButton = item.tipe === 'manual_mitra'
                     ? `<button class="btn btn-sm btn-link text-danger p-0" type="button" data-remove-manual="${index}">Hapus</button>`
                     : `<button class="btn btn-sm btn-link text-danger p-0" type="button" data-remove-mustahik="${escapeHtml(item.id)}">Hapus</button>`;
@@ -567,6 +596,7 @@ $initialManualRecipientsJson = json_encode($initialManualRecipients);
                         <td>${safeProgram}</td>
                         <td>${safePurpose}</td>
                         <td class="text-end">${formatRupiah(nominal)}</td>
+                        <td class="text-end">${safeBeras}</td>
                     </tr>
                 `;
             }).join('');

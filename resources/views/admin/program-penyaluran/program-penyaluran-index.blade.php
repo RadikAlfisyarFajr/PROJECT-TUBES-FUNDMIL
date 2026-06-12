@@ -4,7 +4,6 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="refresh" content="30">
     <title>Program Penyaluran - Fundmil Soreang</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
     @include('admin.partials.tailwind-assets')
@@ -77,14 +76,22 @@
                         : ($program->tags ?? $program->kategoriDana->pluck('nama')->filter()->take(2)->all());
                     $isSelesai = $program->status === 'selesai';
                     $approvalLabels = [
-                        'draft' => 'Pending',
-                        'pending' => 'Pending',
-                        'approved' => 'Disetujui',
+                        'draft' => 'Menunggu diproses kepala desa',
+                        'pending' => 'Menunggu diproses kepala desa',
+                        'approved' => 'Sudah diproses - disetujui',
                         'rejected' => 'Ditolak',
                     ];
+                    $approvalClasses = [
+                        'draft' => 'bg-[#fff5d6] text-[#8a5a00]',
+                        'pending' => 'bg-[#fff5d6] text-[#8a5a00]',
+                        'approved' => 'bg-[#e8f8ec] text-[#0b751f]',
+                        'rejected' => 'bg-[#ffe8e8] text-[#b42318]',
+                    ];
+                    $canUseProgram = $program->approval_status === 'approved' && $program->status === 'aktif';
                     @endphp
-                    <article class="min-h-[266px] rounded-[13px] bg-white px-[24px] py-[24px] shadow-sm ring-1 ring-[#e3ebe6]">
-                        <div class="flex items-start justify-between">
+                    <details class="min-h-[266px] rounded-[13px] bg-white px-[24px] py-[24px] shadow-sm ring-1 ring-[#e3ebe6]" open>
+                        <summary class="cursor-pointer list-none">
+                            <div class="flex items-start justify-between">
                             <span class="flex h-[48px] w-[48px] items-center justify-center rounded-[15px] bg-[#e8eeeb] text-[#0b751f]">
                                 @if (($program->icon ?? '') === 'medical')
                                 <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
@@ -106,16 +113,28 @@
                             </span>
                             <div class="flex flex-col items-end gap-2">
                                 <span class="rounded-full px-[12px] py-[5px] text-[9px] font-black uppercase {{ $isSelesai ? 'bg-[#ddddda] text-[#5e645f]' : 'bg-[#98f091] text-[#0b751f]' }}">{{ $isSelesai ? 'Selesai' : 'Aktif' }}</span>
-                                <span class="rounded-full bg-[#eef2f0] px-[12px] py-[5px] text-[9px] font-black uppercase text-[#58635d]">{{ $approvalLabels[$program->approval_status] ?? 'Pending' }}</span>
+                                <span class="max-w-[190px] rounded-full px-[12px] py-[5px] text-right text-[9px] font-black uppercase {{ $approvalClasses[$program->approval_status] ?? 'bg-[#eef2f0] text-[#58635d]' }}">{{ $approvalLabels[$program->approval_status] ?? 'Menunggu diproses kepala desa' }}</span>
                             </div>
-                        </div>
-                        <h3 class="mt-[25px] text-[18px] font-black leading-[24px]">{{ $program->nama_program }}</h3>
+                            </div>
+                            <div class="mt-[18px] flex items-start justify-between gap-3">
+                                <h3 class="text-[18px] font-black leading-[24px]">{{ $program->nama_program }}</h3>
+                                <span class="shrink-0 text-[11px] font-black uppercase text-[#0b751f]">Buka/Tutup</span>
+                            </div>
+                        </summary>
                         <div class="mt-[8px] flex flex-wrap gap-[7px]">
                             @forelse ($tags as $tag)
                             <span class="rounded-[4px] bg-[#edf1ee] px-[8px] py-[4px] text-[9px] font-black uppercase text-[#7d8880]">{{ $tag }}</span>
                             @empty
                             <span class="rounded-[4px] bg-[#edf1ee] px-[8px] py-[4px] text-[9px] font-black uppercase text-[#7d8880]">ZIS</span>
                             @endforelse
+                        </div>
+                        <p class="mt-[12px] min-h-[40px] text-[12px] leading-[20px] text-[#4a574f]">{{ $program->deskripsi ?: 'Belum ada deskripsi program.' }}</p>
+                        <div class="mt-[12px] grid gap-2 text-[12px] text-[#4a574f]">
+                            <span>Periode: <strong>{{ $program->tanggal_mulai?->format('d M Y') ?? '-' }} - {{ $program->tanggal_selesai?->format('d M Y') ?? '-' }}</strong></span>
+                            <span>Dana rencana: <strong>Rp {{ number_format((float) $program->total_dana, 0, ',', '.') }}</strong></span>
+                            @if($program->approval_note)
+                            <span>Catatan kepala desa: <strong>{{ $program->approval_note }}</strong></span>
+                            @endif
                         </div>
                         <div class="mt-[25px] flex items-center justify-between text-[12px] font-bold">
                             <span>Progress Penyaluran</span>
@@ -125,9 +144,13 @@
                             <div class="h-[7px] rounded-full {{ $isSelesai ? 'bg-[#9b9792]' : 'bg-[#0b751f]' }}" style="--progress: {{ $progress }}%; width: var(--progress);"></div>
                         </div>
                         <div class="mt-[17px] flex items-center justify-between text-[12px]">
-                            <span>Target: <strong>{{ $program->target_mustahik }} {{ $program->target_mustahik > 1 ? 'Jiwa' : 'Bangunan' }}</strong></span>
+                            <span>Target: <strong>{{ $program->target_mustahik }} Jiwa</strong></span>
                             <div class="flex items-center gap-3 font-black">
-                                <a class="{{ $isSelesai ? 'text-[#9b9f9b]' : 'text-[#0b751f]' }}" href="{{ route('pengaturan-distribusi.show', $program) }}">{{ $isSelesai ? 'Arsip >' : 'Pengaturan >' }}</a>
+                                @if($canUseProgram)
+                                <a class="text-[#0b751f]" href="{{ route('pengaturan-distribusi.show', $program) }}">{{ $isSelesai ? 'Arsip >' : 'Pengaturan >' }}</a>
+                                @else
+                                <span class="text-[#9b9f9b]" title="Program baru bisa dipakai setelah disetujui kepala desa.">Terkunci</span>
+                                @endif
                                 <a class="text-[#0b751f]" href="{{ route('program-penyaluran.edit', $program) }}">Edit</a>
                                 <form action="{{ route('program-penyaluran.destroy', $program) }}" method="POST" onsubmit="return confirm('Hapus program ini?')">
                                     @csrf
@@ -136,7 +159,7 @@
                                 </form>
                             </div>
                         </div>
-                    </article>
+                    </details>
                     @empty
                     <div class="min-h-[266px] rounded-[13px] border border-dashed border-[#d9e2dd] bg-white px-[24px] py-[24px] text-center shadow-sm md:col-span-2 xl:col-span-3">
                         <div class="mx-auto flex h-[48px] w-[48px] items-center justify-center rounded-full bg-[#e8f4ec] text-[24px] font-black text-[#0b751f]">+</div>

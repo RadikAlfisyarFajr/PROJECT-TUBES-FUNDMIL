@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Instansi;
 use App\Models\PengaturanDistribusi;
 use App\Models\Penyaluran;
+use App\Support\OfficialVillageAccount;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -38,6 +39,9 @@ class PenyaluranController extends Controller
         $readyPlans = PengaturanDistribusi::with('programPenyaluran')
             ->where('instansi_id', $instansi->id)
             ->where('status', 'siap')
+            ->whereHas('programPenyaluran', fn ($query) => $query
+                ->where('status', 'aktif')
+                ->where('approval_status', 'approved'))
             ->latest()
             ->get();
 
@@ -69,7 +73,14 @@ class PenyaluranController extends Controller
                 'integer',
                 Rule::exists('pengaturan_distribusi', 'id')->where(fn ($query) => $query
                     ->where('instansi_id', $instansi->id)
-                    ->where('status', 'siap')),
+                    ->where('status', 'siap')
+                    ->whereExists(function ($programQuery) {
+                        $programQuery->selectRaw('1')
+                            ->from('program_penyaluran')
+                            ->whereColumn('program_penyaluran.id', 'pengaturan_distribusi.program_penyaluran_id')
+                            ->where('program_penyaluran.status', 'aktif')
+                            ->where('program_penyaluran.approval_status', 'approved');
+                    })),
             ],
             'tanggal_penyaluran' => ['required', 'date'],
             'keterangan' => ['nullable', 'string', 'max:1000'],
@@ -79,6 +90,9 @@ class PenyaluranController extends Controller
         $plan = PengaturanDistribusi::with('programPenyaluran')
             ->where('instansi_id', $instansi->id)
             ->where('status', 'siap')
+            ->whereHas('programPenyaluran', fn ($query) => $query
+                ->where('status', 'aktif')
+                ->where('approval_status', 'approved'))
             ->findOrFail($validated['pengaturan_distribusi_id']);
 
         $recipients = collect($plan->penerima ?? []);
@@ -116,7 +130,12 @@ class PenyaluranController extends Controller
                     : $this->recipientNominal($plan)),
                 'status_penerimaan' => 'diterima',
                 'tanggal_diterima' => now(),
-                'keterangan' => $recipient['tujuan_penggunaan'] ?? $plan->catatan,
+                'keterangan' => trim(implode(' ', array_filter([
+                    $recipient['tujuan_penggunaan'] ?? $plan->catatan,
+                    ((float) ($recipient['beras_kg_alokasi'] ?? 0)) > 0
+                        ? 'Jatah beras: '.$this->cleanNumber((float) $recipient['beras_kg_alokasi']).' kg.'
+                        : null,
+                ]))),
             ])->all();
 
             $penyaluran->penyaluranDetail()->createMany($details);
@@ -176,7 +195,7 @@ class PenyaluranController extends Controller
         return Instansi::firstOrCreate(
             ['nama' => $user?->nama_instansi ?: 'FUNDMIL SOREANG'],
             [
-                'kelurahan' => $user?->desa,
+                'kelurahan' => OfficialVillageAccount::normalizeVillageName($user?->desa),
                 'email' => $user?->email,
                 'status' => 'aktif',
             ]
@@ -198,5 +217,10 @@ class PenyaluranController extends Controller
         }
 
         return (float) floor(((float) ($plan->total_alokasi ?? 0)) / $recipientCount);
+    }
+
+    private function cleanNumber(float $number): string
+    {
+        return rtrim(rtrim(number_format($number, 3, '.', ''), '0'), '.');
     }
 }

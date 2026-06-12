@@ -5,9 +5,11 @@ namespace App\Http\Controllers\PengaturanDistribusi;
 use App\Http\Controllers\Controller;
 use App\Models\Instansi;
 use App\Models\Mustahik;
+use App\Models\Nishab;
 use App\Models\PengaturanDistribusi;
 use App\Models\ProgramPenyaluran;
 use App\Models\TransaksiZakat;
+use App\Support\OfficialVillageAccount;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -36,7 +38,10 @@ class PengaturanDistribusiController extends Controller
             'program_id' => [
                 'required',
                 'integer',
-                Rule::exists('program_penyaluran', 'id')->where(fn ($query) => $query->where('instansi_id', $instansi->id)),
+                Rule::exists('program_penyaluran', 'id')->where(fn ($query) => $query
+                    ->where('instansi_id', $instansi->id)
+                    ->where('status', 'aktif')
+                    ->where('approval_status', 'approved')),
             ],
             'nominal_per_penerima' => ['nullable', 'numeric', 'min:0'],
             'tipe_penerima' => ['required', Rule::in(['database_mustahik', 'manual_mitra'])],
@@ -51,6 +56,8 @@ class PengaturanDistribusiController extends Controller
 
         $program = ProgramPenyaluran::query()
             ->where('instansi_id', $instansi->id)
+            ->where('status', 'aktif')
+            ->where('approval_status', 'approved')
             ->findOrFail($validated['program_id']);
 
         $recipients = $this->recipients($validated, $program, $instansi, 0);
@@ -66,6 +73,12 @@ class PengaturanDistribusiController extends Controller
         $saldoAwal = collect($validated['sumber_dana'])->sum(fn (string $source) => $saldo['source_balances'][$source] ?? 0);
         $bookingAktif = $this->bookedForSources($instansi, $validated['sumber_dana']);
         $saldoTersedia = max(0, $saldoAwal - $bookingAktif);
+        $berasTersedia = in_array('zakat_fitrah', $validated['sumber_dana'], true)
+            ? max(0, $saldo['fitrah_beras_kg'] - $this->bookedBerasKg($instansi))
+            : 0;
+        $berasPerRecipient = $validated['tipe_penerima'] === 'database_mustahik' && $recipientCount > 0
+            ? round($berasTersedia / $recipientCount, 3)
+            : 0;
         $nominal = $validated['tipe_penerima'] === 'database_mustahik'
             ? $this->autoNominalPerRecipient($saldoTersedia, $recipientCount)
             : (float) ($validated['nominal_per_penerima'] ?? 0);
@@ -83,7 +96,7 @@ class PengaturanDistribusiController extends Controller
         }
 
         if ($validated['tipe_penerima'] === 'database_mustahik') {
-            $recipients = $this->recipients($validated, $program, $instansi, $nominal);
+            $recipients = $this->recipients($validated, $program, $instansi, $nominal, $berasPerRecipient);
         }
 
         $totalAlokasi = $nominal * count($recipients);
@@ -110,6 +123,7 @@ class PengaturanDistribusiController extends Controller
                     'key' => $source,
                     'label' => $this->sourceLabels()[$source],
                     'saldo' => $saldo['source_balances'][$source] ?? 0,
+                    'beras_kg' => $source === 'zakat_fitrah' ? $berasTersedia : 0,
                 ])
                 ->values()
                 ->all(),
@@ -208,7 +222,7 @@ class PengaturanDistribusiController extends Controller
         return Instansi::firstOrCreate(
             ['nama' => $user?->nama_instansi ?: 'FUNDMIL SOREANG'],
             [
-                'kelurahan' => $user?->desa,
+                'kelurahan' => OfficialVillageAccount::normalizeVillageName($user?->desa),
                 'email' => $user?->email,
                 'status' => 'aktif',
             ]
@@ -230,6 +244,8 @@ class PengaturanDistribusiController extends Controller
         $instansi = $this->instansi();
         $programs = ProgramPenyaluran::with('kategoriDana')
             ->where('instansi_id', $instansi->id)
+            ->where('status', 'aktif')
+            ->where('approval_status', 'approved')
             ->latest()
             ->get();
 
@@ -270,6 +286,7 @@ class PengaturanDistribusiController extends Controller
 
     private function saldoRekap(Instansi $instansi): array
     {
+        $fitrahRate = $this->fitrahRate();
         $transaksi = TransaksiZakat::query()
             ->where('instansi_id', $instansi->id)
             ->get(['jenis', 'sub_jenis', 'jumlah']);
@@ -283,7 +300,7 @@ class PengaturanDistribusiController extends Controller
             ->sum(fn (TransaksiZakat $row) => (float) $row->jumlah);
 
         $fitrahBerasKg = $fitrahBerasSetara > 0
-            ? ($fitrahBerasSetara / 45000) * 2.5
+            ? ($fitrahBerasSetara / $fitrahRate['uang_per_jiwa']) * $fitrahRate['kg_per_jiwa']
             : 0;
 
         $maalRows = $transaksi->filter(fn (TransaksiZakat $row) => $row->jenis === 'zakat_maal');
@@ -305,7 +322,8 @@ class PengaturanDistribusiController extends Controller
             ->filter(fn (TransaksiZakat $row) => in_array($row->jenis, ['fidyah', 'kaffarah', 'fidyah_kaffarah'], true))
             ->sum(fn (TransaksiZakat $row) => (float) $row->jumlah);
 
-        $kasTotal = $fitrahUang + $maalTotal + $infaqSedekah + $fidyahKaffarah;
+        $fitrahTotalSetara = $fitrahUang + $fitrahBerasSetara;
+        $kasTotal = $fitrahTotalSetara + $maalTotal + $infaqSedekah + $fidyahKaffarah;
         $bookedTotal = (float) PengaturanDistribusi::query()
             ->where('instansi_id', $instansi->id)
             ->where('status', 'siap')
@@ -315,6 +333,7 @@ class PengaturanDistribusiController extends Controller
             'fitrah_uang' => $fitrahUang,
             'fitrah_beras_kg' => $fitrahBerasKg,
             'fitrah_beras_setara' => $fitrahBerasSetara,
+            'fitrah_total_setara' => $fitrahTotalSetara,
             'maal_total' => $maalTotal,
             'maal_breakdown' => $maalBreakdown,
             'infaq_sedekah' => $infaqSedekah,
@@ -323,7 +342,7 @@ class PengaturanDistribusiController extends Controller
             'booked_total' => $bookedTotal,
             'saldo_tersedia' => max(0, $kasTotal - $bookedTotal),
             'source_balances' => [
-                'zakat_fitrah' => $fitrahUang,
+                'zakat_fitrah' => $fitrahTotalSetara,
                 'zakat_maal' => $maalTotal,
                 'infaq_sedekah' => $infaqSedekah,
                 'fidyah_kaffarah' => $fidyahKaffarah,
@@ -331,7 +350,7 @@ class PengaturanDistribusiController extends Controller
         ];
     }
 
-    private function recipients(array $validated, ProgramPenyaluran $program, Instansi $instansi, float $nominal): array
+    private function recipients(array $validated, ProgramPenyaluran $program, Instansi $instansi, float $nominal, float $berasKgPerRecipient = 0): array
     {
         $tujuan = ($validated['tujuan_penggunaan'] ?? null) ?: 'alokasi program '.$program->nama_program;
         $allowedAsnaf = $program->target_asnaf ?? [];
@@ -341,22 +360,20 @@ class PengaturanDistribusiController extends Controller
         }
 
         $ids = array_values(array_unique($validated['mustahik_ids'] ?? []));
-
-        if ($ids === []) {
-            return [];
-        }
-
-        $mustahik = Mustahik::query()
+        $mustahikQuery = Mustahik::query()
             ->where('instansi_id', $instansi->id)
             ->where('status', 'aktif')
-            ->whereIn('id', $ids)
             ->when(! empty($allowedAsnaf), function ($query) use ($allowedAsnaf) {
                 $query->whereIn('kategori_asnaf', $allowedAsnaf);
-            })
-            ->orderBy('nama')
-            ->get();
+            });
 
-        if ($mustahik->count() !== count($ids)) {
+        if ($ids !== []) {
+            $mustahikQuery->whereIn('id', $ids);
+        }
+
+        $mustahik = $mustahikQuery->orderBy('nama')->get();
+
+        if ($ids !== [] && $mustahik->count() !== count($ids)) {
             return [];
         }
 
@@ -368,6 +385,7 @@ class PengaturanDistribusiController extends Controller
                 'program' => $program->nama_program,
                 'tujuan_penggunaan' => $tujuan,
                 'nominal_alokasi' => $nominal,
+                'beras_kg_alokasi' => $berasKgPerRecipient,
             ])
             ->values()
             ->all();
@@ -392,6 +410,8 @@ class PengaturanDistribusiController extends Controller
 
         return ProgramPenyaluran::query()
             ->where('instansi_id', $instansi->id)
+            ->where('status', 'aktif')
+            ->where('approval_status', 'approved')
             ->find($programId);
     }
 
@@ -432,6 +452,33 @@ class PengaturanDistribusiController extends Controller
                 return count(array_intersect($sources, $storedSources)) > 0;
             })
             ->sum(fn (PengaturanDistribusi $plan) => (float) $plan->total_alokasi);
+    }
+
+    private function bookedBerasKg(Instansi $instansi): float
+    {
+        return (float) PengaturanDistribusi::query()
+            ->where('instansi_id', $instansi->id)
+            ->where('status', 'siap')
+            ->get(['penerima'])
+            ->sum(fn (PengaturanDistribusi $plan) => collect($plan->penerima ?? [])
+                ->sum(fn ($recipient) => (float) ($recipient['beras_kg_alokasi'] ?? 0)));
+    }
+
+    private function fitrahRate(): array
+    {
+        $nishab = Nishab::query()
+            ->where('jenis_zakat', 'zakat_fitrah')
+            ->where('tanggal_berlaku', '<=', now()->toDateString())
+            ->where(fn ($query) => $query
+                ->whereNull('tanggal_berakhir')
+                ->orWhere('tanggal_berakhir', '>=', now()->toDateString()))
+            ->orderByDesc('tanggal_berlaku')
+            ->first();
+
+        return [
+            'kg_per_jiwa' => max((float) ($nishab?->nishab_kg ?: 2.5), 0.01),
+            'uang_per_jiwa' => max((float) ($nishab?->nishab_rupiah ?: 45000), 0.01),
+        ];
     }
 
     private function generatePlanCode(): string

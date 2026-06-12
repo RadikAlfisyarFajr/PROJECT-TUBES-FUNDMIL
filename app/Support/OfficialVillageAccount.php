@@ -9,16 +9,31 @@ class OfficialVillageAccount
     public static function villages(): array
     {
         return [
-            'Desa Cingcin',
-            'Desa Soreang',
-            'Desa Pamekaran',
-            'Desa Sekarwangi',
-            'Desa Parungserab',
-            'Desa Karamatmulya',
-            'Desa Sukapura',
-            'Desa Sadu',
-            'Desa Buninagara',
-            'Desa Cahaya Maju',
+            'Cingcin',
+            'Soreang',
+            'Pamekaran',
+            'Sekarwangi',
+            'Parungserab',
+            'Karamatmulya',
+            'Sukapura',
+            'Sadu',
+            'Buninagara',
+            'Cahaya Maju',
         ];
+    }
+
+    public static function normalizeVillageName(?string $value): string
+    {
+        $normalized = strtolower(trim((string) $value));
+        $normalized = (string) preg_replace('/\s+/', ' ', $normalized);
+        $normalized = (string) preg_replace('/^(desa|kelurahan)\s+/i', '', $normalized);
+
+        foreach (self::villages() as $village) {
+            if ($normalized === strtolower($village)) {
+                return $village;
+            }
+        }
+
+        return ucwords($normalized);
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Instansi;
 use App\Models\KategoriDana;
 use App\Models\User;
+use App\Support\OfficialVillageAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -76,7 +77,7 @@ class PemasukanController extends Controller
             if (! $user->instansi_id || ! Instansi::query()->whereKey($user->instansi_id)->exists()) {
                 $instansi = Instansi::query()->create([
                     'nama' => $user->nama_instansi ?: $user->name,
-                    'kelurahan' => $user->desa,
+                    'kelurahan' => OfficialVillageAccount::normalizeVillageName($user->desa),
                     'email' => $user->email,
                     'status' => 'aktif',
                 ]);

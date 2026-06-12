@@ -7,6 +7,7 @@ use App\Models\Instansi;
 use App\Models\PenyaluranDetail;
 use App\Models\ProgramPenyaluran;
 use App\Models\TransaksiZakat;
+use App\Support\OfficialVillageAccount;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -156,16 +157,19 @@ class KepalaDesaController extends Controller
 
     private function desa(): string
     {
-        return (string) Auth::user()->desa;
+        return OfficialVillageAccount::normalizeVillageName(Auth::user()->desa);
     }
 
     private function activeInstansi(): Collection
     {
+        $desa = $this->desa();
+
         return Instansi::query()
             ->where('status', 'aktif')
-            ->where('kelurahan', $this->desa())
             ->orderBy('nama')
-            ->get();
+            ->get()
+            ->filter(fn (Instansi $instansi) => $this->sameVillage($instansi->kelurahan, $desa))
+            ->values();
     }
 
     private function monthlyCirculation(Collection $instansiIds): Collection
@@ -201,8 +205,21 @@ class KepalaDesaController extends Controller
     {
         abort_unless(
             $program->instansi?->status === 'aktif'
-            && $program->instansi?->kelurahan === $this->desa(),
+            && $this->sameVillage($program->instansi?->kelurahan, $this->desa()),
             403
         );
+    }
+
+    private function sameVillage(?string $left, ?string $right): bool
+    {
+        $left = $this->normalizeVillage($left);
+        $right = $this->normalizeVillage($right);
+
+        return $left !== '' && $left === $right;
+    }
+
+    private function normalizeVillage(?string $value): string
+    {
+        return strtolower(OfficialVillageAccount::normalizeVillageName($value));
     }
 }

@@ -1,10 +1,10 @@
 @php
     $rupiah = fn ($value) => 'Rp ' . number_format((float) $value, 0, ',', '.');
     $statusLabel = [
-        'pending' => 'Pending',
-        'approved' => 'Disetujui',
+        'pending' => 'Menunggu Diproses',
+        'approved' => 'Sudah Diproses - Disetujui',
         'rejected' => 'Ditolak',
-        'draft' => 'Pending',
+        'draft' => 'Menunggu Diproses',
     ][$program->approval_status] ?? $program->approval_status;
 @endphp
 

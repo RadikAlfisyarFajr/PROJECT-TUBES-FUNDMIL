@@ -5,6 +5,7 @@ namespace App\Http\Controllers\SuperAdmin\ApprovalAdminInstansi;
 use App\Http\Controllers\Controller;
 use App\Models\Instansi;
 use App\Models\User;
+use App\Support\OfficialVillageAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -58,8 +59,10 @@ class ApprovalAdminInstansiController extends Controller
 
         DB::transaction(function () use ($user, $validated) {
             $instansi = $user->instansi;
+            $desa = OfficialVillageAccount::normalizeVillageName($instansi->kelurahan);
 
             $instansi->update([
+                'kelurahan' => $desa,
                 'status' => 'aktif',
                 'verified_by' => Auth::id(),
                 'verified_at' => now(),
@@ -68,7 +71,7 @@ class ApprovalAdminInstansiController extends Controller
 
             $user->update([
                 'status' => 'active',
-                'desa' => $instansi->kelurahan,
+                'desa' => $desa,
                 'nama_instansi' => $instansi->nama,
             ]);
         });

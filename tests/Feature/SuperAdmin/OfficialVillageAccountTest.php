@@ -17,7 +17,7 @@ function superAdminUser(): User
 function officialVillagePayload(array $overrides = []): array
 {
     return array_merge([
-        'desa' => 'Desa Soreang',
+        'desa' => 'Soreang',
         'nama' => 'Pemerintah Desa Soreang',
         'nama_pimpinan' => 'Kepala Desa Soreang',
         'email' => 'kepaladesa.soreang@example.test',
@@ -39,7 +39,7 @@ test('super admin can centrally create an official village account', function ()
     $this->assertDatabaseHas('instansi', [
         'nama' => 'Pemerintah Desa Soreang',
         'tipe' => OfficialVillageAccount::TYPE,
-        'kelurahan' => 'Desa Soreang',
+        'kelurahan' => 'Soreang',
         'status' => 'aktif',
     ]);
 
@@ -48,7 +48,7 @@ test('super admin can centrally create an official village account', function ()
     expect($admin)->not->toBeNull()
         ->and($admin->role)->toBe(User::ROLE_ADMIN_KEPALA_DESA)
         ->and($admin->status)->toBe('active')
-        ->and($admin->desa)->toBe('Desa Soreang')
+        ->and($admin->desa)->toBe('Soreang')
         ->and(Hash::check('KepalaDesa123', $admin->password))->toBeTrue();
 });
 
@@ -56,7 +56,7 @@ test('super admin cannot create two active official accounts for the same villag
     Instansi::create([
         'nama' => 'Pemerintah Desa Soreang',
         'tipe' => OfficialVillageAccount::TYPE,
-        'kelurahan' => 'Desa Soreang',
+        'kelurahan' => 'Soreang',
         'status' => 'aktif',
         'email' => 'existing.soreang@example.test',
     ]);
@@ -74,7 +74,7 @@ test('super admin cannot create two active official accounts for the same villag
         ->assertSessionHasErrors('desa');
 
     expect(Instansi::where('tipe', OfficialVillageAccount::TYPE)
-        ->where('kelurahan', 'Desa Soreang')
+        ->where('kelurahan', 'Soreang')
         ->whereIn('status', ['pending', 'aktif'])
         ->count())->toBe(1);
 });
@@ -83,7 +83,7 @@ test('inactive official village account can be recreated for the same village', 
     Instansi::create([
         'nama' => 'Pemerintah Desa Soreang Lama',
         'tipe' => OfficialVillageAccount::TYPE,
-        'kelurahan' => 'Desa Soreang',
+        'kelurahan' => 'Soreang',
         'status' => 'nonaktif',
         'email' => 'inactive.soreang@example.test',
     ]);
@@ -95,7 +95,7 @@ test('inactive official village account can be recreated for the same village', 
     $response->assertRedirect(route('superadmin.instansi.index'));
 
     expect(Instansi::where('tipe', OfficialVillageAccount::TYPE)
-        ->where('kelurahan', 'Desa Soreang')
+        ->where('kelurahan', 'Soreang')
         ->count())->toBe(2);
 });
 

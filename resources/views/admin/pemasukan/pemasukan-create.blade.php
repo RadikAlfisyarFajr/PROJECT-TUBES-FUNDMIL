@@ -9,18 +9,6 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title }} | Admin Instansi</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="{{ asset('css/admin-theme.css') }}" rel="stylesheet">
-</head>
-
-<!DOCTYPE html>
-<html lang="id">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Input Pemasukan Zakat | Admin Instansi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
@@ -283,6 +271,10 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
             place-items: center;
         }
 
+        .fitrah-input-mode {
+            margin-top: 8px;
+        }
+
         .subtle-note {
             margin-top: 7px;
             color: #9b9894;
@@ -432,6 +424,39 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
             font-weight: 800;
         }
 
+        .success-flash.is-toast {
+            position: fixed;
+            top: 84px;
+            right: 24px;
+            z-index: 1060;
+            max-width: 420px;
+            box-shadow: 0 18px 36px rgba(18, 32, 22, .16);
+        }
+
+        .preview-history {
+            display: grid;
+            gap: 10px;
+        }
+
+        .preview-history-item {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: #f8faf8;
+            padding: 12px 14px;
+        }
+
+        .preview-history-item strong,
+        .preview-history-item span {
+            display: block;
+        }
+
+        .preview-history-item span {
+            margin-top: 4px;
+            color: #4c574f;
+            font-size: .82rem;
+            line-height: 1.5;
+        }
+
         .invalid-feedback-box {
             display: none;
             margin-bottom: 18px;
@@ -510,7 +535,7 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
                 </div>
 
 
-                <div id="successFlash" class="success-flash"></div>
+                <div id="successFlash" class="success-flash is-toast" role="alert"></div>
                 <div id="errorBox" class="invalid-feedback-box"></div>
 
                 @if (session('success'))
@@ -621,7 +646,7 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
                                 Info Kurs Zakat
                             </h2>
                             <p class="mini-copy">
-                                Zakat Fitrah: Rp {{ number_format($rates['fitrahUangPerJiwa'], 0, ',', '.') }} / 2.5 Kg Beras.
+                                Zakat Fitrah: Rp {{ number_format($rates['fitrahUangPerJiwa'], 0, ',', '.') }} / {{ rtrim(rtrim(number_format($rates['fitrahBerasKgPerJiwa'], 2, ',', '.'), '0'), ',') }} Kg Beras per jiwa.
                                 Fidyah: Rp {{ number_format($rates['fidyahPerHari'], 0, ',', '.') }} per hari/jiwa
                                 (buka puasa Rp {{ number_format($rates['fidyahBukaPuasaPerHari'], 0, ',', '.') }} +
                                 sahur Rp {{ number_format($rates['fidyahSahurPerHari'], 0, ',', '.') }}).
@@ -634,7 +659,9 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
                                 <i class="bi bi-arrow-counterclockwise"></i>
                                 Transaksi Terakhir
                             </h2>
-                            <p class="mini-copy">Setelah tersimpan, form otomatis kosong dan nomor kuitansi baru disiapkan untuk muzaki berikutnya.</p>
+                            <div id="previewHistory" class="preview-history">
+                                <p class="mini-copy">Setelah tersimpan, ringkasan transaksi terakhir akan tampil di sini.</p>
+                            </div>
                         </section>
                     </div>
                     <div class="col-md-4">
@@ -656,7 +683,6 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
             document.body.classList.toggle('sidebar-expanded');
         });
     </script>
-</body>
 
 <div
     id="zakatRatesData"
@@ -692,6 +718,8 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
     const errorBox = document.getElementById('errorBox');
     const nomorKuitansi = document.getElementById('nomorKuitansi');
     const receiptPreview = document.getElementById('receiptPreview');
+    const previewHistory = document.getElementById('previewHistory');
+    const defaultSubmitHtml = submitBtn.innerHTML;
     let rowCounter = 0;
 
     const formatRupiah = (value) => new Intl.NumberFormat('id-ID', {
@@ -757,7 +785,17 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
                     <div class="payment-input-stack">
                         <label class="field-label js-amount-label">Jumlah Jiwa</label>
                         <input class="soft-input js-amount" name="items[${index}][jumlah_input]" type="number" min="0" step="0.01" value="1">
-                        <div class="subtle-note js-note">Standar: Rp 45.000/jiwa</div>
+                        <div class="js-fitrah-input-mode segmented fitrah-input-mode d-none">
+                            <label>
+                                <input type="radio" name="items[${index}][fitrah_input_mode]" value="jiwa" checked>
+                                <span>Jiwa</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="items[${index}][fitrah_input_mode]" value="kg">
+                                <span>Kg</span>
+                            </label>
+                        </div>
+                        <div class="subtle-note js-note">Standar: ${formatRupiah(zakatRates.fitrahUangPerJiwa)}/jiwa</div>
                         <div class="js-fidyah-budget fidyah-budget-grid d-none">
                             <div>
                                 <label class="mini-field-label">Buka Puasa</label>
@@ -809,15 +847,22 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
         const category = row.querySelector('.js-category').value;
         const amount = Number(row.querySelector('.js-amount').value || 0);
         const fitrahMedia = row.querySelector('.js-fitrah-type input:checked')?.value || 'uang';
+        const fitrahInputMode = row.querySelector('.js-fitrah-input-mode input:checked')?.value || 'jiwa';
         const maalType = row.querySelector('.js-maal-type').value;
         const fidyahBuka = Number(row.querySelector('.js-fidyah-buka').value || 0);
         const fidyahSahur = Number(row.querySelector('.js-fidyah-sahur').value || 0);
         let subtotal = 0;
         let berasKg = 0;
+        let jiwa = 0;
 
         if (category === 'zakat_fitrah') {
-            subtotal = amount * zakatRates.fitrahUangPerJiwa;
-            berasKg = fitrahMedia === 'beras' ? amount * zakatRates.fitrahBerasKgPerJiwa : 0;
+            jiwa = fitrahMedia === 'beras' && fitrahInputMode === 'kg'
+                ? amount / zakatRates.fitrahBerasKgPerJiwa
+                : amount;
+            subtotal = jiwa * zakatRates.fitrahUangPerJiwa;
+            berasKg = fitrahMedia === 'beras'
+                ? (fitrahInputMode === 'kg' ? amount : jiwa * zakatRates.fitrahBerasKgPerJiwa)
+                : 0;
         } else if (category === 'zakat_maal') {
             if (maalType === 'Pertanian') {
                 subtotal = amount * zakatRates.pertanianPerKg;
@@ -836,6 +881,8 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
             category,
             amount,
             fitrahMedia,
+            fitrahInputMode,
+            jiwa,
             maalType,
             fidyahBuka,
             fidyahSahur,
@@ -847,6 +894,7 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
     function updateRow(row) {
         const data = rowData(row);
         const fitrahType = row.querySelector('.js-fitrah-type');
+        const fitrahInputMode = row.querySelector('.js-fitrah-input-mode');
         const maalType = row.querySelector('.js-maal-type');
         const categoryIcon = row.querySelector('.js-category-icon');
         const amountLabel = row.querySelector('.js-amount-label');
@@ -856,16 +904,21 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
         const categoryMeta = categoryOptions.find((category) => category.key === data.category);
 
         fitrahType.classList.toggle('d-none', data.category !== 'zakat_fitrah');
+        fitrahInputMode.classList.toggle('d-none', data.category !== 'zakat_fitrah' || data.fitrahMedia !== 'beras');
         maalType.classList.toggle('d-none', data.category !== 'zakat_maal');
         fidyahBudget.classList.toggle('d-none', data.category !== 'fidyah');
         categoryIcon.innerHTML = `<i class="bi ${escapeHtml(categoryMeta?.icon || 'bi-tags-fill')}"></i>`;
         categoryIcon.classList.toggle('is-fidyah', data.category === 'fidyah');
 
         if (data.category === 'zakat_fitrah') {
-            amountLabel.textContent = 'Jumlah Jiwa';
-            note.textContent = data.fitrahMedia === 'beras' ?
-                `Standar: ${zakatRates.fitrahBerasKgPerJiwa} Kg/jiwa, ekuivalen Rp 45.000` :
-                'Standar: Rp 45.000/jiwa';
+            amountLabel.textContent = data.fitrahMedia === 'beras' && data.fitrahInputMode === 'kg' ? 'Berat Beras (Kg)' : 'Jumlah Jiwa';
+            if (data.fitrahMedia === 'beras' && data.fitrahInputMode === 'kg') {
+                note.textContent = `Setara ${cleanNumber(data.jiwa)} jiwa. Standar: ${cleanNumber(zakatRates.fitrahBerasKgPerJiwa)} Kg/jiwa`;
+            } else if (data.fitrahMedia === 'beras') {
+                note.textContent = `Akan tercatat ${cleanNumber(data.berasKg)} Kg beras. Standar: ${cleanNumber(zakatRates.fitrahBerasKgPerJiwa)} Kg/jiwa`;
+            } else {
+                note.textContent = `Standar: ${formatRupiah(zakatRates.fitrahUangPerJiwa)}/jiwa`;
+            }
         } else if (data.category === 'zakat_maal') {
             if (data.maalType === 'Pertanian') {
                 amountLabel.textContent = 'Berat Hasil Panen (Kg)';
@@ -920,7 +973,17 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
         const rows = Array.from(rowsContainer.querySelectorAll('.payment-row')).map((row) => {
             const rowInfo = rowData(row);
             const category = escapeHtml(row.querySelector('.js-category option:checked').textContent.trim());
-            return `<tr><td>${category}</td><td>${cleanNumber(rowInfo.amount)}</td><td>${formatRupiah(rowInfo.subtotal)}</td></tr>`;
+            let inputText = cleanNumber(rowInfo.amount);
+
+            if (rowInfo.category === 'zakat_fitrah' && rowInfo.fitrahMedia === 'beras') {
+                inputText = rowInfo.fitrahInputMode === 'kg'
+                    ? `${cleanNumber(rowInfo.berasKg)} kg (${cleanNumber(rowInfo.jiwa)} jiwa)`
+                    : `${cleanNumber(rowInfo.jiwa)} jiwa (${cleanNumber(rowInfo.berasKg)} kg)`;
+            } else if (rowInfo.category === 'zakat_fitrah') {
+                inputText = `${cleanNumber(rowInfo.jiwa)} jiwa`;
+            }
+
+            return `<tr><td>${category}</td><td>${inputText}</td><td>${formatRupiah(rowInfo.subtotal)}</td></tr>`;
         }).join('');
 
         return `
@@ -949,9 +1012,28 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
             `;
     }
 
+    function capturePreview(payload) {
+        const beras = totalBeras.textContent;
+        const itemCount = rowsContainer.querySelectorAll('.payment-row').length;
+        const item = document.createElement('div');
+        item.className = 'preview-history-item';
+        item.innerHTML = `
+            <strong>${escapeHtml(payload.nomor_kuitansi)} - ${escapeHtml(document.getElementById('namaMuzakki').value)}</strong>
+            <span>${itemCount} item, total ${escapeHtml(formatRupiah(payload.total))}, beras ${escapeHtml(beras)}</span>
+        `;
+
+        if (previewHistory.querySelector('.mini-copy')) {
+            previewHistory.innerHTML = '';
+        }
+
+        previewHistory.prepend(item);
+        [...previewHistory.querySelectorAll('.preview-history-item')].slice(3).forEach((row) => row.remove());
+    }
+
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Menyimpan...';
         errorBox.style.display = 'none';
         successFlash.style.display = 'none';
 
@@ -972,6 +1054,8 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
                 throw new Error(firstError || 'Data belum berhasil disimpan.');
             }
 
+            capturePreview(payload);
+
             const printWindow = window.open('', '_blank', 'width=520,height=720');
             if (printWindow) {
                 printWindow.document.write(buildReceipt(payload));
@@ -983,8 +1067,6 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
             successFlash.textContent = `${payload.message} Nomor kuitansi ${payload.nomor_kuitansi}.`;
             successFlash.style.display = 'block';
 
-            // popup auto-hide (biar user ga klik berkali-kali)
-            submitBtn.textContent = 'Menyimpan...';
             let isToastVisible = true;
             clearTimeout(window.__pemasukanToastTimer);
             window.__pemasukanToastTimer = setTimeout(() => {
@@ -999,6 +1081,7 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
             errorBox.style.display = 'block';
         } finally {
             submitBtn.disabled = false;
+            submitBtn.innerHTML = defaultSubmitHtml;
         }
     });
 

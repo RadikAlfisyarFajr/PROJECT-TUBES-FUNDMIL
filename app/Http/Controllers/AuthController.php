@@ -256,6 +256,8 @@ class AuthController extends Controller
             'masa_berlaku.after_or_equal' => 'Masa berlaku SK tidak boleh sudah kedaluwarsa.',
         ]);
 
+        $validated['desa'] = OfficialVillageAccount::normalizeVillageName($validated['desa']);
+
         DB::transaction(function () use ($validated) {
             $instansi = Instansi::query()->create([
                 'nama' => $validated['nama_instansi'],

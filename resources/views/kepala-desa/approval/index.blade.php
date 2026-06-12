@@ -1,8 +1,8 @@
 @php
     $rupiah = fn ($value) => 'Rp ' . number_format((float) $value, 0, ',', '.');
     $statusOptions = [
-        'pending' => 'Pending',
-        'approved' => 'Disetujui',
+        'pending' => 'Menunggu Diproses',
+        'approved' => 'Sudah Diproses',
         'rejected' => 'Ditolak',
         'semua' => 'Semua',
     ];

@@ -89,6 +89,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('pemasukan', PemasukanZakatController::class)
             ->names('pemasukan');
 
+        Route::get('pengaturan-distribusi/mustahik-search', [PengaturanDistribusiController::class, 'searchMustahik'])
+            ->name('pengaturan-distribusi.mustahik-search');
+
         Route::resource('pengaturan-distribusi', PengaturanDistribusiController::class)
             ->parameters(['pengaturan-distribusi' => 'program_penyaluran'])
             ->names('pengaturan-distribusi');
@@ -122,13 +125,6 @@ Route::middleware('auth')->group(function () {
         ->name('kategori-dana.')
         ->group(function () {
             Route::post('notifikasi/read', 'markNotificationsRead')->name('notifications.read');
-        });
-
-    Route::prefix('pengaturan-distribusi')
-        ->controller(PengaturanDistribusiController::class)
-        ->name('pengaturan-distribusi.')
-        ->group(function () {
-            Route::get('mustahik-search', 'searchMustahik')->name('mustahik-search');
         });
 
     Route::prefix('profil-instansi')

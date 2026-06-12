@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Pemasukan;
 use App\Http\Controllers\Controller;
 use App\Models\Instansi;
 use App\Models\KategoriDana;
+use App\Models\Nishab;
 use App\Models\TransaksiZakat;
 use App\Support\OfficialVillageAccount;
 use Illuminate\Http\JsonResponse;
@@ -49,6 +50,7 @@ class PemasukanZakatController extends Controller
             'items' => ['required', 'array', 'min:1'],
             'items.*.kategori_utama' => ['required', Rule::in($this->activeKategoriKeys($instansi))],
             'items.*.fitrah_media' => ['nullable', Rule::in(['uang', 'beras'])],
+            'items.*.fitrah_input_mode' => ['nullable', Rule::in(['jiwa', 'kg'])],
             'items.*.sub_maal' => ['nullable', Rule::in(['Profesi', 'Simpanan', 'Perdagangan', 'Emas', 'Pertanian', 'Peternakan'])],
             'items.*.jumlah_input' => ['required', 'numeric', 'min:0.01'],
             'items.*.fidyah_buka_puasa' => ['nullable', 'numeric', 'min:0'],
@@ -59,14 +61,17 @@ class PemasukanZakatController extends Controller
         $user = $request->user();
         abort_unless($user, 403);
 
+        $validated['desa'] = OfficialVillageAccount::normalizeVillageName($validated['desa']);
+
         $nomorKuitansi = $validated['nomor_kuitansi'] ?: $this->generateNomorKuitansi();
         $hargaBeras = $this->hargaBerasPerKg();
+        $fitrahRate = $this->fitrahRate();
         $tanggal = now()->toDateString();
         $total = 0;
 
-        DB::transaction(function () use ($validated, $user, $instansi, $nomorKuitansi, $hargaBeras, $tanggal, &$total) {
+        DB::transaction(function () use ($validated, $user, $instansi, $nomorKuitansi, $hargaBeras, $fitrahRate, $tanggal, &$total) {
             foreach ($validated['items'] as $item) {
-                $converted = $this->convertItem($item, $hargaBeras);
+                $converted = $this->convertItem($item, $hargaBeras, $fitrahRate);
                 $kategori = $this->kategoriDana($instansi, $converted['kategori_nama']);
                 $total += $converted['jumlah'];
 
@@ -130,24 +135,35 @@ class PemasukanZakatController extends Controller
             ->with('success', 'Fitur hapus pemasukan belum tersedia.');
     }
 
-    private function convertItem(array $item, float $hargaBeras): array
+    private function convertItem(array $item, float $hargaBeras, array $fitrahRate): array
     {
         $kategoriUtama = $item['kategori_utama'];
         $jumlahInput = (float) $item['jumlah_input'];
 
         if ($kategoriUtama === 'zakat_fitrah') {
             $media = $item['fitrah_media'] ?? 'uang';
-            $berasKg = $jumlahInput * self::FITRAH_BERAS_KG_PER_JIWA;
+            $inputMode = $media === 'beras' ? ($item['fitrah_input_mode'] ?? 'jiwa') : 'jiwa';
+            $kgPerJiwa = $fitrahRate['kg_per_jiwa'];
+            $uangPerJiwa = $fitrahRate['uang_per_jiwa'];
+            $jiwa = $media === 'beras' && $inputMode === 'kg'
+                ? $jumlahInput / $kgPerJiwa
+                : $jumlahInput;
+            $berasKg = $media === 'beras' && $inputMode === 'kg'
+                ? $jumlahInput
+                : $jiwa * $kgPerJiwa;
+            $detailFisik = $media === 'beras'
+                ? ($inputMode === 'kg'
+                    ? sprintf('Zakat Fitrah Beras: %s Kg Beras (setara %s jiwa, %s Kg/jiwa).', $this->cleanNumber($berasKg), $this->cleanNumber($jiwa), $this->cleanNumber($kgPerJiwa))
+                    : sprintf('Zakat Fitrah Beras: %s jiwa x %s Kg = %s Kg Beras.', $this->cleanNumber($jiwa), $this->cleanNumber($kgPerJiwa), $this->cleanNumber($berasKg)))
+                : sprintf('Zakat Fitrah Uang: %s jiwa x Rp %s.', $this->cleanNumber($jiwa), number_format($uangPerJiwa, 0, ',', '.'));
 
             return [
                 'kategori_nama' => 'Zakat Fitrah',
                 'jenis' => 'zakat_fitrah',
                 'sub_jenis' => $media,
-                'jumlah' => (int) round($jumlahInput * self::FITRAH_UANG_PER_JIWA),
+                'jumlah' => (int) round($jiwa * $uangPerJiwa),
                 'harga_beras_snapshot' => $media === 'beras' ? $hargaBeras : null,
-                'detail_fisik' => $media === 'beras'
-                    ? sprintf('Zakat Fitrah Beras: %s jiwa x 2.5 Kg = %s Kg Beras.', $this->cleanNumber($jumlahInput), $this->cleanNumber($berasKg))
-                    : sprintf('Zakat Fitrah Uang: %s jiwa x Rp 45.000.', $this->cleanNumber($jumlahInput)),
+                'detail_fisik' => $detailFisik,
             ];
         }
 
@@ -234,7 +250,7 @@ class PemasukanZakatController extends Controller
         return Instansi::firstOrCreate(
             ['nama' => $user?->nama_instansi ?: 'FUNDMIL SOREANG'],
             [
-                'kelurahan' => $user?->desa ?: 'Soreang',
+                'kelurahan' => OfficialVillageAccount::normalizeVillageName($user?->desa ?: 'Soreang'),
                 'email' => $user?->email,
                 'status' => 'aktif',
             ]
@@ -254,9 +270,11 @@ class PemasukanZakatController extends Controller
 
     private function rates(): array
     {
+        $fitrahRate = $this->fitrahRate();
+
         return [
-            'fitrahUangPerJiwa' => self::FITRAH_UANG_PER_JIWA,
-            'fitrahBerasKgPerJiwa' => self::FITRAH_BERAS_KG_PER_JIWA,
+            'fitrahUangPerJiwa' => $fitrahRate['uang_per_jiwa'],
+            'fitrahBerasKgPerJiwa' => $fitrahRate['kg_per_jiwa'],
             'hargaBerasPerKg' => $this->hargaBerasPerKg(),
             'fidyahPerHari' => self::FIDYAH_PER_HARI,
             'fidyahBukaPuasaPerHari' => self::FIDYAH_BUKA_PUASA_PER_HARI,
@@ -335,6 +353,23 @@ class PemasukanZakatController extends Controller
     private function generateNomorKuitansi(): string
     {
         return 'FR-'.now()->format('ymdHis').random_int(10, 99);
+    }
+
+    private function fitrahRate(): array
+    {
+        $nishab = Nishab::query()
+            ->where('jenis_zakat', 'zakat_fitrah')
+            ->where('tanggal_berlaku', '<=', now()->toDateString())
+            ->where(fn ($query) => $query
+                ->whereNull('tanggal_berakhir')
+                ->orWhere('tanggal_berakhir', '>=', now()->toDateString()))
+            ->orderByDesc('tanggal_berlaku')
+            ->first();
+
+        return [
+            'kg_per_jiwa' => max((float) ($nishab?->nishab_kg ?: self::FITRAH_BERAS_KG_PER_JIWA), 0.01),
+            'uang_per_jiwa' => max((float) ($nishab?->nishab_rupiah ?: self::FITRAH_UANG_PER_JIWA), 0),
+        ];
     }
 
     private function cleanNumber(float $number): string

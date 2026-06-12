@@ -1,13 +1,14 @@
 @php
     $isEdit = isset($instansi) && $instansi;
+    $selectedDesa = \App\Support\OfficialVillageAccount::normalizeVillageName(old('desa', $instansi?->kelurahan ?? ''));
 @endphp
 
 <div class="distribution-field">
     <label for="desa">Desa</label>
     <select id="desa" name="desa" class="distribution-select" required>
-        <option value="" disabled {{ old('desa', $instansi?->kelurahan ?? '') === '' ? 'selected' : '' }}>Pilih Desa</option>
+        <option value="" disabled {{ $selectedDesa === '' ? 'selected' : '' }}>Pilih Desa</option>
         @foreach($desaOptions as $desa)
-            <option value="{{ $desa }}" {{ old('desa', $instansi?->kelurahan ?? '') === $desa ? 'selected' : '' }}>{{ $desa }}</option>
+            <option value="{{ $desa }}" {{ $selectedDesa === $desa ? 'selected' : '' }}>{{ $desa }}</option>
         @endforeach
     </select>
 </div>
