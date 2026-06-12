@@ -83,7 +83,11 @@
                 @if ($errors->any())
                 <div class="alert alert-danger">
                     <strong>Data belum bisa disimpan.</strong>
-                    <div>Periksa kembali field yang ditandai.</div>
+                    <ul class="mb-0 mt-2">
+                        @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
                 @endif
 
@@ -94,57 +98,68 @@
                     <div class="row g-4">
                         <div class="col-md-6">
                             <label class="form-label" for="nama">Nama Instansi</label>
-                            <input id="nama" class="form-control @error('nama') is-invalid @enderror" name="nama" value="{{ old('nama', $instansi->nama) }}" required>
+                            <input id="nama" class="form-control @error('nama') is-invalid @enderror" name="nama" value="{{ old('nama') }}" placeholder="Saat ini: {{ $instansi->nama ?: '-' }}">
                             @error('nama')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="form-text">Opsional. Kosongkan jika tidak ada perubahan.</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" for="tipe">Tipe Instansi</label>
                             <select id="tipe" class="form-select @error('tipe') is-invalid @enderror" name="tipe">
+                                <option value="" @selected(old('tipe') === null || old('tipe') === '')>Tidak diubah ({{ $instansi->tipe ?: '-' }})</option>
                                 @foreach (['Masjid', 'Mushola', 'Lembaga Amil', 'Yayasan', 'Lainnya'] as $tipe)
-                                <option value="{{ $tipe }}" @selected(old('tipe', $instansi->tipe) === $tipe)>{{ $tipe }}</option>
+                                <option value="{{ $tipe }}" @selected(old('tipe') === $tipe)>{{ $tipe }}</option>
                                 @endforeach
                             </select>
                             @error('tipe')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="form-text">Opsional. Kosongkan jika tidak ada perubahan.</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" for="kontak">WhatsApp Admin</label>
-                            <input id="kontak" class="form-control @error('kontak') is-invalid @enderror" name="kontak" value="{{ old('kontak', $instansi->kontak) }}">
+                            <input id="kontak" class="form-control @error('kontak') is-invalid @enderror" name="kontak" value="{{ old('kontak') }}" inputmode="tel" placeholder="Saat ini: {{ $instansi->kontak ?: '-' }}">
                             @error('kontak')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="form-text">Opsional. Kosongkan jika tidak ada perubahan. Gunakan format 08, 62, atau +62.</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" for="email">Email Resmi</label>
-                            <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email', $instansi->email) }}">
+                            <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" placeholder="Saat ini: {{ $instansi->email ?: '-' }}">
                             @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="form-text">Opsional. Kosongkan jika tidak ada perubahan.</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" for="kelurahan">Desa/Kelurahan</label>
-                            <input id="kelurahan" class="form-control @error('kelurahan') is-invalid @enderror" name="kelurahan" value="{{ old('kelurahan', $instansi->kelurahan) }}">
+                            <input id="kelurahan" class="form-control @error('kelurahan') is-invalid @enderror" name="kelurahan" value="{{ old('kelurahan') }}" placeholder="Saat ini: {{ $instansi->kelurahan ?: '-' }}">
                             @error('kelurahan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="form-text">Opsional. Kosongkan jika tidak ada perubahan.</div>
                         </div>
                         <div class="col-12">
                             <label class="form-label" for="alamat">Alamat Lengkap</label>
-                            <textarea id="alamat" class="form-control @error('alamat') is-invalid @enderror" name="alamat" rows="4">{{ old('alamat', $instansi->alamat) }}</textarea>
+                            <textarea id="alamat" class="form-control @error('alamat') is-invalid @enderror" name="alamat" rows="4" placeholder="Saat ini: {{ $instansi->alamat ?: '-' }}">{{ old('alamat') }}</textarea>
                             @error('alamat')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="form-text">Opsional. Kosongkan jika tidak ada perubahan.</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" for="nomor_sk">Nomor SK/Izin Operasional</label>
-                            <input id="nomor_sk" class="form-control @error('nomor_sk') is-invalid @enderror" name="nomor_sk" value="{{ old('nomor_sk', $instansi->nomor_sk) }}">
+                            <input id="nomor_sk" class="form-control @error('nomor_sk') is-invalid @enderror" name="nomor_sk" value="{{ old('nomor_sk') }}" placeholder="Saat ini: {{ $instansi->nomor_sk ?: '-' }}">
                             @error('nomor_sk')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="form-text">Opsional. Kosongkan jika tidak ada perubahan.</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" for="masa_berlaku">Masa Berlaku</label>
-                            <input id="masa_berlaku" type="date" class="form-control @error('masa_berlaku') is-invalid @enderror" name="masa_berlaku" value="{{ old('masa_berlaku', optional($instansi->masa_berlaku)->format('Y-m-d')) }}">
+                            <input id="masa_berlaku" type="date" class="form-control @error('masa_berlaku') is-invalid @enderror" name="masa_berlaku" value="{{ old('masa_berlaku') }}">
                             @error('masa_berlaku')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="form-text">Opsional. Kosongkan jika tidak ada perubahan. Saat ini: {{ $instansi->masa_berlaku ? $instansi->masa_berlaku->format('d-m-Y') : '-' }}.</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" for="nama_pimpinan">Nama Ketua/DKM</label>
-                            <input id="nama_pimpinan" class="form-control @error('nama_pimpinan') is-invalid @enderror" name="nama_pimpinan" value="{{ old('nama_pimpinan', $instansi->nama_pimpinan) }}">
+                            <input id="nama_pimpinan" class="form-control @error('nama_pimpinan') is-invalid @enderror" name="nama_pimpinan" value="{{ old('nama_pimpinan') }}" placeholder="Saat ini: {{ $instansi->nama_pimpinan ?: '-' }}">
                             @error('nama_pimpinan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="form-text">Opsional. Kosongkan jika tidak ada perubahan.</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" for="logo">Foto Profil Instansi</label>
                             <input id="logo" type="file" class="form-control @error('logo') is-invalid @enderror" name="logo" accept="image/png,image/jpeg,image/webp">
                             @error('logo')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="form-text">Opsional. Kosongkan jika tidak ada perubahan.</div>
                             @if ($instansi->logo)
                             <img class="preview-img mt-3 w-100" src="{{ asset('storage/'.$instansi->logo) }}" alt="Foto profil instansi">
                             @endif
@@ -153,6 +168,7 @@
                             <label class="form-label" for="tanda_tangan">Tanda Tangan Digital</label>
                             <input id="tanda_tangan" type="file" class="form-control @error('tanda_tangan') is-invalid @enderror" name="tanda_tangan" accept="image/png,image/jpeg,image/webp">
                             @error('tanda_tangan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="form-text">Opsional. Kosongkan jika tidak ada perubahan.</div>
                             @if ($instansi->tanda_tangan)
                             <img class="preview-img mt-3 w-100" src="{{ asset('storage/'.$instansi->tanda_tangan) }}" alt="Tanda tangan digital">
                             @endif

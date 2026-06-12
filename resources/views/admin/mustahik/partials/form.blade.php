@@ -116,8 +116,9 @@
                             </div>
                             <label>
                                 <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Nomor Telepon</span>
-                                <input name="kontak" value="{{ old('kontak', $mustahik->kontak ?? '') }}" class="mt-[10px] h-[48px] w-full rounded-[11px] bg-[#e5eae7] px-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]" placeholder="08xxxxxxxxxx">
+                                <input type="tel" name="kontak" value="{{ old('kontak', $mustahik->kontak ?? '') }}" maxlength="15" inputmode="numeric" pattern="[0-9]*" class="mt-[10px] h-[48px] w-full rounded-[11px] bg-[#e5eae7] px-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#0b751f]" placeholder="08xxxxxxxxxx">
                                 @error('kontak') <span class="mt-2 block text-xs font-bold text-red-600">{{ $message }}</span> @enderror
+                                <span class="mt-2 block text-[11px] italic text-[#8a948e]">Hanya angka, 8 sampai 15 digit.</span>
                             </label>
                             <label>
                                 <span class="text-[11px] font-black uppercase tracking-[.14em] text-[#6a756f]">Status</span>

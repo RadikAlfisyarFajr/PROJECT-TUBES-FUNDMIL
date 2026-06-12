@@ -735,7 +735,11 @@
             @if ($errors->any())
             <div class="alert alert-danger">
                 <strong>Data belum bisa disimpan.</strong>
-                <div>Periksa kembali input pada form.</div>
+                <ul class="mb-0 mt-2">
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
             @endif
 
@@ -894,15 +898,18 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label" for="nama_bank">Nama Bank</label>
-                        <input id="nama_bank" class="form-control" name="nama_bank" value="{{ old('nama_bank') }}" required>
+                        <input id="nama_bank" class="form-control @error('nama_bank') is-invalid @enderror" name="nama_bank" value="{{ old('nama_bank') }}" required>
+                        <div class="form-text">Harus memuat abjad, tidak boleh hanya angka.</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="nomor_rekening">Nomor Rekening</label>
-                        <input id="nomor_rekening" class="form-control" name="nomor_rekening" value="{{ old('nomor_rekening') }}" required>
+                        <input id="nomor_rekening" class="form-control @error('nomor_rekening') is-invalid @enderror" name="nomor_rekening" value="{{ old('nomor_rekening') }}" inputmode="numeric" pattern="[0-9]*" required>
+                        <div class="form-text">Hanya angka, 6 sampai 30 digit.</div>
                     </div>
                     <div class="mb-0">
                         <label class="form-label" for="nama_pemilik">Nama Pemilik</label>
-                        <input id="nama_pemilik" class="form-control" name="nama_pemilik" value="{{ old('nama_pemilik') }}" required>
+                        <input id="nama_pemilik" class="form-control @error('nama_pemilik') is-invalid @enderror" name="nama_pemilik" value="{{ old('nama_pemilik') }}" required>
+                        <div class="form-text">Harus memuat abjad, tidak boleh hanya angka.</div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -926,15 +933,18 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label" for="nama_bank_{{ $rekening->id }}">Nama Bank</label>
-                        <input id="nama_bank_{{ $rekening->id }}" class="form-control" name="nama_bank" value="{{ old('nama_bank', $rekening->nama_bank) }}" required>
+                        <input id="nama_bank_{{ $rekening->id }}" class="form-control @error('nama_bank') is-invalid @enderror" name="nama_bank" value="{{ old('nama_bank', $rekening->nama_bank) }}" required>
+                        <div class="form-text">Harus memuat abjad, tidak boleh hanya angka.</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="nomor_rekening_{{ $rekening->id }}">Nomor Rekening</label>
-                        <input id="nomor_rekening_{{ $rekening->id }}" class="form-control" name="nomor_rekening" value="{{ old('nomor_rekening', $rekening->nomor_rekening) }}" required>
+                        <input id="nomor_rekening_{{ $rekening->id }}" class="form-control @error('nomor_rekening') is-invalid @enderror" name="nomor_rekening" value="{{ old('nomor_rekening', $rekening->nomor_rekening) }}" inputmode="numeric" pattern="[0-9]*" required>
+                        <div class="form-text">Hanya angka, 6 sampai 30 digit.</div>
                     </div>
                     <div class="mb-0">
                         <label class="form-label" for="nama_pemilik_{{ $rekening->id }}">Nama Pemilik</label>
-                        <input id="nama_pemilik_{{ $rekening->id }}" class="form-control" name="nama_pemilik" value="{{ old('nama_pemilik', $rekening->nama_pemilik) }}" required>
+                        <input id="nama_pemilik_{{ $rekening->id }}" class="form-control @error('nama_pemilik') is-invalid @enderror" name="nama_pemilik" value="{{ old('nama_pemilik', $rekening->nama_pemilik) }}" required>
+                        <div class="form-text">Harus memuat abjad, tidak boleh hanya angka.</div>
                     </div>
                 </div>
                 <div class="modal-footer">

@@ -26,17 +26,6 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
             gap: 16px;
         }
 
-        .back-link {
-            border: 0;
-            background: transparent;
-            color: var(--green);
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            font-weight: 900;
-            text-decoration: none;
-        }
-
         .page-heading h1 {
             margin: 0;
             font-size: 2rem;
@@ -527,10 +516,6 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
 
             <div class="pemasukan-shell">
                 <div class="page-heading">
-                    <a class="back-link" href="{{ route('pemasukan.index') }}">
-                        <i class="bi bi-arrow-left"></i>
-                        <span>Kembali</span>
-                    </a>
                     <h1>Input Data Pemasukan</h1>
                 </div>
 

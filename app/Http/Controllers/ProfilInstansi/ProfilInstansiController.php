@@ -62,9 +62,9 @@ class ProfilInstansiController extends Controller
         /** @var User|null $user */
         $user = Auth::user();
         $validated = $request->validate([
-            'nama' => ['required', 'string', 'max:255'],
-            'tipe' => ['nullable', 'string', 'max:100'],
-            'kontak' => ['nullable', 'string', 'max:30'],
+            'nama' => ['nullable', 'string', 'max:255', 'regex:/\pL/u'],
+            'tipe' => ['nullable', 'string', 'max:100', Rule::in(['Masjid', 'Mushola', 'Lembaga Amil', 'Yayasan', 'Lainnya'])],
+            'kontak' => ['nullable', 'string', 'max:30', 'regex:/^(?:\+62|62|0)8[1-9][0-9]{6,10}$/'],
             'email' => [
                 'nullable',
                 'email',
@@ -75,19 +75,27 @@ class ProfilInstansiController extends Controller
             'alamat' => ['nullable', 'string'],
             'nomor_sk' => ['nullable', 'string', 'max:255'],
             'masa_berlaku' => ['nullable', 'date'],
-            'nama_pimpinan' => ['nullable', 'string', 'max:255'],
+            'nama_pimpinan' => ['nullable', 'string', 'max:255', 'regex:/\pL/u'],
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'tanda_tangan' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
+        ], [
+            'nama.regex' => 'Nama instansi harus menggunakan abjad, tidak boleh hanya angka.',
+            'kontak.regex' => 'Nomor WhatsApp harus valid, diawali 08, 62, atau +62, dan tidak boleh berisi huruf.',
+            'nama_pimpinan.regex' => 'Nama Ketua/DKM harus menggunakan abjad, tidak boleh hanya angka.',
         ]);
 
+        $validated = $this->onlyFilledProfileFields($request, $validated);
         $this->replaceUploadedFile($request, $validated, $instansi, 'logo', 'profil-instansi/logo');
         $this->replaceUploadedFile($request, $validated, $instansi, 'tanda_tangan', 'profil-instansi/tanda-tangan');
 
-        if (! empty($validated['kelurahan'])) {
+        if (array_key_exists('kelurahan', $validated)) {
             $validated['kelurahan'] = OfficialVillageAccount::normalizeVillageName($validated['kelurahan']);
         }
 
-        $instansi->update($validated);
+        if ($validated !== []) {
+            $instansi->update($validated);
+        }
+
         $this->syncAuthenticatedUserProfile($instansi, $validated['email'] ?? null, $validated['kelurahan'] ?? null);
         $this->recordNotification(
             $instansi,
@@ -207,10 +215,35 @@ class ProfilInstansiController extends Controller
     private function validateRekening(Request $request): array
     {
         return $request->validate([
-            'nama_bank' => ['required', 'string', 'max:255'],
-            'nomor_rekening' => ['required', 'string', 'max:100'],
-            'nama_pemilik' => ['required', 'string', 'max:255'],
+            'nama_bank' => ['required', 'string', 'max:255', 'regex:/\pL/u'],
+            'nomor_rekening' => ['required', 'string', 'regex:/^[0-9]{6,30}$/'],
+            'nama_pemilik' => ['required', 'string', 'max:255', 'regex:/\pL/u'],
+        ], [
+            'nama_bank.regex' => 'Nama rekening harus menggunakan abjad, tidak boleh hanya angka.',
+            'nomor_rekening.regex' => 'Nomor rekening harus hanya berisi angka sebanyak 6 sampai 30 digit.',
+            'nama_pemilik.regex' => 'Nama pemilik harus menggunakan abjad, tidak boleh hanya angka.',
         ]);
+    }
+
+    private function onlyFilledProfileFields(Request $request, array $validated): array
+    {
+        foreach ([
+            'nama',
+            'tipe',
+            'kontak',
+            'email',
+            'kelurahan',
+            'alamat',
+            'nomor_sk',
+            'masa_berlaku',
+            'nama_pimpinan',
+        ] as $field) {
+            if (! $request->filled($field)) {
+                unset($validated[$field]);
+            }
+        }
+
+        return $validated;
     }
 
     private function syncAuthenticatedUserProfile(Instansi $instansi, ?string $email, ?string $desa): void
