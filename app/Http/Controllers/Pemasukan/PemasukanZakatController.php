@@ -8,6 +8,8 @@ use App\Models\KategoriDana;
 use App\Models\Nishab;
 use App\Models\TransaksiZakat;
 use App\Support\OfficialVillageAccount;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,6 +17,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Laravolt\Indonesia\Models\Province;
+use Laravolt\Indonesia\Models\City;
+use Laravolt\Indonesia\Models\District;
+use Laravolt\Indonesia\Models\Village;
 
 class PemasukanZakatController extends Controller
 {
@@ -29,7 +35,52 @@ class PemasukanZakatController extends Controller
 
     public function index(): View
     {
-        return view('admin.pemasukan.pemasukan-create', $this->createViewData());
+        $instansi = $this->instansi();
+
+        // Get all items grouped by nomor_kuitansi
+        $allItems = TransaksiZakat::where('instansi_id', $instansi->id)
+            ->with(['kategori'])
+            ->orderByDesc('tanggal')
+            ->orderByDesc('created_at')
+            ->get()
+            ->groupBy('nomor_kuitansi');
+
+        // Build grouped collection
+        $grouped = $allItems->map(function ($group) {
+            $first = $group->first();
+            return (object)[
+                'nomor_kuitansi' => $first->nomor_kuitansi,
+                'nama_muzakki' => $first->nama_muzakki,
+                'nomor_wa' => $first->nomor_wa,
+                'tanggal' => $first->tanggal,
+                'jumlah_total' => $group->sum('jumlah'),
+                'jenis_pembayaran' => $first->jenis_pembayaran,
+                'items' => $group,
+                'item_count' => $group->count(),
+            ];
+        })->values(); // Re-index
+
+        // Manual pagination
+        $perPage = 20;
+        $page = Paginator::resolveCurrentPage();
+        $total = $grouped->count();
+        $items = $grouped->forPage($page, $perPage);
+
+        $transaksi = new LengthAwarePaginator(
+            $items,
+            $total,
+            $perPage,
+            $page,
+            [
+                'path' => Paginator::resolveCurrentPath(),
+                'query' => request()->query(),
+            ]
+        );
+
+        return view('admin.pemasukan.pemasukan-index', [
+            'transaksi' => $transaksi,
+            'instansi' => $instansi,
+        ]);
     }
 
     public function create(): View
@@ -45,7 +96,11 @@ class PemasukanZakatController extends Controller
             'nomor_kuitansi' => ['nullable', 'string', 'max:50'],
             'nama_muzakki' => ['required', 'string', 'max:255'],
             'nomor_wa' => ['nullable', 'string', 'max:30'],
+            'provinsi' => ['required', 'string', 'max:100'],
+            'kabupaten' => ['required', 'string', 'max:100'],
+            'kecamatan' => ['required', 'string', 'max:100'],
             'desa' => ['required', 'string', 'max:100'],
+            'alamat_detail' => ['nullable', 'string', 'max:255'],
             'jenis_pembayaran' => ['required', Rule::in(['tunai', 'non_tunai'])],
             'items' => ['required', 'array', 'min:1'],
             'items.*.kategori_utama' => ['required', Rule::in($this->activeKategoriKeys($instansi))],
@@ -61,7 +116,11 @@ class PemasukanZakatController extends Controller
         $user = $request->user();
         abort_unless($user, 403);
 
+        $validated['provinsi'] = ucwords(strtolower(trim($validated['provinsi'])));
+        $validated['kabupaten'] = ucwords(strtolower(trim($validated['kabupaten'])));
+        $validated['kecamatan'] = ucwords(strtolower(trim($validated['kecamatan'])));
         $validated['desa'] = OfficialVillageAccount::normalizeVillageName($validated['desa']);
+        $validated['alamat_detail'] = trim($validated['alamat_detail'] ?? '');
 
         $nomorKuitansi = $validated['nomor_kuitansi'] ?: $this->generateNomorKuitansi();
         $hargaBeras = $this->hargaBerasPerKg();
@@ -82,18 +141,21 @@ class PemasukanZakatController extends Controller
                     'nomor_kuitansi' => $nomorKuitansi,
                     'nama_muzakki' => $validated['nama_muzakki'],
                     'nomor_wa' => $validated['nomor_wa'] ?? null,
+                    'provinsi' => $validated['provinsi'],
+                    'kabupaten' => $validated['kabupaten'],
+                    'kecamatan' => $validated['kecamatan'],
                     'desa' => $validated['desa'],
+                    'alamat_detail' => $validated['alamat_detail'] ?: null,
                     'jenis' => $converted['jenis'],
                     'sub_jenis' => $converted['sub_jenis'],
                     'jumlah' => $converted['jumlah'],
                     'harga_beras_snapshot' => $converted['harga_beras_snapshot'],
                     'jenis_pembayaran' => $validated['jenis_pembayaran'],
-                    'keterangan' => trim($converted['detail_fisik'].' '.($item['keterangan'] ?? '')),
+                    'keterangan' => trim($converted['detail_fisik'] . ' ' . ($item['keterangan'] ?? '')),
                     'tanggal' => $tanggal,
                 ]);
             }
         });
-
         if ($request->expectsJson()) {
             return response()->json([
                 'message' => 'Pemasukan zakat berhasil disimpan.',
@@ -110,7 +172,43 @@ class PemasukanZakatController extends Controller
 
     public function show(string $id): View
     {
-        return view('admin.pemasukan.pemasukan-show', compact('id'));
+        $trx = TransaksiZakat::with(['instansi', 'kategori'])->findOrFail($id);
+
+        $labelMap = [
+            'zakat_fitrah'  => 'Zakat Fitrah',
+            'zakat_maal'    => 'Zakat Maal',
+            'infaq_sedekah' => 'Infaq & Sedekah',
+            'fidyah'        => 'Fidyah',
+        ];
+
+        $iconMap = [
+            'zakat_fitrah'  => 'bi-flower1',
+            'zakat_maal'    => 'bi-wallet2',
+            'infaq_sedekah' => 'bi-heart-fill',
+            'fidyah'        => 'bi-cup-hot-fill',
+        ];
+
+        $kategoriKey = $trx->kategori?->slug ?? $trx->jenis ?? '';
+        $items = [[
+            'kategori_utama' => $kategoriKey,
+            'label_kategori' => $labelMap[$kategoriKey] ?? ($trx->kategori?->nama ?? $trx->jenis ?? '—'),
+            'icon'           => $iconMap[$kategoriKey] ?? 'bi-tags-fill',
+            'sub'            => $trx->sub_jenis ?? null,
+            'jumlah_input'   => $trx->jumlah ?? 0,
+            'subtotal'       => $trx->jumlah ?? 0,
+            'keterangan'     => $trx->keterangan ?? '',
+        ]];
+
+        $admin = $trx->admin_id ? \App\Models\User::find($trx->admin_id) : auth()->user();
+        $instansi = $trx->instansi ?? $this->instansi();
+
+        return view('admin.pemasukan.pemasukan-show', [
+            'trx'      => $trx,
+            'items'    => $items,
+            'admin'    => $admin,
+            'instansi' => $instansi,
+            'total'    => (int) $trx->jumlah,
+        ]);
     }
 
     public function edit(string $id): View
@@ -261,7 +359,7 @@ class PemasukanZakatController extends Controller
     {
         return (float) (DB::table('harga_beras')
             ->where('tanggal_berlaku', '<=', now()->toDateString())
-            ->where(fn ($query) => $query
+            ->where(fn($query) => $query
                 ->whereNull('tanggal_berakhir')
                 ->orWhere('tanggal_berakhir', '>=', now()->toDateString()))
             ->latest('tanggal_berlaku')
@@ -291,6 +389,9 @@ class PemasukanZakatController extends Controller
         return [
             'nomorKuitansi' => $this->generateNomorKuitansi(),
             'desaOptions' => $this->desaOptions(),
+            'provinsiOptions' => $this->provinsiOptions(),
+            'kabupatenOptions' => [], // Default kosong, akan diisi via AJAX
+            'kecamatanOptions' => [], // Default kosong, akan diisi via AJAX
             'rates' => $this->rates(),
             'kategoriDropdown' => $this->kategoriDropdown($instansi),
             'activeKategoriKeys' => $this->activeKategoriKeys($instansi),
@@ -303,19 +404,19 @@ class PemasukanZakatController extends Controller
             ->where('instansi_id', $instansi->id)
             ->whereNull('parent_id')
             ->where('is_active', true)
-            ->with(['children' => fn ($query) => $query->where('is_active', true)->orderBy('nama')])
+            ->with(['children' => fn($query) => $query->where('is_active', true)->orderBy('nama')])
             ->orderBy('nama')
             ->get()
-            ->map(fn (KategoriDana $category) => [
+            ->map(fn(KategoriDana $category) => [
                 'key' => $this->kategoriKeyFromName($category->nama),
                 'label' => $category->nama,
                 'icon' => $this->kategoriIconFromName($category->nama),
-                'children' => $category->children->map(fn (KategoriDana $child) => [
+                'children' => $category->children->map(fn(KategoriDana $child) => [
                     'id' => $child->id,
                     'nama' => $child->nama,
                 ])->values()->all(),
             ])
-            ->filter(fn (array $category) => $category['key'] !== null)
+            ->filter(fn(array $category) => $category['key'] !== null)
             ->values()
             ->all();
     }
@@ -352,7 +453,7 @@ class PemasukanZakatController extends Controller
 
     private function generateNomorKuitansi(): string
     {
-        return 'FR-'.now()->format('ymdHis').random_int(10, 99);
+        return 'FR-' . now()->format('ymdHis') . random_int(10, 99);
     }
 
     private function fitrahRate(): array
@@ -360,7 +461,7 @@ class PemasukanZakatController extends Controller
         $nishab = Nishab::query()
             ->where('jenis_zakat', 'zakat_fitrah')
             ->where('tanggal_berlaku', '<=', now()->toDateString())
-            ->where(fn ($query) => $query
+            ->where(fn($query) => $query
                 ->whereNull('tanggal_berakhir')
                 ->orWhere('tanggal_berakhir', '>=', now()->toDateString()))
             ->orderByDesc('tanggal_berlaku')
@@ -375,6 +476,61 @@ class PemasukanZakatController extends Controller
     private function cleanNumber(float $number): string
     {
         return rtrim(rtrim(number_format($number, 2, '.', ''), '0'), '.');
+    }
+
+    private function provinsiOptions(): array
+    {
+        return Province::query()
+            ->orderBy('name')
+            ->get()
+            ->map(fn($p) => ['id' => $p->code, 'name' => $p->name])
+            ->values()
+            ->all();
+    }
+
+    public function getKabupaten(Request $request): JsonResponse
+    {
+        $provinsiCode = $request->get('provinsi_code');
+
+        $kabupaten = City::query()
+            ->where('province_code', $provinsiCode)
+            ->orderBy('name')
+            ->get()
+            ->map(fn($k) => ['id' => $k->code, 'name' => $k->name])
+            ->values()
+            ->all();
+
+        return response()->json($kabupaten);
+    }
+
+    public function getKecamatan(Request $request): JsonResponse
+    {
+        $kabupatenCode = $request->get('kabupaten_code');
+
+        $kecamatan = District::query()
+            ->where('city_code', $kabupatenCode)
+            ->orderBy('name')
+            ->get()
+            ->map(fn($k) => ['id' => $k->code, 'name' => $k->name])
+            ->values()
+            ->all();
+
+        return response()->json($kecamatan);
+    }
+
+    public function getDesa(Request $request): JsonResponse
+    {
+        $kecamatanCode = $request->get('kecamatan_code');
+
+        $desa = Village::query()
+            ->where('district_code', $kecamatanCode)
+            ->orderBy('name')
+            ->get()
+            ->map(fn($d) => ['id' => $d->code, 'name' => $d->name])
+            ->values()
+            ->all();
+
+        return response()->json($desa);
     }
 
     private function desaOptions(): array

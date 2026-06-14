@@ -562,17 +562,35 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
                                 <input id="nomorWa" class="soft-input" name="nomor_wa" type="text" placeholder="0812...">
                             </div>
                             <div class="col-md-6">
-                                <label class="field-label" for="desa">Desa / Kelurahan</label>
-                                <select id="desa" class="soft-select" name="desa" required>
-                                    <option value="">Pilih Desa/Kelurahan</option>
-                                    @foreach ($desaOptions as $desa)
-                                    <option value="{{ $desa }}">{{ $desa }}</option>
+                                <label class="field-label" for="provinsi">Provinsi</label>
+                                <select id="provinsi" class="soft-select" name="provinsi" required>
+                                    <option value="">Pilih Provinsi</option>
+                                    @foreach ($provinsiOptions as $prov)
+                                    <option value="{{ $prov['name'] }}" data-code="{{ $prov['id'] }}">{{ $prov['name'] }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-md-6">
+                                <label class="field-label" for="kabupaten">Kabupaten / Kota</label>
+                                <select id="kabupaten" class="soft-select" name="kabupaten" required disabled>
+                                    <option value="">Pilih Kabupaten/Kota</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="field-label" for="kecamatan">Kecamatan</label>
+                                <select id="kecamatan" class="soft-select" name="kecamatan" required disabled>
+                                    <option value="">Pilih Kecamatan</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="field-label" for="desa">Desa / Kelurahan</label>
+                                <select id="desa" class="soft-select" name="desa" required disabled>
+                                    <option value="">Pilih Desa/Kelurahan</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
                                 <label class="field-label" for="alamatDetail">RW / RT (Detail Alamat)</label>
-                                <input id="alamatDetail" class="soft-input" type="text" placeholder="Contoh: RW 05 / RT 02">
+                                <input id="alamatDetail" class="soft-input" type="text" placeholder="Contoh: RW 05 / RT 02" name="alamat_detail">
                             </div>
                         </div>
 
@@ -684,75 +702,75 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
         });
     </script>
 
-<div
-    id="zakatRatesData"
-    hidden
-    data-fitrah-uang-per-jiwa="{{ $rates['fitrahUangPerJiwa'] }}"
-    data-fitrah-beras-kg-per-jiwa="{{ $rates['fitrahBerasKgPerJiwa'] }}"
-    data-harga-beras-per-kg="{{ $rates['hargaBerasPerKg'] }}"
-    data-fidyah-per-hari="{{ $rates['fidyahPerHari'] }}"
-    data-fidyah-buka-puasa-per-hari="{{ $rates['fidyahBukaPuasaPerHari'] }}"
-    data-fidyah-sahur-per-hari="{{ $rates['fidyahSahurPerHari'] }}"
-    data-pertanian-per-kg="{{ $rates['pertanianPerKg'] }}"
-    data-peternakan-per-ekor="{{ $rates['peternakanPerEkor'] }}"></div>
-<script>
-    const zakatRatesData = document.getElementById('zakatRatesData').dataset;
-    const zakatRates = {
-        fitrahUangPerJiwa: Number(zakatRatesData.fitrahUangPerJiwa),
-        fitrahBerasKgPerJiwa: Number(zakatRatesData.fitrahBerasKgPerJiwa),
-        hargaBerasPerKg: Number(zakatRatesData.hargaBerasPerKg),
-        fidyahPerHari: Number(zakatRatesData.fidyahPerHari),
-        fidyahBukaPuasaPerHari: Number(zakatRatesData.fidyahBukaPuasaPerHari),
-        fidyahSahurPerHari: Number(zakatRatesData.fidyahSahurPerHari),
-        pertanianPerKg: Number(zakatRatesData.pertanianPerKg),
-        peternakanPerEkor: Number(zakatRatesData.peternakanPerEkor),
-    };
-    const form = document.getElementById('pemasukanForm');
-    const rowsContainer = document.getElementById('paymentRows');
-    const addItemBtn = document.getElementById('addItemBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const submitBtn = document.getElementById('submitBtn');
-    const grandTotal = document.getElementById('grandTotal');
-    const totalBeras = document.getElementById('totalBeras');
-    const successFlash = document.getElementById('successFlash');
-    const errorBox = document.getElementById('errorBox');
-    const nomorKuitansi = document.getElementById('nomorKuitansi');
-    const receiptPreview = document.getElementById('receiptPreview');
-    const previewHistory = document.getElementById('previewHistory');
-    const defaultSubmitHtml = submitBtn.innerHTML;
-    let rowCounter = 0;
+    <div
+        id="zakatRatesData"
+        hidden
+        data-fitrah-uang-per-jiwa="{{ $rates['fitrahUangPerJiwa'] }}"
+        data-fitrah-beras-kg-per-jiwa="{{ $rates['fitrahBerasKgPerJiwa'] }}"
+        data-harga-beras-per-kg="{{ $rates['hargaBerasPerKg'] }}"
+        data-fidyah-per-hari="{{ $rates['fidyahPerHari'] }}"
+        data-fidyah-buka-puasa-per-hari="{{ $rates['fidyahBukaPuasaPerHari'] }}"
+        data-fidyah-sahur-per-hari="{{ $rates['fidyahSahurPerHari'] }}"
+        data-pertanian-per-kg="{{ $rates['pertanianPerKg'] }}"
+        data-peternakan-per-ekor="{{ $rates['peternakanPerEkor'] }}"></div>
+    <script>
+        const zakatRatesData = document.getElementById('zakatRatesData').dataset;
+        const zakatRates = {
+            fitrahUangPerJiwa: Number(zakatRatesData.fitrahUangPerJiwa),
+            fitrahBerasKgPerJiwa: Number(zakatRatesData.fitrahBerasKgPerJiwa),
+            hargaBerasPerKg: Number(zakatRatesData.hargaBerasPerKg),
+            fidyahPerHari: Number(zakatRatesData.fidyahPerHari),
+            fidyahBukaPuasaPerHari: Number(zakatRatesData.fidyahBukaPuasaPerHari),
+            fidyahSahurPerHari: Number(zakatRatesData.fidyahSahurPerHari),
+            pertanianPerKg: Number(zakatRatesData.pertanianPerKg),
+            peternakanPerEkor: Number(zakatRatesData.peternakanPerEkor),
+        };
+        const form = document.getElementById('pemasukanForm');
+        const rowsContainer = document.getElementById('paymentRows');
+        const addItemBtn = document.getElementById('addItemBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const grandTotal = document.getElementById('grandTotal');
+        const totalBeras = document.getElementById('totalBeras');
+        const successFlash = document.getElementById('successFlash');
+        const errorBox = document.getElementById('errorBox');
+        const nomorKuitansi = document.getElementById('nomorKuitansi');
+        const receiptPreview = document.getElementById('receiptPreview');
+        const previewHistory = document.getElementById('previewHistory');
+        const defaultSubmitHtml = submitBtn.innerHTML;
+        let rowCounter = 0;
 
-    const formatRupiah = (value) => new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0
-    }).format(value || 0);
+        const formatRupiah = (value) => new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            maximumFractionDigits: 0
+        }).format(value || 0);
 
-    const cleanNumber = (value) => {
-        const number = Number(value || 0);
-        return Number.isInteger(number) ? String(number) : number.toFixed(2).replace(/\.?0+$/, '');
-    };
+        const cleanNumber = (value) => {
+            const number = Number(value || 0);
+            return Number.isInteger(number) ? String(number) : number.toFixed(2).replace(/\.?0+$/, '');
+        };
 
-    const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, (character) => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    } [character]));
+        const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, (character) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        } [character]));
 
-    const categoryOptions = @json($kategoriDropdown);
-    const categoryOptionsHtml = categoryOptions.length
-        ? categoryOptions.map((category) => `<option value="${category.key}">${escapeHtml(category.label)}</option>`).join('')
-        : '<option value="" disabled>Belum ada kategori aktif</option>';
-    const firstCategory = categoryOptions[0]?.key || '';
-    const initialCategories = categoryOptions.slice(0, 2).map((category) => category.key);
+        const categoryOptions = @json($kategoriDropdown);
+        const categoryOptionsHtml = categoryOptions.length ?
+            categoryOptions.map((category) => `<option value="${category.key}">${escapeHtml(category.label)}</option>`).join('') :
+            '<option value="" disabled>Belum ada kategori aktif</option>';
+        const firstCategory = categoryOptions[0]?.key || '';
+        const initialCategories = categoryOptions.slice(0, 2).map((category) => category.key);
 
-    function addRow(defaultCategory = firstCategory) {
-        const index = rowCounter++;
-        const row = document.createElement('tr');
-        row.className = 'payment-row';
-        row.innerHTML = `
+        function addRow(defaultCategory = firstCategory) {
+            const index = rowCounter++;
+            const row = document.createElement('tr');
+            row.className = 'payment-row';
+            row.innerHTML = `
                 <td>
                     <div class="category-select-wrap">
                         <span class="category-select-icon js-category-icon"><i class="bi bi-tags-fill"></i></span>
@@ -823,170 +841,170 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
                 </td>
             `;
 
-        rowsContainer.appendChild(row);
-        row.querySelector('.js-category').value = defaultCategory;
-        bindRow(row);
-        updateRow(row);
-    }
+            rowsContainer.appendChild(row);
+            row.querySelector('.js-category').value = defaultCategory;
+            bindRow(row);
+            updateRow(row);
+        }
 
-    function bindRow(row) {
-        row.querySelectorAll('input, select').forEach((element) => {
-            element.addEventListener('input', () => updateRow(row));
-            element.addEventListener('change', () => updateRow(row));
-        });
+        function bindRow(row) {
+            row.querySelectorAll('input, select').forEach((element) => {
+                element.addEventListener('input', () => updateRow(row));
+                element.addEventListener('change', () => updateRow(row));
+            });
 
-        row.querySelector('.remove-row').addEventListener('click', () => {
-            if (rowsContainer.querySelectorAll('.payment-row').length > 1) {
-                row.remove();
-                updateTotals();
-            }
-        });
-    }
+            row.querySelector('.remove-row').addEventListener('click', () => {
+                if (rowsContainer.querySelectorAll('.payment-row').length > 1) {
+                    row.remove();
+                    updateTotals();
+                }
+            });
+        }
 
-    function rowData(row) {
-        const category = row.querySelector('.js-category').value;
-        const amount = Number(row.querySelector('.js-amount').value || 0);
-        const fitrahMedia = row.querySelector('.js-fitrah-type input:checked')?.value || 'uang';
-        const fitrahInputMode = row.querySelector('.js-fitrah-input-mode input:checked')?.value || 'jiwa';
-        const maalType = row.querySelector('.js-maal-type').value;
-        const fidyahBuka = Number(row.querySelector('.js-fidyah-buka').value || 0);
-        const fidyahSahur = Number(row.querySelector('.js-fidyah-sahur').value || 0);
-        let subtotal = 0;
-        let berasKg = 0;
-        let jiwa = 0;
+        function rowData(row) {
+            const category = row.querySelector('.js-category').value;
+            const amount = Number(row.querySelector('.js-amount').value || 0);
+            const fitrahMedia = row.querySelector('.js-fitrah-type input:checked')?.value || 'uang';
+            const fitrahInputMode = row.querySelector('.js-fitrah-input-mode input:checked')?.value || 'jiwa';
+            const maalType = row.querySelector('.js-maal-type').value;
+            const fidyahBuka = Number(row.querySelector('.js-fidyah-buka').value || 0);
+            const fidyahSahur = Number(row.querySelector('.js-fidyah-sahur').value || 0);
+            let subtotal = 0;
+            let berasKg = 0;
+            let jiwa = 0;
 
-        if (category === 'zakat_fitrah') {
-            jiwa = fitrahMedia === 'beras' && fitrahInputMode === 'kg'
-                ? amount / zakatRates.fitrahBerasKgPerJiwa
-                : amount;
-            subtotal = jiwa * zakatRates.fitrahUangPerJiwa;
-            berasKg = fitrahMedia === 'beras'
-                ? (fitrahInputMode === 'kg' ? amount : jiwa * zakatRates.fitrahBerasKgPerJiwa)
-                : 0;
-        } else if (category === 'zakat_maal') {
-            if (maalType === 'Pertanian') {
-                subtotal = amount * zakatRates.pertanianPerKg;
-            } else if (maalType === 'Peternakan') {
-                subtotal = amount * zakatRates.peternakanPerEkor;
+            if (category === 'zakat_fitrah') {
+                jiwa = fitrahMedia === 'beras' && fitrahInputMode === 'kg' ?
+                    amount / zakatRates.fitrahBerasKgPerJiwa :
+                    amount;
+                subtotal = jiwa * zakatRates.fitrahUangPerJiwa;
+                berasKg = fitrahMedia === 'beras' ?
+                    (fitrahInputMode === 'kg' ? amount : jiwa * zakatRates.fitrahBerasKgPerJiwa) :
+                    0;
+            } else if (category === 'zakat_maal') {
+                if (maalType === 'Pertanian') {
+                    subtotal = amount * zakatRates.pertanianPerKg;
+                } else if (maalType === 'Peternakan') {
+                    subtotal = amount * zakatRates.peternakanPerEkor;
+                } else {
+                    subtotal = amount;
+                }
+            } else if (category === 'fidyah') {
+                subtotal = amount * (fidyahBuka + fidyahSahur);
             } else {
                 subtotal = amount;
             }
-        } else if (category === 'fidyah') {
-            subtotal = amount * (fidyahBuka + fidyahSahur);
-        } else {
-            subtotal = amount;
+
+            return {
+                category,
+                amount,
+                fitrahMedia,
+                fitrahInputMode,
+                jiwa,
+                maalType,
+                fidyahBuka,
+                fidyahSahur,
+                subtotal,
+                berasKg
+            };
         }
 
-        return {
-            category,
-            amount,
-            fitrahMedia,
-            fitrahInputMode,
-            jiwa,
-            maalType,
-            fidyahBuka,
-            fidyahSahur,
-            subtotal,
-            berasKg
-        };
-    }
+        function updateRow(row) {
+            const data = rowData(row);
+            const fitrahType = row.querySelector('.js-fitrah-type');
+            const fitrahInputMode = row.querySelector('.js-fitrah-input-mode');
+            const maalType = row.querySelector('.js-maal-type');
+            const categoryIcon = row.querySelector('.js-category-icon');
+            const amountLabel = row.querySelector('.js-amount-label');
+            const note = row.querySelector('.js-note');
+            const subtotal = row.querySelector('.js-subtotal');
+            const fidyahBudget = row.querySelector('.js-fidyah-budget');
+            const categoryMeta = categoryOptions.find((category) => category.key === data.category);
 
-    function updateRow(row) {
-        const data = rowData(row);
-        const fitrahType = row.querySelector('.js-fitrah-type');
-        const fitrahInputMode = row.querySelector('.js-fitrah-input-mode');
-        const maalType = row.querySelector('.js-maal-type');
-        const categoryIcon = row.querySelector('.js-category-icon');
-        const amountLabel = row.querySelector('.js-amount-label');
-        const note = row.querySelector('.js-note');
-        const subtotal = row.querySelector('.js-subtotal');
-        const fidyahBudget = row.querySelector('.js-fidyah-budget');
-        const categoryMeta = categoryOptions.find((category) => category.key === data.category);
+            fitrahType.classList.toggle('d-none', data.category !== 'zakat_fitrah');
+            fitrahInputMode.classList.toggle('d-none', data.category !== 'zakat_fitrah' || data.fitrahMedia !== 'beras');
+            maalType.classList.toggle('d-none', data.category !== 'zakat_maal');
+            fidyahBudget.classList.toggle('d-none', data.category !== 'fidyah');
+            categoryIcon.innerHTML = `<i class="bi ${escapeHtml(categoryMeta?.icon || 'bi-tags-fill')}"></i>`;
+            categoryIcon.classList.toggle('is-fidyah', data.category === 'fidyah');
 
-        fitrahType.classList.toggle('d-none', data.category !== 'zakat_fitrah');
-        fitrahInputMode.classList.toggle('d-none', data.category !== 'zakat_fitrah' || data.fitrahMedia !== 'beras');
-        maalType.classList.toggle('d-none', data.category !== 'zakat_maal');
-        fidyahBudget.classList.toggle('d-none', data.category !== 'fidyah');
-        categoryIcon.innerHTML = `<i class="bi ${escapeHtml(categoryMeta?.icon || 'bi-tags-fill')}"></i>`;
-        categoryIcon.classList.toggle('is-fidyah', data.category === 'fidyah');
-
-        if (data.category === 'zakat_fitrah') {
-            amountLabel.textContent = data.fitrahMedia === 'beras' && data.fitrahInputMode === 'kg' ? 'Berat Beras (Kg)' : 'Jumlah Jiwa';
-            if (data.fitrahMedia === 'beras' && data.fitrahInputMode === 'kg') {
-                note.textContent = `Setara ${cleanNumber(data.jiwa)} jiwa. Standar: ${cleanNumber(zakatRates.fitrahBerasKgPerJiwa)} Kg/jiwa`;
-            } else if (data.fitrahMedia === 'beras') {
-                note.textContent = `Akan tercatat ${cleanNumber(data.berasKg)} Kg beras. Standar: ${cleanNumber(zakatRates.fitrahBerasKgPerJiwa)} Kg/jiwa`;
+            if (data.category === 'zakat_fitrah') {
+                amountLabel.textContent = data.fitrahMedia === 'beras' && data.fitrahInputMode === 'kg' ? 'Berat Beras (Kg)' : 'Jumlah Jiwa';
+                if (data.fitrahMedia === 'beras' && data.fitrahInputMode === 'kg') {
+                    note.textContent = `Setara ${cleanNumber(data.jiwa)} jiwa. Standar: ${cleanNumber(zakatRates.fitrahBerasKgPerJiwa)} Kg/jiwa`;
+                } else if (data.fitrahMedia === 'beras') {
+                    note.textContent = `Akan tercatat ${cleanNumber(data.berasKg)} Kg beras. Standar: ${cleanNumber(zakatRates.fitrahBerasKgPerJiwa)} Kg/jiwa`;
+                } else {
+                    note.textContent = `Standar: ${formatRupiah(zakatRates.fitrahUangPerJiwa)}/jiwa`;
+                }
+            } else if (data.category === 'zakat_maal') {
+                if (data.maalType === 'Pertanian') {
+                    amountLabel.textContent = 'Berat Hasil Panen (Kg)';
+                    note.textContent = `Konversi audit: ${formatRupiah(zakatRates.pertanianPerKg)}/Kg`;
+                } else if (data.maalType === 'Peternakan') {
+                    amountLabel.textContent = 'Jumlah Hewan (Ekor)';
+                    note.textContent = `Konversi audit: ${formatRupiah(zakatRates.peternakanPerEkor)}/Ekor`;
+                } else {
+                    amountLabel.textContent = 'Nominal Rupiah';
+                    note.textContent = 'Masukkan nominal uang yang diterima';
+                }
+            } else if (data.category === 'fidyah') {
+                amountLabel.textContent = 'Jumlah Hari/Jiwa';
+                note.textContent = `Budget harian: buka puasa + sahur = ${formatRupiah(data.fidyahBuka + data.fidyahSahur)} per hari/jiwa`;
             } else {
-                note.textContent = `Standar: ${formatRupiah(zakatRates.fitrahUangPerJiwa)}/jiwa`;
-            }
-        } else if (data.category === 'zakat_maal') {
-            if (data.maalType === 'Pertanian') {
-                amountLabel.textContent = 'Berat Hasil Panen (Kg)';
-                note.textContent = `Konversi audit: ${formatRupiah(zakatRates.pertanianPerKg)}/Kg`;
-            } else if (data.maalType === 'Peternakan') {
-                amountLabel.textContent = 'Jumlah Hewan (Ekor)';
-                note.textContent = `Konversi audit: ${formatRupiah(zakatRates.peternakanPerEkor)}/Ekor`;
-            } else {
-                amountLabel.textContent = 'Nominal Rupiah';
+                amountLabel.textContent = 'Nominal Uang';
                 note.textContent = 'Masukkan nominal uang yang diterima';
             }
-        } else if (data.category === 'fidyah') {
-            amountLabel.textContent = 'Jumlah Hari/Jiwa';
-            note.textContent = `Budget harian: buka puasa + sahur = ${formatRupiah(data.fidyahBuka + data.fidyahSahur)} per hari/jiwa`;
-        } else {
-            amountLabel.textContent = 'Nominal Uang';
-            note.textContent = 'Masukkan nominal uang yang diterima';
+
+            subtotal.value = formatRupiah(data.subtotal);
+            updateTotals();
         }
 
-        subtotal.value = formatRupiah(data.subtotal);
-        updateTotals();
-    }
+        function updateTotals() {
+            let total = 0;
+            let beras = 0;
 
-    function updateTotals() {
-        let total = 0;
-        let beras = 0;
+            rowsContainer.querySelectorAll('.payment-row').forEach((row) => {
+                const data = rowData(row);
+                total += data.subtotal;
+                beras += data.berasKg;
+            });
 
-        rowsContainer.querySelectorAll('.payment-row').forEach((row) => {
-            const data = rowData(row);
-            total += data.subtotal;
-            beras += data.berasKg;
-        });
-
-        grandTotal.textContent = formatRupiah(total);
-        totalBeras.textContent = `${cleanNumber(beras)} KG`;
-    }
-
-    function resetForm(nextReceipt = null) {
-        form.reset();
-        rowsContainer.innerHTML = '';
-        rowCounter = 0;
-        initialCategories.forEach((categoryKey) => addRow(categoryKey));
-
-        if (nextReceipt) {
-            nomorKuitansi.value = nextReceipt;
-            nomorKuitansi.defaultValue = nextReceipt;
-            receiptPreview.textContent = nextReceipt;
+            grandTotal.textContent = formatRupiah(total);
+            totalBeras.textContent = `${cleanNumber(beras)} KG`;
         }
-    }
 
-    function buildReceipt(data) {
-        const rows = Array.from(rowsContainer.querySelectorAll('.payment-row')).map((row) => {
-            const rowInfo = rowData(row);
-            const category = escapeHtml(row.querySelector('.js-category option:checked').textContent.trim());
-            let inputText = cleanNumber(rowInfo.amount);
+        function resetForm(nextReceipt = null) {
+            form.reset();
+            rowsContainer.innerHTML = '';
+            rowCounter = 0;
+            initialCategories.forEach((categoryKey) => addRow(categoryKey));
 
-            if (rowInfo.category === 'zakat_fitrah' && rowInfo.fitrahMedia === 'beras') {
-                inputText = rowInfo.fitrahInputMode === 'kg'
-                    ? `${cleanNumber(rowInfo.berasKg)} kg (${cleanNumber(rowInfo.jiwa)} jiwa)`
-                    : `${cleanNumber(rowInfo.jiwa)} jiwa (${cleanNumber(rowInfo.berasKg)} kg)`;
-            } else if (rowInfo.category === 'zakat_fitrah') {
-                inputText = `${cleanNumber(rowInfo.jiwa)} jiwa`;
+            if (nextReceipt) {
+                nomorKuitansi.value = nextReceipt;
+                nomorKuitansi.defaultValue = nextReceipt;
+                receiptPreview.textContent = nextReceipt;
             }
+        }
 
-            return `<tr><td>${category}</td><td>${inputText}</td><td>${formatRupiah(rowInfo.subtotal)}</td></tr>`;
-        }).join('');
+        function buildReceipt(data) {
+            const rows = Array.from(rowsContainer.querySelectorAll('.payment-row')).map((row) => {
+                const rowInfo = rowData(row);
+                const category = escapeHtml(row.querySelector('.js-category option:checked').textContent.trim());
+                let inputText = cleanNumber(rowInfo.amount);
 
-        return `
+                if (rowInfo.category === 'zakat_fitrah' && rowInfo.fitrahMedia === 'beras') {
+                    inputText = rowInfo.fitrahInputMode === 'kg' ?
+                        `${cleanNumber(rowInfo.berasKg)} kg (${cleanNumber(rowInfo.jiwa)} jiwa)` :
+                        `${cleanNumber(rowInfo.jiwa)} jiwa (${cleanNumber(rowInfo.berasKg)} kg)`;
+                } else if (rowInfo.category === 'zakat_fitrah') {
+                    inputText = `${cleanNumber(rowInfo.jiwa)} jiwa`;
+                }
+
+                return `<tr><td>${category}</td><td>${inputText}</td><td>${formatRupiah(rowInfo.subtotal)}</td></tr>`;
+            }).join('');
+
+            return `
                 <html>
                     <head>
                         <title>Struk ${data.nomor_kuitansi}</title>
@@ -1010,90 +1028,182 @@ $description = 'Pilih sub-kategori dana berdasarkan kategori utama yang aktif.';
                     </body>
                 </html>
             `;
-    }
+        }
 
-    function capturePreview(payload) {
-        const beras = totalBeras.textContent;
-        const itemCount = rowsContainer.querySelectorAll('.payment-row').length;
-        const item = document.createElement('div');
-        item.className = 'preview-history-item';
-        item.innerHTML = `
+        function capturePreview(payload) {
+            const beras = totalBeras.textContent;
+            const itemCount = rowsContainer.querySelectorAll('.payment-row').length;
+            const item = document.createElement('div');
+            item.className = 'preview-history-item';
+            item.innerHTML = `
             <strong>${escapeHtml(payload.nomor_kuitansi)} - ${escapeHtml(document.getElementById('namaMuzakki').value)}</strong>
             <span>${itemCount} item, total ${escapeHtml(formatRupiah(payload.total))}, beras ${escapeHtml(beras)}</span>
         `;
 
-        if (previewHistory.querySelector('.mini-copy')) {
-            previewHistory.innerHTML = '';
-        }
-
-        previewHistory.prepend(item);
-        [...previewHistory.querySelectorAll('.preview-history-item')].slice(3).forEach((row) => row.remove());
-    }
-
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Menyimpan...';
-        errorBox.style.display = 'none';
-        successFlash.style.display = 'none';
-
-        try {
-            const response = await fetch(form.action, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
-                },
-                body: new FormData(form),
-            });
-
-            const payload = await response.json();
-
-            if (!response.ok) {
-                const firstError = payload.errors ? Object.values(payload.errors).flat()[0] : payload.message;
-                throw new Error(firstError || 'Data belum berhasil disimpan.');
+            if (previewHistory.querySelector('.mini-copy')) {
+                previewHistory.innerHTML = '';
             }
 
-            capturePreview(payload);
-
-            const printWindow = window.open('', '_blank', 'width=520,height=720');
-            if (printWindow) {
-                printWindow.document.write(buildReceipt(payload));
-                printWindow.document.close();
-                printWindow.focus();
-                printWindow.print();
-            }
-
-            successFlash.textContent = `${payload.message} Nomor kuitansi ${payload.nomor_kuitansi}.`;
-            successFlash.style.display = 'block';
-
-            let isToastVisible = true;
-            clearTimeout(window.__pemasukanToastTimer);
-            window.__pemasukanToastTimer = setTimeout(() => {
-                if (!isToastVisible) return;
-                successFlash.style.display = 'none';
-                isToastVisible = false;
-            }, 2500);
-
-            resetForm(payload.next_nomor_kuitansi);
-        } catch (error) {
-            errorBox.textContent = error.message;
-            errorBox.style.display = 'block';
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = defaultSubmitHtml;
+            previewHistory.prepend(item);
+            [...previewHistory.querySelectorAll('.preview-history-item')].slice(3).forEach((row) => row.remove());
         }
-    });
 
-    addItemBtn.addEventListener('click', () => addRow(firstCategory));
-    resetBtn.addEventListener('click', () => resetForm());
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Menyimpan...';
+            errorBox.style.display = 'none';
+            successFlash.style.display = 'none';
 
-    document.getElementById('sidebarToggle')?.addEventListener('click', () => {
-        document.body.classList.toggle('sidebar-expanded');
-    });
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
+                    },
+                    body: new FormData(form),
+                });
 
-    resetForm();
-</script>
+                const payload = await response.json();
+
+                if (!response.ok) {
+                    const firstError = payload.errors ? Object.values(payload.errors).flat()[0] : payload.message;
+                    throw new Error(firstError || 'Data belum berhasil disimpan.');
+                }
+
+                capturePreview(payload);
+
+                const printWindow = window.open('', '_blank', 'width=520,height=720');
+                if (printWindow) {
+                    printWindow.document.write(buildReceipt(payload));
+                    printWindow.document.close();
+                    printWindow.focus();
+                    printWindow.print();
+                }
+
+                successFlash.textContent = `${payload.message} Nomor kuitansi ${payload.nomor_kuitansi}.`;
+                successFlash.style.display = 'block';
+
+                let isToastVisible = true;
+                clearTimeout(window.__pemasukanToastTimer);
+                window.__pemasukanToastTimer = setTimeout(() => {
+                    if (!isToastVisible) return;
+                    successFlash.style.display = 'none';
+                    isToastVisible = false;
+                }, 2500);
+
+                resetForm(payload.next_nomor_kuitansi);
+            } catch (error) {
+                errorBox.textContent = error.message;
+                errorBox.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = defaultSubmitHtml;
+            }
+        });
+
+        addItemBtn.addEventListener('click', () => addRow(firstCategory));
+        resetBtn.addEventListener('click', () => resetForm());
+
+        document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+            document.body.classList.toggle('sidebar-expanded');
+        });
+
+        resetForm();
+
+        // Cascading dropdown untuk provinsi -> kabupaten -> kecamatan -> desa
+        const provinsiSelect = document.getElementById('provinsi');
+        const kabupatenSelect = document.getElementById('kabupaten');
+        const kecamatanSelect = document.getElementById('kecamatan');
+        const desaSelect = document.getElementById('desa');
+
+        provinsiSelect.addEventListener('change', async (e) => {
+            const provinsiCode = e.target.options[e.target.selectedIndex]?.dataset?.code;
+
+            // Reset kabupaten, kecamatan, dan desa
+            kabupatenSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
+            kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+            desaSelect.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
+            kabupatenSelect.disabled = true;
+            kecamatanSelect.disabled = true;
+            desaSelect.disabled = true;
+
+            if (!provinsiCode) return;
+
+            try {
+                const response = await fetch(`{{ route('pemasukan.api.kabupaten') }}?provinsi_code=${provinsiCode}`);
+                const kabupatenList = await response.json();
+
+                kabupatenList.forEach(k => {
+                    const option = document.createElement('option');
+                    option.value = k.name;
+                    option.dataset.code = k.id;
+                    option.textContent = k.name;
+                    kabupatenSelect.appendChild(option);
+                });
+
+                kabupatenSelect.disabled = false;
+            } catch (error) {
+                console.error('Error loading kabupaten:', error);
+            }
+        });
+
+        kabupatenSelect.addEventListener('change', async (e) => {
+            const kabupatenCode = e.target.options[e.target.selectedIndex]?.dataset?.code;
+
+            // Reset kecamatan dan desa
+            kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+            desaSelect.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
+            kecamatanSelect.disabled = true;
+            desaSelect.disabled = true;
+
+            if (!kabupatenCode) return;
+
+            try {
+                const response = await fetch(`{{ route('pemasukan.api.kecamatan') }}?kabupaten_code=${kabupatenCode}`);
+                const kecamatanList = await response.json();
+
+                kecamatanList.forEach(k => {
+                    const option = document.createElement('option');
+                    option.value = k.name;
+                    option.dataset.code = k.id;
+                    option.textContent = k.name;
+                    kecamatanSelect.appendChild(option);
+                });
+
+                kecamatanSelect.disabled = false;
+            } catch (error) {
+                console.error('Error loading kecamatan:', error);
+            }
+        });
+
+        kecamatanSelect.addEventListener('change', async (e) => {
+            const kecamatanCode = e.target.options[e.target.selectedIndex]?.dataset?.code;
+
+            // Reset desa
+            desaSelect.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
+            desaSelect.disabled = true;
+
+            if (!kecamatanCode) return;
+
+            try {
+                const response = await fetch(`{{ route('pemasukan.api.desa') }}?kecamatan_code=${kecamatanCode}`);
+                const desaList = await response.json();
+
+                desaList.forEach(d => {
+                    const option = document.createElement('option');
+                    option.value = d.name;
+                    option.textContent = d.name;
+                    desaSelect.appendChild(option);
+                });
+
+                desaSelect.disabled = false;
+            } catch (error) {
+                console.error('Error loading desa:', error);
+            }
+        });
+    </script>
 </body>
 
 </html>

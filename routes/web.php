@@ -86,6 +86,13 @@ Route::middleware('auth')->group(function () {
         Route::resource('kategori-dana', KategoriDanaController::class)
             ->names('kategori-dana');
 
+        Route::get('pemasukan/api/kabupaten', [PemasukanZakatController::class, 'getKabupaten'])
+            ->name('pemasukan.api.kabupaten');
+        Route::get('pemasukan/api/kecamatan', [PemasukanZakatController::class, 'getKecamatan'])
+            ->name('pemasukan.api.kecamatan');
+        Route::get('pemasukan/api/desa', [PemasukanZakatController::class, 'getDesa'])
+            ->name('pemasukan.api.desa');
+
         Route::resource('pemasukan', PemasukanZakatController::class)
             ->names('pemasukan');
 

@@ -108,31 +108,8 @@ class LaporanController extends Controller
 
     public function pemasukanStruk(int $id)
     {
-        $trx = TransaksiZakat::with('kategori')->findOrFail($id);
-
-        $labelMap = [
-            'zakat_fitrah'  => 'Zakat Fitrah',
-            'zakat_maal'    => 'Zakat Maal',
-            'infaq_sedekah' => 'Infaq & Sedekah',
-            'fidyah'        => 'Fidyah',
-        ];
-
-        $kategoriKey = $trx->kategori?->slug ?? $trx->jenis ?? '';
-        $items = [[
-            'kategori_utama' => $kategoriKey,
-            'label_kategori' => $labelMap[$kategoriKey] ?? ($trx->kategori?->nama ?? $trx->jenis ?? '—'),
-            'sub' => null,
-            'jumlah_input' => $trx->jumlah ?? 0,
-            'subtotal' => $trx->jumlah ?? 0,
-            'keterangan' => $trx->keterangan ?? '',
-        ]];
-
-        return view('admin.laporan.cetak-pdf', [
-            'trx' => $trx,
-            'items' => $items,
-            'generatedAt' => now(),
-            'report' => 'pemasukan-struk',
-        ]);
+        // Redirect ke halaman struk premium di pemasukan.show
+        return redirect()->route('pemasukan.show', $id);
     }
 
     /**

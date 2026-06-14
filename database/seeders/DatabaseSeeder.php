@@ -28,7 +28,9 @@ class DatabaseSeeder extends Seeder
             'instansi_id' => null,
         ]);
 
+        // Seed Indonesia regions data first
         $this->call([
+            IndonesiaDataSeeder::class,
             InstansiSeeder::class,
             HargaBerasSeeder::class,
             NishabSeeder::class,

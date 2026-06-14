@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\TransaksiZakat;
 use Illuminate\Database\Seeder;
 
 class PemasukanSeeder extends Seeder
@@ -11,6 +12,6 @@ class PemasukanSeeder extends Seeder
      */
     public function run(): void
     {
-        // Belum ada data awal pemasukan zakat.
+        // Kosong - data pemasukan di-input manual melalui form
     }
 }
